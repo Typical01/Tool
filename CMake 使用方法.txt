@@ -1,0 +1,3 @@
+./build
+	cmake ..
+	cmake --build . --config Debug/Release/Debug_Win/Release_Win
