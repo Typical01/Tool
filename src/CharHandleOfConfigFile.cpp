@@ -23,22 +23,40 @@ bool Typical_Tool::StringHandling::CharHandleOfConfigFile::Init(Ustr& 传入配�
 
 	std::vector<Ustr> 传入区域内容;
 	//读取配置文件内容
-	Uchar tempWchar_t[512] = _T("");
+	Uchar tempUchar[512] = _T("");
 	int 空行计数 = 0;
 
 	lgc(_T("文件: 开始读取...\n"), lgm::wr);
 
+	try {
+		if (读取文件流指针 == nullptr)
+#ifndef UNICODE
+			throw std::runtime_error(
+				_T("bool Typical_Tool::StringHandling::CharHandleOfConfigFile::Init(Ustr& 传入配置文件路径, bool 解析) |读取文件流指针为空"));
+#else
+			throw std::runtime_error(
+				wtos(_T("bool Typical_Tool::StringHandling::CharHandleOfConfigFile::Init(Ustr& 传入配置文件路径, bool 解析) |读取文件流指针为空")));
+#endif
+	}
+	catch (std::runtime_error& err) {
+#ifndef UNICODE
+		lgc(err.what(), lgm::er);
+#else
+		lgc(stow(err.what()), lgm::er);
+#endif
+	}
+
 	while (!feof(读取文件流指针)) //feof: 文件尾时, 返回非0
 	{
-		Ufgets(tempWchar_t, 512, 读取文件流指针); //读取一行, 最大字符容量 512
-		if (tempWchar_t == _T("\n")) //记录空行
+		Ufgets(tempUchar, 512, 读取文件流指针); //读取一行, 最大字符容量 512
+		if (tempUchar == _T("\n")) //记录空行
 		{
 			this->空行位置统计.insert(空行计数);
 			空行计数++;
 		}
-		传入区域内容.push_back(tempWchar_t); //保存内容
+		传入区域内容.push_back(tempUchar); //保存内容
 
-		//lg(_T("读取字符: ") + *tempWchar_t, lg::wr);
+		//lg(_T("读取字符: ") + *tempUchar, lg::wr);
 	}
 	fclose(读取文件流指针);
 
@@ -73,7 +91,7 @@ bool Typical_Tool::StringHandling::CharHandleOfConfigFile::Init(Ustr&& 传入配
 
 	std::vector<Ustr> 传入区域内容;
 	//读取配置文件内容
-	Uchar tempWchar_t[512] = _T("");
+	Uchar tempUchar[512] = _T("");
 	int 空行计数 = 0;
 
 	lgc(_T("文件: 开始读取...\n"), lgm::wr);
@@ -98,15 +116,15 @@ bool Typical_Tool::StringHandling::CharHandleOfConfigFile::Init(Ustr&& 传入配
 
 	while (!feof(读取文件流指针)) //feof: 文件尾时, 返回非0
 	{
-		Ufgets(tempWchar_t, 512, 读取文件流指针); //读取一行, 最大字符容量 512
-		if (tempWchar_t == _T("\n")) //记录空行
+		Ufgets(tempUchar, 512, 读取文件流指针); //读取一行, 最大字符容量 512
+		if (tempUchar == _T("\n")) //记录空行
 		{
 			this->空行位置统计.insert(空行计数);
 			空行计数++;
 		}
-		传入区域内容.push_back(tempWchar_t); //保存内容
+		传入区域内容.push_back(tempUchar); //保存内容
 
-		//lg(_T("读取字符: ") + *tempWchar_t, lg::wr);
+		lgc(_T("读取字符: ") + *tempUchar);
 	}
 	fclose(读取文件流指针);
 
@@ -123,7 +141,7 @@ bool Typical_Tool::StringHandling::CharHandleOfConfigFile::Init(Ustr&& 传入配
 	return true;
 }
 
-bool Typical_Tool::StringHandling::CharHandleOfConfigFile::Init_Str(Ustr 传入配置文件路径, Ustr& 文件内容)
+bool Typical_Tool::StringHandling::CharHandleOfConfigFile::Init_Str(Ustr 传入配置文件路径, std::vector<Ustr>& 文件内容)
 {
 	//保存路径
 	this->配置文件_路径 = 传入配置文件路径;
@@ -134,18 +152,18 @@ bool Typical_Tool::StringHandling::CharHandleOfConfigFile::Init_Str(Ustr 传入�
 		return false;
 	}
 	//读取配置文件内容
-	Uchar tempWchar_t[512] = _T("");
+	Uchar tempUchar[512] = _T("");
 	int 空行计数 = 0;
 
 	lgc(_T("文件: 开始读取...\n"), lgm::wr);
 
 	while (!feof(读取文件流指针)) //feof: 文件尾时, 返回非0
 	{
-		Ufgets(tempWchar_t, 512, 读取文件流指针); //读取一行, 最大字符容量 512
+		Ufgets(tempUchar, 512, 读取文件流指针); //读取一行, 最大字符容量 512
 		
-		文件内容.append(tempWchar_t); //保存内容
+		文件内容.push_back(tempUchar); //保存内容
 
-		lgc(_T("读取字符: ") + *tempWchar_t);
+		lgc(_T("读取字符: ") + *tempUchar);
 	}
 	fclose(读取文件流指针);
 

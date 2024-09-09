@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(libTypical_Tool)
 
-# 查找源文件
-file(GLOB SRC_Tool_LIST "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+# 查找源文件和头文件
+file(GLOB_RECURSE SRC_Tool_LIST "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE HEADER_Tool_LIST "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 
 # 包含头文件目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -23,7 +24,7 @@ foreach(CONFIGURATION IN ITEMS Debug Release Debug_Win Release_Win)
 endforeach()
 
 # 创建静态库
-add_library(libTypical_Tool STATIC ${SRC_Tool_LIST})
+add_library(libTypical_Tool STATIC ${SRC_Tool_LIST} ${HEADER_Tool_LIST})
 
 # 设置不同配置的编译定义
 target_compile_definitions(libTypical_Tool
@@ -41,3 +42,7 @@ target_compile_options(libTypical_Tool PRIVATE
   $<$<CONFIG:Debug_Win>:-DDEBUG_WIN>
   $<$<CONFIG:Release_Win>:-DRELEASE_WIN>
 )
+
+# 分组源文件和头文件
+source_group("Header Files" FILES ${HEADER_Tool_LIST})
+source_group("Source Files" FILES ${SRC_Tool_LIST})

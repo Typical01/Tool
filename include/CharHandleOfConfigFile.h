@@ -5,6 +5,7 @@
 #define _CHARHANDLEOFCONFIGFILE_H
 
 //#include "Typical_Tool.h"
+#include "pch.h"
 #include "CommonTools.h"
 #include "Log.h"
 
@@ -66,7 +67,7 @@ namespace Typical_Tool {
 			// 初始化
 			bool Init(Ustr& 传入配置文件路径, bool 解析 = true);
 			bool Init(Ustr&& 传入配置文件路径, bool 解析 = true);
-			bool Init_Str(Ustr 传入配置文件路径, Ustr& 文件内容);
+			bool Init_Str(Ustr 传入配置文件路径, std::vector<Ustr>& 文件内容);
 
 			// 获取 指定区域中所有的内容
 			std::map<Ustr, Ustr> Get指定区域内容(Ustr 传入区域设置) const;
