@@ -134,19 +134,21 @@ namespace Typical_Tool
 
 #ifndef _CONSOLE
 #ifdef _WINDOWS
-				////分离控制台
-				//if (FreeConsole() == 0)
-				//{
-				//	MessageBox(0, _T("log: 分离控制台失败!"), Log_er, MB_ICONSTOP);
-				//	MessageBox(0, _T("错误代码: ") + Uto_string(GetLastError()).c_str(), Log_er, MB_ICONSTOP);
-				//}
+				//分离控制台
+				/*if (FreeConsole() == 0)
+				{
+					MessageBox(0, _T("log: 分离控制台失败!"), Log_er, MB_ICONSTOP);
+					MessageBox(0, _T("错误代码: ") + Uto_string(GetLastError()).c_str(), Log_er, MB_ICONSTOP);
+				}*/
 
-				//分配控制台
+				//分配控制台: 当不是控制台程序时
+#ifndef _CONSOLE
 				if (AllocConsole() == 0)
 				{
 					MessageBox(0, _T("log: 分配控制台失败!"), Log_er, MB_ICONSTOP);
 					MessageBox(0, ((Ustr)_T("错误代码: ") + Uto_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
 				}
+#endif
 
 				// 获取控制台窗口的句柄
 				hConsole = GetConsoleWindow();
@@ -155,44 +157,43 @@ namespace Typical_Tool
 				if (LogFileWrite) {
 #ifdef _WINDOWS
 					//获取 当前路径/Log/Log文件名.txt 
-					//创建文件夹 Log
+					//创建文件夹 ./Log
 					Ustr Log_FolderName = (Ustr)_T(".") + PATH_BACKSLASH + _T("Log");
 					if (CreateFolder(Log_FolderName)) {
 						Ucout << _T("Log 文件夹: 创建成功!\n\n");
 					}
 					else {
 						Ucout << _T("Log 文件夹: 创建失败!\n\n");
-						Log_FolderName = (Ustr)_T(".") + PATH_BACKSLASH + _T("");
-					}
+						Log_FolderName = (Ustr)_T("."); //Log_FilePath 总是添加 \\
 
-					//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + _程序名.txt
-					//需要 多线程支持
-					Ustr Log_FileName = GetFormattingTime(_T("%Y-%m-%d_%H-%M-%S")) + _T(".txt");
+						//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + _程序名.txt
+						//需要 多线程支持
+						Ustr Log_FileName = GetFormattingTime(_T("%Y-%m-%d_%H-%M-%S")) + _T(".txt");
 
-					Ustr Log_FilePath = Log_FolderName + PATH_BACKSLASH + Log_FileName;
-					//打开文件
-					errno_t err = Ufopen_s(&LogFileStream, Log_FilePath.c_str(), _T("a+, ccs=UTF-8")); //追加模式打开文件
-					if (err != 0)
-					{
-						Ucout << (Ustr)_T("文件: ") + Log_FilePath + _T(" 打开错误!") << std::endl;
-						if (LogFileStream == nullptr) {
-							Ucout << (Ustr)_T("LogFileStream errno_t: ") + Uto_string(err) << std::endl;
+						Ustr Log_FilePath = Log_FolderName + PATH_BACKSLASH + Log_FileName; //总是添加 \\
+						
+						//打开文件
+						errno_t err = Ufopen_s(&LogFileStream, Log_FilePath.c_str(), _T("a+, ccs=UTF-8")); //追加模式打开文件
+						if (err != 0) {
+							Ucout << (Ustr)_T("文件: ") + Log_FilePath + _T(" 打开错误!") << std::endl;
+							if (LogFileStream == nullptr) {
+								Ucout << (Ustr)_T("LogFileStream errno_t: ") + Uto_string(err) << std::endl;
+							}
 						}
-						//return false; //没有文件, 则不进行读取和解析
-					}
-					Ucout << (Ustr)_T("文件: ") + Log_FilePath + _T(" 打开成功") << std::endl;
+						Ucout << (Ustr)_T("文件: ") + Log_FilePath + _T(" 打开成功") << std::endl;
 #endif
+					}
+
+					//初始化: 日志文件写入线程
+					LogFileProcessing = std::thread(&Log::LogWirteToFile, this, std::ref(LogFileWrite_Queue), LogFileStream, std::ref(LogFileWriteThreadStop));
+					LogFileProcessing.detach(); //分离线程
+
+					//完成初始化
+					FirstInit = true;
 				}
-
-				//初始化: 日志文件写入线程
-				LogFileProcessing = std::thread(&Log::LogWirteToFile, this, std::ref(LogFileWrite_Queue), LogFileStream, std::ref(LogFileWriteThreadStop));
-				LogFileProcessing.detach(); //分离线程
-
-				//完成初始化
-				FirstInit = true; 
-			}
-			else { //跳过初始化
-				return;
+				else { //跳过初始化
+					return;
+				}
 			}
 		}
 
@@ -560,22 +561,22 @@ namespace Typical_Tool
 				// 路径不存在或出错，尝试创建目录  
 				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS)
 				{
-					//lgc(_T("文件夹") + folderPath + _T(("创建成功(或已存在)!")));
-					// 创建成功或路径已存在  
+					lgc(_T("文件夹") + folderPath + _T(("创建成功!")));
+					// 创建成功
 					return true;
 				}
-				//lgc(_T("文件夹") + folderPath + _T("创建失败!"));
+				lgc(_T("文件夹") + folderPath + _T("创建失败!"));
 				// 创建失败且不是因为路径已存在  
 				return false;
 			}
 			else if (attributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				//lgc(_T("文件夹") + folderPath + _T("已存在"));
+				lgc(_T("文件夹") + folderPath + _T("已存在"));
 				// 路径已经是一个目录  
 				return true;
 			}
 #endif
-			//lgc(_T("文件夹") + folderPath + _T(("创建失败(路径存在, 但不是目录)!")));
+			lgc(_T("文件夹") + folderPath + _T(("创建失败(路径存在, 但不是目录)!")));
 			// 路径存在但不是目录（可能是一个文件）  
 			return false;
 		}
