@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #ifndef _SHELL_H
 #define _SHELL_H

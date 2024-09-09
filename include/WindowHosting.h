@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #ifndef _WINDOWSHOSTING_H
 #define _WINDOWSHOSTING_H

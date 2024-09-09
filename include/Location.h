@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #ifndef _LOCATION_H
 #define _LOCATION_H

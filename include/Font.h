@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #ifndef _FONT_H
 #define _FONT_H
@@ -28,7 +28,7 @@ namespace Typical_Tool {
 					FALSE, //删除线
 					DEFAULT_CHARSET, OUT_CHARACTER_PRECIS, CLIP_CHARACTER_PRECIS, DEFAULT_QUALITY,
 					FF_DONTCARE,
-					_T("微软雅黑")
+					"微软雅黑"
 				);
 				*/
 			}

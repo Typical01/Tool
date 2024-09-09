@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 //常用工具
 #ifndef _COMMONTOOLS_H
@@ -37,10 +37,10 @@ namespace Typical_Tool {
 		{
 			//设置DPI感知级别(可选，仅Windows 10 1703及更高版本）
 			if (SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) == NULL) { //传入的值无效
-				lgc(_T("传入的值无效"), _T("Windows DPI"));
+				lgc("传入的值无效", "Windows DPI");
 			}
 			else {
-				lgc(_T("DPI感知(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) 设置成功!"), _T("Windows DPI"));
+				lgc("DPI感知(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) 设置成功!", "Windows DPI");
 				lgc();
 				lgc();
 			}
@@ -53,7 +53,7 @@ namespace Typical_Tool {
 			HWND handle = FindWindow(windowClassName.c_str(), windowTitleName.c_str());
 			if (handle != NULL)
 			{
-				lgr((Ustr)_T("应用程序已在运行") + windowTitleName, lgm::wr);
+				lgr((Ustr)"应用程序已在运行" + windowTitleName, lgm::wr);
 				return 0;
 			}
 			return 1;
@@ -101,7 +101,7 @@ namespace Typical_Tool {
 			ShellMessage temp;
 
 			if (!IsUserAdmin()) { //非管理员权限, 则申请
-				ShellMessage UserAdmin(_T("申请管理员权限"), (int)ShellExecute(NULL, _T("runas"), strApp.c_str(), NULL, NULL, SW_SHOWNORMAL));
+				ShellMessage UserAdmin("申请管理员权限", (int)ShellExecute(NULL, "runas", strApp.c_str(), NULL, NULL, SW_SHOWNORMAL));
 				temp = UserAdmin;
 			}
 			//成功申请时, 退出当前进程
@@ -123,7 +123,7 @@ namespace Typical_Tool {
 		{
 			if (isGet) {
 				//获取当前程序的全路径
-				Uchar 程序路径[MAX_PATH] = _T("");
+				Uchar 程序路径[MAX_PATH] = "";
 				GetModuleFileName(NULL, 程序路径, MAX_PATH);
 				//获得管理员权限
 				if (GainAdminPrivileges(程序路径)) {
@@ -145,25 +145,25 @@ namespace Typical_Tool {
 			LONG result;
 			HKEY hKey;
 
-			Ustr regPath = _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+			Ustr regPath = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
 
 			// 打开注册表项  
 			result = RegOpenKeyEx(HKEY_CURRENT_USER, regPath.c_str(), 0, KEY_SET_VALUE, &hKey);
 			if (result != ERROR_SUCCESS) {
-				lgc(_T("打开密钥失败: %ld") + result, lgm::er); // 假设 lgc 能够处理 wstring 和日志级别  
+				lgc("打开密钥失败: %ld" + result, lgm::er); // 假设 lgc 能够处理 wstring 和日志级别  
 				return false;
 			}
 
 			// 设置注册表值  
 			result = RegSetValueEx(hKey, valueName.c_str(), 0, REG_SZ, (const BYTE*)exePath.c_str(), (Ustrlen(exePath.c_str()) + 1) * sizeof(Uchar));
 			if (result != ERROR_SUCCESS) {
-				lgc(_T("设置注册表值失败: %ld") + result, lgm::er); // 假设 lgc 能够处理 wstring 和日志级别 
+				lgc("设置注册表值失败: %ld" + result, lgm::er); // 假设 lgc 能够处理 wstring 和日志级别 
 				RegCloseKey(hKey);
 				return false;
 			}
 
 			RegCloseKey(hKey);
-			lgc(_T("注册表注册成功!"), lgm::wr);
+			lgc("注册表注册成功!", lgm::wr);
 			return true;
 		}
 
@@ -173,13 +173,13 @@ namespace Typical_Tool {
 		Ustr 提取程序名(const Ustr& path)
 		{
 			//匹配 '\' && '/' 任意
-			size_t lastSepPos = path.find_last_of(_T("\\/"));
+			size_t lastSepPos = path.find_last_of("\\/");
 			if (lastSepPos != std::wstring::npos) {
 				return path.substr(lastSepPos + 1); // 提取文件名部分
 			}
 
 			// 去掉 .exe 后缀
-			size_t exePos = path.find_last_of(_T(".exe"));
+			size_t exePos = path.find_last_of(".exe");
 			if (exePos != Ustr::npos && exePos == path.length() - 4) {
 				path = path.substr(0, exePos); // 去掉 .exe 后缀
 			}
@@ -190,12 +190,12 @@ namespace Typical_Tool {
 		template<class T = bool>
 		Ustr 提取程序目录路径(const Ustr& path)
 		{
-			size_t lastSepPos = path.find_last_of(_T("\\/"));
+			size_t lastSepPos = path.find_last_of("\\/");
 			if (lastSepPos != std::wstring::npos) {
 				//return path.substr(0, lastSepPos + 1); // 包括最后一个路径分隔符
 				return path.substr(0, lastSepPos); // 不包括最后一个路径分隔符
 			}
-			return _T(""); // 如果找不到路径分隔符，则返回空字符串
+			return ""; // 如果找不到路径分隔符，则返回空字符串
 		}
 		template<class T = bool>
 		Ustr Get程序名()
@@ -211,7 +211,7 @@ namespace Typical_Tool {
 				lgc(_T("当前可执行文件的名称: " + exeName));
 			}
 			else {
-				lgc(_T("无法获取当前可执行文件的路径!"));
+				lgc("无法获取当前可执行文件的路径!");
 			}
 			return exeName;
 		}
@@ -226,10 +226,10 @@ namespace Typical_Tool {
 
 			if (length > 0 && length < MAX_PATH) {
 				folderName = 提取程序目录路径(exePath);
-				lgc(_T("当前程序目录路径名: " + folderName));
+				lgc(_T("当前程序目录路径名: " + folderName + "\n"));
 			}
 			else {
-				lgc(_T("无法获取当前可执行文件的路径!"));
+				lgc("无法获取当前可执行文件的路径!");
 			}
 
 			return folderName;
@@ -246,20 +246,20 @@ namespace Typical_Tool {
 				// 路径不存在或出错，尝试创建目录  
 				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS)
 				{
-					lgc(_T("文件夹") + folderPath + _T("创建成功!"));
+					lgc("文件夹" + folderPath + "创建成功!");
 					return true;
 				}
-				lgc(_T("文件夹") + folderPath + _T("创建失败!"));
+				lgc("文件夹" + folderPath + "创建失败!");
 				// 创建失败且不是因为路径已存在  
 				return false;
 			}
 			else if (attributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				lgc(_T("文件夹") + folderPath + _T("已存在"));
+				lgc("文件夹" + folderPath + "已存在");
 				// 路径已经是一个目录  
 				return true;
 			}
-			lgc(_T("文件夹") + folderPath + _T("创建失败(路径存在, 但不是目录)!"));
+			lgc("文件夹" + folderPath + "创建失败(路径存在, 但不是目录)!");
 			// 路径存在但不是目录（可能是一个文件）  
 			return false;
 		}

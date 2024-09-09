@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "Shell.h"
 
 
@@ -13,13 +13,13 @@ void Typical_Tool::WindowsSystem::WindowShell::Shell处理(HMENU 菜单, std::ve
 		
 		//注册 程序启动时Shell 事件函数
 		if (程序启动时运行) {
-			if (Shell操作 == _T("管理员运行")) {
+			if (Shell操作 == "管理员运行") {
 				程序启动时.insert(std::make_pair(*tempShell, 执行_管理员运行));
 			}
-			else if (Shell操作 == _T("打开文件夹")) {
+			else if (Shell操作 == "打开文件夹") {
 				程序启动时.insert(std::make_pair(*tempShell, 执行_打开文件夹));
 			}
-			else if (Shell操作 == _T("打开文件")) {
+			else if (Shell操作 == "打开文件") {
 				程序启动时.insert(std::make_pair(*tempShell, 执行_打开文件));
 			}
 		}
@@ -32,21 +32,21 @@ void Typical_Tool::WindowsSystem::WindowShell::Shell处理(HMENU 菜单, std::ve
 		int 菜单项总数 = GetMenuItemCount(菜单);
 		int 菜单项ID = WinHost::GetHMENU();
 		//注册菜单
-		if (Shell操作 == _T("管理员运行")) {
+		if (Shell操作 == "管理员运行") {
 			//关联 菜单项ID和 操作名
 			菜单ID.insert(std::make_pair(菜单项ID, 操作名));
 			//插入菜单项
 			InsertMenu(菜单, 菜单项总数 - 4, MF_STRING, 菜单项ID, 操作名.c_str());
 			程序菜单项.insert(std::make_pair(*tempShell, 执行_管理员运行));
 		}
-		else if (Shell操作 == _T("打开文件夹")) {
+		else if (Shell操作 == "打开文件夹") {
 			//关联 菜单项ID和 操作名
 			菜单ID.insert(std::make_pair(菜单项ID, 操作名));
 			//插入菜单项
 			InsertMenu(菜单, 菜单项总数 - 4, MF_STRING, 菜单项ID, 操作名.c_str());
 			程序菜单项.insert(std::make_pair(*tempShell, 执行_打开文件夹));
 		}
-		else if (Shell操作 == _T("打开文件")) {
+		else if (Shell操作 == "打开文件") {
 			//关联 菜单项ID和 操作名
 			菜单ID.insert(std::make_pair(菜单项ID, 操作名));
 			//插入菜单项
@@ -100,22 +100,22 @@ void Typical_Tool::WindowsSystem::WindowShell::程序菜单项Shell(int 菜单�
 
 Shell消息 Typical_Tool::WindowsSystem::WindowShell::执行(Ustr 操作名, Ustr Shell操作, Ustr Shell文件, Ustr Shell参数, int 窗口显示)
 {
-	//Shell消息 temp(_T("nvidia-smi"), (int)ShellExecute(NULL, _T("runas"), _T("cmd"), _T("nvidia-smi -lgc 1080"), NULL, SW_SHOWNORMAL));
+	//Shell消息 temp("nvidia-smi", (int)ShellExecute(NULL, "runas", "cmd", "nvidia-smi -lgc 1080", NULL, SW_SHOWNORMAL));
 	Shell消息 temp(操作名, (int)ShellExecute(NULL, Shell操作.c_str(), Shell文件.c_str(), Shell参数.c_str(), NULL, 窗口显示));
 	return temp;
 }
 
 Shell消息 Typical_Tool::WindowsSystem::WindowShell::执行_管理员运行(Ustr 操作名, Ustr Shell文件, Ustr Shell参数, int 窗口显示)
 {
-	return 执行(操作名, _T("runas"), Shell文件, Shell参数, 窗口显示);
+	return 执行(操作名, "runas", Shell文件, Shell参数, 窗口显示);
 }
 
 Shell消息 Typical_Tool::WindowsSystem::WindowShell::执行_打开文件夹(Ustr 操作名, Ustr Shell文件, Ustr Shell参数, int 窗口显示)
 {
-	return 执行(操作名, _T("explore"), Shell文件, Shell参数, 窗口显示);
+	return 执行(操作名, "explore", Shell文件, Shell参数, 窗口显示);
 }
 
 Shell消息 Typical_Tool::WindowsSystem::WindowShell::执行_打开文件(Ustr 操作名, Ustr Shell文件, Ustr Shell参数, int 窗口显示)
 {
-	return 执行(操作名, _T("open"), Shell文件, Shell参数, 窗口显示);
+	return 执行(操作名, "open", Shell文件, Shell参数, 窗口显示);
 }

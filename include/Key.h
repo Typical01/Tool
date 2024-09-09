@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 //Key.h 按键
 #ifndef _KEY_H

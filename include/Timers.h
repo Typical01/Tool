@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 //Timers.h 计时器
 #ifndef _TIMERS_H_
@@ -104,7 +104,7 @@ namespace Typical_Tool {
 		{
 			for (long long temp = 1; temp < sec; temp++) {
 				std::this_thread::sleep_for(std::chrono::seconds(1));
-				lgc(_T("暂停: ") + Uto_string(temp) + _T("秒"), lgm::ts);
+				lgc("暂停: " + Uto_string(temp) + "秒", lgm::ts);
 			}
 		}
 #define 延迟_毫秒 sleep_s
@@ -122,8 +122,8 @@ namespace Typical_Tool {
 
 		// [time]text
 		template<class Temp = bool>
-		static void FormattingTime(Ustr& text, const Ustr& timeFormat = _T("%Y-%m-%d %H:%M:%S"), 
-			const Ustr& textLeftFormat = _T("["), const Ustr& textRigthFormat = _T("]"))
+		static void FormattingTime(Ustr& text, const Ustr& timeFormat = "%Y-%m-%d %H:%M:%S", 
+			const Ustr& textLeftFormat = "[", const Ustr& textRigthFormat = "]")
 		{
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();;
 			// 获取当前时间点（自epoch以来的时间）
@@ -137,15 +137,15 @@ namespace Typical_Tool {
 			oss << std::put_time(now_tm, timeFormat.c_str()); // 自定义时间格式
 
 			//不需要修饰字符时, 直接返回格式化后的时间文本
-			if (textLeftFormat == _T("") && textRigthFormat == _T("")) {
+			if (textLeftFormat == "" && textRigthFormat == "") {
 				text = oss.str() + text;
 			}
 			text = textLeftFormat + oss.str() + textRigthFormat + text;
 		}
 		// [time]text
 		template<class Temp = bool>
-		static Ustr GetFormattingTime(const Ustr& timeFormat = _T("%Y-%m-%d %H:%M:%S"), 
-			const Ustr& textLeftFormat = _T("["), const Ustr& textRigthFormat = _T("]"))
+		static Ustr GetFormattingTime(const Ustr& timeFormat = "%Y-%m-%d %H:%M:%S", 
+			const Ustr& textLeftFormat = "[", const Ustr& textRigthFormat = "]")
 		{
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();;
 			// 获取当前时间点（自epoch以来的时间）
@@ -159,7 +159,7 @@ namespace Typical_Tool {
 			oss << std::put_time(now_tm, timeFormat.c_str()); // 自定义时间格式
 
 			//不需要修饰字符时, 直接返回格式化后的时间文本
-			if (textLeftFormat == _T("") && textRigthFormat == _T("")) {
+			if (textLeftFormat == "" && textRigthFormat == "") {
 				return oss.str();
 			}
 			return textLeftFormat + oss.str() + textRigthFormat;

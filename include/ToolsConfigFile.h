@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 //工具配置文件
 #ifndef _TOOLSCONFIGFILE_H
@@ -23,17 +23,17 @@ namespace Typical_Tool {
 		Uchar 程序所在路径[MAX_PATH] = { 0 };
 
 		// "C:\\Users\\22793\\source\\repos\\Tools\\Debug\\Tools.exe"
-		Ustr 程序_路径名 = _T("");
+		Ustr 程序_路径名 = "";
 		// "C:\\Users\\22793\\source\\repos\\Tools\\Debug"
-		Ustr 程序父文件夹_路径名 = _T("");
+		Ustr 程序父文件夹_路径名 = "";
 		// "C:\\Users\\22793\\source\\repos\\Tools\\Debug\\config\\ToolsConfig.ini"
-		Ustr 工具箱配置文件_路径名 = _T("");
+		Ustr 工具箱配置文件_路径名 = "";
 
 	private:
 		//工具箱程序 文件名: \\Tools
-		Ustr 程序_名 = _T("");
+		Ustr 程序_名 = "";
 		//工具箱配置 文件名: \\ToolsConfig
-		Ustr 工具箱配置文件_名 = _T("\\ToolsConfig");
+		Ustr 工具箱配置文件_名 = "\\ToolsConfig";
 
 	public:
 		ToolsConfigFile() {}
@@ -41,7 +41,7 @@ namespace Typical_Tool {
 		template<class T = bool>
 		void 初始化(Ustr 程序_名)
 		{
-			this->程序_名 = _T("\\") + 程序_名;
+			this->程序_名 = "\\" + 程序_名;
 
 			//获取当前程序的全路径
 			GetModuleFileName(NULL, this->程序所在路径, MAX_PATH);
@@ -51,10 +51,10 @@ namespace Typical_Tool {
 
 			//程序父文件夹路径名
 			int 工具箱文件_路径名长度;
-			工具箱文件_路径名长度 = (this->程序_名 + _T(".exe")).size(); //Tools.exe 长度
+			工具箱文件_路径名长度 = (this->程序_名 + ".exe").size(); //Tools.exe 长度
 			int temp程序父文件夹_路径名长度;
 			temp程序父文件夹_路径名长度 = this->程序_路径名.size() - 工具箱文件_路径名长度; //程序父文件夹路径 = 程序全路径 - 程序名
-			Ustr temp程序父文件夹_路径名(_T(" "), temp程序父文件夹_路径名长度);
+			Ustr temp程序父文件夹_路径名(" ", temp程序父文件夹_路径名长度);
 			for (int i = 0; i < temp程序父文件夹_路径名长度; i++)
 			{
 				temp程序父文件夹_路径名[i] = this->程序_路径名[i];
@@ -62,7 +62,7 @@ namespace Typical_Tool {
 			this->程序父文件夹_路径名 = temp程序父文件夹_路径名;
 
 			//配置文件
-			this->工具箱配置文件_路径名 = this->程序父文件夹_路径名 + _T("\\Config") + _T("\\ToolsConfig.ini");
+			this->工具箱配置文件_路径名 = this->程序父文件夹_路径名 + "\\Config" + "\\ToolsConfig.ini";
 		}
 
 	public:
@@ -87,11 +87,11 @@ namespace Typical_Tool {
 		template<class T = bool>
 		void 打开配置文件()
 		{
-			lgc(_T("打开配置文件"));
+			lgc("打开配置文件");
 
-			auto temp = WindowShell::执行(_T("打开文件"), _T("open"), this->工具箱配置文件_路径名);
+			auto temp = WindowShell::执行("打开文件", "open", this->工具箱配置文件_路径名);
 			if (temp.IsSucceed()) {
-				lgc(_T("成功: 打开配置文件"), lgm::wr);
+				lgc("成功: 打开配置文件", lgm::wr);
 			}
 		}
 	};

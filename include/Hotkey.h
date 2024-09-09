@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #ifndef _HOTKEY_H
 #define _HOTKEY_H
@@ -20,7 +20,7 @@ namespace Typical_Tool {
 
 			std::vector<Ustr> KeyName_lib;
 			std::vector<int> KeyID_lib;
-			Ustr 组合按键名 = _T("");
+			Ustr 组合按键名 = "";
 			int 修饰符 = 0;
 			bool 基础按键 = false;
 

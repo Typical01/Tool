@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #ifndef _TOOLS_Tool_H
 #define _TOOLS_Tool_H
