@@ -29,19 +29,20 @@ add_library(libTypical_Tool STATIC ${SRC_Tool_LIST} ${HEADER_Tool_LIST})
 # 设置不同配置的编译定义
 target_compile_definitions(libTypical_Tool
   PRIVATE
-  $<$<CONFIG:Debug>:_DEBUG>
-  $<$<CONFIG:Release>:NDEBUG>
   $<$<CONFIG:Debug_Win>:_DEBUG;_WINDOWS>
   $<$<CONFIG:Release_Win>:NDEBUG;_WINDOWS>
+  $<$<CONFIG:Debug>:_DEBUG>
+  $<$<CONFIG:Release>:NDEBUG>
 )
 
-# 设置不同配置的编译选项
-target_compile_options(libTypical_Tool PRIVATE
-  $<$<CONFIG:Debug>:-g>
-  $<$<CONFIG:Release>:-O3>
-  $<$<CONFIG:Debug_Win>:-DDEBUG_WIN>
-  $<$<CONFIG:Release_Win>:-DRELEASE_WIN>
-)
+if (MSVC)
+  #对于调试和发布配置，明确地删除_WINDOWS
+  target_compile_options(libTypical_Tool
+    PRIVATE
+    $<$<CONFIG:Debug>:/U_WINDOWS>
+    $<$<CONFIG:Release>:/U_WINDOWS>
+  )
+endif()
 
 # 分组源文件和头文件
 source_group("Header Files" FILES ${HEADER_Tool_LIST})

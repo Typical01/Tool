@@ -164,30 +164,39 @@ namespace Typical_Tool
 					}
 					else {
 						Ucout << _T("Log 文件夹: 创建失败!\n\n");
-						Log_FolderName = (Ustr)_T("."); //Log_FilePath 总是添加 \\
+						Log_FolderName = (Ustr)_T(".");
+					}
 
-						//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + _程序名.txt
-						//需要 多线程支持
-						Ustr Log_FileName = GetFormattingTime(_T("%Y-%m-%d_%H-%M-%S")) + _T(".txt");
+					//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + _程序名.txt
+					//需要 多线程支持
+					Ustr Log_FileName = GetFormattingTime(_T("%Y-%m-%d_%H-%M-%S")) + _T(".txt");
 
-						Ustr Log_FilePath = Log_FolderName + PATH_BACKSLASH + Log_FileName; //总是添加 \\
-						
-						//打开文件
-						errno_t err = Ufopen_s(&LogFileStream, Log_FilePath.c_str(), _T("a+, ccs=UTF-8")); //追加模式打开文件
+					Ustr Log_FilePath = Log_FolderName + PATH_BACKSLASH + Log_FileName; //总是添加 \\
+					
+					//打开文件
+					try {
+						errno_t err = Ufopen_s(&LogFileStream, Log_FilePath.c_str(), _T("a+")); //追加模式打开文件
 						if (err != 0) {
 							Ucout << (Ustr)_T("文件: ") + Log_FilePath + _T(" 打开错误!") << std::endl;
 							if (LogFileStream == nullptr) {
-								Ucout << (Ustr)_T("LogFileStream errno_t: ") + Uto_string(err) << std::endl;
+								throw std::runtime_error("Typical_Tool::Log::Init()::LogFileStream errno_t: " + Uto_string(err));
 							}
 						}
-						Ucout << (Ustr)_T("文件: ") + Log_FilePath + _T(" 打开成功") << std::endl;
-#endif
 					}
-
+					catch (std::runtime_error& err) {
+						err.what();
+					}
+					Ucout << (Ustr)_T("文件: ") + Log_FilePath + _T(" 打开成功") << std::endl;
+#endif
+					
 					//初始化: 日志文件写入线程
-					LogFileProcessing = std::thread(&Log::LogWirteToFile, this, std::ref(LogFileWrite_Queue), LogFileStream, std::ref(LogFileWriteThreadStop));
-					LogFileProcessing.detach(); //分离线程
-
+					try {
+						LogFileProcessing = std::thread(&Log::LogWirteToFile, this, std::ref(LogFileWrite_Queue), LogFileStream, std::ref(LogFileWriteThreadStop));
+						LogFileProcessing.detach(); //分离线程
+					}
+					catch (...) {
+						Ucout << _T("Typical_Tool::Log::Init()::LogFileProcessing");
+					}
 					//完成初始化
 					FirstInit = true;
 				}
@@ -227,33 +236,33 @@ namespace Typical_Tool
 		template<class T = bool>
 		void SetConsoleTextColor(const Ustr& _Color)
 		{
-			Ucout << _Color << _T("_"); //修改颜色
+			Ucout << _Color; //修改颜色
 		}
 		template<class T = bool>
 		void SetConsoleTextColor_Error(const Ustr& _Color)
 		{
-			Ucerr << _Color << _T("_"); //修改颜色
+			Ucerr << _Color; //修改颜色
 		}
 		template<class T = bool>
 		void ReSetConsoleTextColor()
 		{
-			Ucout << _T("_") << ANSI_RESET << _T("\n"); //还原颜色
+			Ucout << ANSI_RESET; //还原颜色
 		}
 		template<class T = bool>
 		void ReSetConsoleTextColor_Error()
 		{
-			Ucerr << _T("_") << ANSI_RESET << _T("\n"); //还原颜色
+			Ucerr << ANSI_RESET; //还原颜色
 		}
 
 		template<class T = bool>
 		void ConsoleOutput(const Ustr& _Test)
 		{
-			Ucout << _Test << _T("\n");
+			Ucout << _Test;
 		}
 		template<class T = bool>
 		void ConsoleOutput_Error(const Ustr& _Test)
 		{
-			Ucerr << _Test << _T("\n");
+			Ucerr << _Test;
 		}
 
 

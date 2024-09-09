@@ -127,8 +127,8 @@ namespace Typical_Tool {
 			rt+ 读写打开一个文本文件，允许读和写。
 			wt+ 读写打开或着建立一个文本文件；允许读写。
 			at+ 读写打开一个文本文件，允许读或在文本末追加数据。*/
-			static bool 文件操作(Ustr 文件路径, Ustr 文件打开方式 = _T("r"), Ustr 日志 = _T("打开"));
-			static bool 文件操作(FILE** 文件流, Ustr 文件路径, Ustr 文件打开方式 = _T("r"), Ustr 日志 = _T("打开"));
+			static bool 文件操作(std::string 文件路径, std::string 文件打开方式 = "r", Ustr 日志 = _T("打开"));
+			static bool 文件操作(FILE** 文件流, std::string 文件路径, std::string 文件打开方式 = "r", Ustr 日志 = _T("打开"));
 		};
 		using CfgFile = CharHandleOfConfigFile;
 	}
