@@ -247,12 +247,12 @@ namespace Typical_Tool
 		template<class T = bool>
 		void ConsoleOutput(const Ustr& _Test)
 		{
-			Ucout << _Test;
+			Ucout << _Test << _T("\n");
 		}
 		template<class T = bool>
 		void ConsoleOutput_Error(const Ustr& _Test)
 		{
-			Ucerr << _Test;
+			Ucerr << _Test << _T("\n");
 		}
 
 
@@ -296,11 +296,11 @@ namespace Typical_Tool
 				if (CMD)
 				{
 					Ustr temp;
+					SetConsoleTextColor(ANSI_GREEN); //在时间输出之前
 					if (ShowTime) {
 						Ucout << GetFormattingTime();
 					}
 					temp = (Ustr)Log_ts + _T(": ") + text;
-					SetConsoleTextColor(ANSI_GREEN);
 					ConsoleOutput(temp);
 					ReSetConsoleTextColor();
 
@@ -327,11 +327,11 @@ namespace Typical_Tool
 				if (CMD)
 				{
 					Ustr temp;
+					SetConsoleTextColor(ANSI_YELLOW); //在时间输出之前
 					if (ShowTime) {
 						Ucout << GetFormattingTime();
 					}
 					temp = (Ustr)Log_wr + _T(": ") + text;
-					SetConsoleTextColor(ANSI_YELLOW);
 					ConsoleOutput(temp);
 					ReSetConsoleTextColor();
 
@@ -358,11 +358,11 @@ namespace Typical_Tool
 				if (CMD)
 				{
 					Ustr temp;
+					SetConsoleTextColor(ANSI_RED); //在时间输出之前
 					if (ShowTime) {
 						Ucout << GetFormattingTime();
 					}
 					temp = (Ustr)Log_er + _T(": ") + text;
-					SetConsoleTextColor(ANSI_RED);
 					ConsoleOutput(temp);
 					ReSetConsoleTextColor();
 
