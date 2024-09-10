@@ -354,10 +354,12 @@ namespace Typical_Tool
 					}
 					cv_LogFileQueue.notify_one(); // 通知线程有新消息
 #endif
-					if (ShowTime) {
-						LogFileStream_Out << GetFormattingTime();
+					if (LogAllOutput) {
+						if (ShowTime) {
+							LogFileStream_Out << GetFormattingTime();
+						}
+						LogFileStream_Out << temp;
 					}
-					LogFileStream_Out << temp;
 				}
 
 				return;
@@ -398,10 +400,12 @@ namespace Typical_Tool
 						}
 						cv_LogFileQueue.notify_one(); // 通知线程有新消息
 #endif
-						if (ShowTime) {
-							LogFileStream_Out << GetFormattingTime();
+						if (LogAllOutput) {
+							if (ShowTime) {
+								LogFileStream_Out << GetFormattingTime();
+							}
+							LogFileStream_Out << temp;
 						}
-						LogFileStream_Out << temp;
 					}
 					break;
 				}
@@ -437,10 +441,12 @@ namespace Typical_Tool
 						}
 						cv_LogFileQueue.notify_one(); // 通知线程有新消息
 #endif
-						if (ShowTime) {
-							LogFileStream_Out << GetFormattingTime();
+						if (LogAllOutput) {
+							if (ShowTime) {
+								LogFileStream_Out << GetFormattingTime();
+							}
+							LogFileStream_Out << temp;
 						}
-						LogFileStream_Out << temp;
 					}
 					break;
 				}
@@ -510,10 +516,12 @@ namespace Typical_Tool
 						}
 						cv_LogFileQueue.notify_one(); // 通知线程有新消息
 #endif
-						if (ShowTime) {
-							LogFileStream_Out << GetFormattingTime();
+						if (LogAllOutput) {
+							if (ShowTime) {
+								LogFileStream_Out << GetFormattingTime();
+							}
+							LogFileStream_Out << temp;
 						}
-						LogFileStream_Out << temp;
 					}
 					break;
 				}
@@ -548,10 +556,12 @@ namespace Typical_Tool
 						}
 						cv_LogFileQueue.notify_one(); // 通知线程有新消息
 #endif
-						if (ShowTime) {
-							LogFileStream_Out << GetFormattingTime();
+						if (LogAllOutput) {
+							if (ShowTime) {
+								LogFileStream_Out << GetFormattingTime();
+							}
+							LogFileStream_Out << temp;
 						}
-						LogFileStream_Out << temp;
 					}
 					return;
 				}
