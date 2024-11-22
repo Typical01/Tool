@@ -23,7 +23,7 @@ namespace Typical_Tool
 {
 	enum  LogMessage
 	{
-		nl, //空行: NULL String
+		tx, //文本: Text
 		lf, //换行: Line Feed
 		ts, //提示: Tips [INFO]
 		wr, //警告: Warning [WARRING]
@@ -68,10 +68,9 @@ namespace Typical_Tool
 
 #if 0
 #ifdef _WINDOWS
-
 #define PATH_BACKSLASH "\\"
-#else
 
+#else
 #define PATH_BACKSLASH "/"
 #endif
 
@@ -84,29 +83,20 @@ namespace Typical_Tool
 #define Log_wr "[WARNING]"
 #define Log_er "[ERROR]"
 
-#ifdef _WINDOWS
 #ifdef _CONSOLE
-
 #define ANSI_RESET "\033[0m"
 #define ANSI_GREEN "\033[32m"
 #define ANSI_YELLOW "\033[33m"
 #define ANSI_RED "\033[31m"
 
-#endif
-
-#define ANSI_RESET ""
-#define ANSI_GREEN ""
-#define ANSI_YELLOW ""
-#define ANSI_RED ""
-
 #else
-
 #define ANSI_RESET ""
 #define ANSI_GREEN ""
 #define ANSI_YELLOW ""
 #define ANSI_RED ""
 
 #endif
+
 
 	class  Log {
 	private:
@@ -537,16 +527,14 @@ namespace Typical_Tool
 
 				break;
 			}
-			case LogMessage::nl:
+			case LogMessage::tx:
 			{
 				if (CMD)
 				{
-					Tstr temp;
 					/*if (ShowTime) {
 						Tcout << GetFormattingTime();
 					}*/
-					temp = text;
-					ConsoleOutput(temp);
+					ConsoleOutput(text);
 
 					//WriteConfigFile log日志
 					if (LogFileWrite) {
@@ -556,7 +544,7 @@ namespace Typical_Tool
 							std::lock_guard<std::mutex> lock(mutex_LogFileStream_Out); // 上锁
 
 							if (LogAllOutput) {
-								LogFileWrite_Queue.push(temp);
+								LogFileWrite_Queue.push(text);
 							}
 						}
 						cv_LogFileQueue.notify_one(); // 通知线程有新消息
@@ -565,7 +553,7 @@ namespace Typical_Tool
 							if (ShowTime) {
 								LogFileStream_Out << GetFormattingTime();
 							}
-							LogFileStream_Out << temp;
+							LogFileStream_Out << text;
 						}
 					}
 					break;
@@ -703,7 +691,7 @@ namespace Typical_Tool
 			}
 		}
 		template<class T = bool>
-		void operator()(const Tstr& text, const LogMessage& lm = lm::lf)
+		void operator()(const Tstr& text, const LogMessage& lm = lm::tx)
 		{
 			if (ShowLog)
 			{
@@ -711,7 +699,7 @@ namespace Typical_Tool
 			}
 		}
 		template<class T = bool>
-		void operator()(Tstr&& text, const LogMessage& lm = lm::lf)
+		void operator()(Tstr&& text, const LogMessage& lm = lm::tx)
 		{
 			if (ShowLog)
 			{
@@ -806,7 +794,7 @@ namespace Typical_Tool
 		/*
 		* level:
 		* er: Error log level output
-		* !=3: All(lm: ts/wr/nl) log level output
+		* !=3: All(lm: ts/wr/tx) log level output
 		*/
 		template<class T = bool>
 		static void SetAllLogFileWrite(bool logFileWrite, int logLevel = lm::wr)
@@ -859,7 +847,7 @@ namespace Typical_Tool
 		lgcr();
 		lgcr("lm", "enum");
 		lgcr("\t#ifndef _English");
-		lgcr("\tlgm::nl,  //空标题(不带标题): 只输出内容");
+		lgcr("\tlgm::tx,  //文本: 只输出文本");
 		lgcr("\tlgm::ts,  //提示");
 		lgcr("\tlgm::wr,  //警告");
 		lgcr("\tlgm::er   //错误");
@@ -884,7 +872,6 @@ namespace Typical_Tool
 		lgcr();
 		lgcr("lm", "enum");
 		lgcr("\t#ifdef _English");
-		lgcr("\tlgm::nl,  //Empty title (without title): Only the content is output");
 		lgcr("\tlgm::ts,  //Tips");
 		lgcr("\tlgm::wr,  //Warning");
 		lgcr("\tlgm::er   //Error");

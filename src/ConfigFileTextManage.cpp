@@ -154,8 +154,9 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Co
 	Tstr tempAnalyzeLaterConfigItem_Key; //解析后的配置项 Key
 	Tstr tempAnalyzeLaterConfigItem_Value; //解析后的配置项 Value
 	for (auto tempConfigItem = _ConfigItem.begin(); tempConfigItem != _ConfigItem.end(); tempConfigItem++) {
-		if (this->ConfigItemTextManage(*tempConfigItem, tempAnalyzeLaterConfigItem_Key, tempAnalyzeLaterConfigItem_Value)) {
+		if (!this->ConfigItemTextManage(*tempConfigItem, tempAnalyzeLaterConfigItem_Key, tempAnalyzeLaterConfigItem_Value)) {
 			lgcr("AddConfig: 配置项文本处理失败!\n", lm::wr);
+			lgcr("  配置[" + _Config + "]\n", lm::wr);
 			return false;
 		}
 		else { //成功处理后, 临时保存
@@ -522,7 +523,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Format(std::vector<Tstr>&
 	bool FirstLineText = true; //第一行文本
 	int TextLine = 1; //文本行数
 
-	if (this->ConfigMap.size() > 1)
+	if (this->ConfigMap.size() > 0)
 	{
 		for (auto tempConfig = this->ConfigMap.begin(); tempConfig != this->ConfigMap.end(); tempConfig++)
 		{
