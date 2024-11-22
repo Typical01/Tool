@@ -284,7 +284,7 @@ namespace Typical_Tool {
 	namespace WinSys = WindowsSystem;
 
 	//字符处理---------------------------------------------------------------------------------------------------------------
-	namespace StringHandling 
+	namespace StringManage 
 	{
 
 		//字符转换-------------------------------------------------------------------------------------------------------
@@ -297,7 +297,7 @@ namespace Typical_Tool {
 
 		//编码转换---------------------------------------------------------------------------------------------------------
 	}
-	namespace 字符处理 = StringHandling;
+	namespace 字符处理 = StringManage;
 
 	namespace GameTools
 	{

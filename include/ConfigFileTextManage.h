@@ -9,7 +9,7 @@
 
 
 namespace Typical_Tool {
-	namespace StringHandling
+	namespace StringManage
 	{
 		/* 配置字符串格式, 基础结构:
 		*	[config]\n

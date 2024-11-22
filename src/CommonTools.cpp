@@ -49,7 +49,7 @@ void Typical_Tool::WindowsSystem::SetDisplaySize(int displayWidth, int displayHe
 	 SetConsoleCursorPosition(hOut, pos);
  }
 
-std::wstring Typical_Tool::StringHandling::StringToWstring(const std::string& str)
+std::wstring Typical_Tool::StringManage::StringToWstring(const std::string& str)
 {
 	std::wstring wContext;
 
@@ -76,7 +76,7 @@ std::wstring Typical_Tool::StringHandling::StringToWstring(const std::string& st
 	return wContext;
 }
 
-std::wstring Typical_Tool::StringHandling::StringToWstring(std::string&& str)
+std::wstring Typical_Tool::StringManage::StringToWstring(std::string&& str)
 {
 	std::wstring wContext;
 
@@ -103,7 +103,7 @@ std::wstring Typical_Tool::StringHandling::StringToWstring(std::string&& str)
 	return wContext;
 }
 
-std::string Typical_Tool::StringHandling::WstringToString(const std::wstring& wStr)
+std::string Typical_Tool::StringManage::WstringToString(const std::wstring& wStr)
 {
 	std::string context;
 
@@ -130,7 +130,7 @@ std::string Typical_Tool::StringHandling::WstringToString(const std::wstring& wS
 	return context;
 }
 
-std::string Typical_Tool::StringHandling::WstringToString(std::wstring&& wStr)
+std::string Typical_Tool::StringManage::WstringToString(std::wstring&& wStr)
 {
 	std::string context;
 

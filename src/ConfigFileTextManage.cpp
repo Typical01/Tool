@@ -3,13 +3,13 @@
 #include "ConfigFileTextManage.h"
 
 
-using namespace Typical_Tool::StringHandling;
+using namespace Typical_Tool::StringManage;
 
-Typical_Tool::StringHandling::ConfigFileTextManage::~ConfigFileTextManage()
+Typical_Tool::StringManage::ConfigFileTextManage::~ConfigFileTextManage()
 {
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::Init(const Tstr& _ConfigFilePath, bool _Analyze)
+bool Typical_Tool::StringManage::ConfigFileTextManage::Init(const Tstr& _ConfigFilePath, bool _Analyze)
 {
 	//保存路径
 	this->ConfigFilePath = _ConfigFilePath;
@@ -36,7 +36,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::Init(const Tstr& _Confi
 	return true;
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::InitText(const Tstr& _ConfigFilePath, std::vector<Tstr>& _ReadText)
+bool Typical_Tool::StringManage::ConfigFileTextManage::InitText(const Tstr& _ConfigFilePath, std::vector<Tstr>& _ReadText)
 {
 	//保存路径
 	this->ConfigFilePath = _ConfigFilePath;
@@ -52,7 +52,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::InitText(const Tstr& _C
 	return true;
 }
 
-Tstr Typical_Tool::StringHandling::ConfigFileTextManage::GetConfigItem_Value(const Tstr& _Config, const Tstr& _ConfigItem)
+Tstr Typical_Tool::StringManage::ConfigFileTextManage::GetConfigItem_Value(const Tstr& _Config, const Tstr& _ConfigItem)
 {
 	auto tempConfig = this->ConfigMap.find(_Config);
 	if (tempConfig != this->ConfigMap.end()) {
@@ -79,7 +79,7 @@ Tstr Typical_Tool::StringHandling::ConfigFileTextManage::GetConfigItem_Value(con
 	}
 }
 
-std::map<Tstr, Tstr> Typical_Tool::StringHandling::ConfigFileTextManage::GetConfigItem(const Tstr& _Config, const Tstr& _ConfigItem)
+std::map<Tstr, Tstr> Typical_Tool::StringManage::ConfigFileTextManage::GetConfigItem(const Tstr& _Config, const Tstr& _ConfigItem)
 {
 	auto tempConfig = this->ConfigMap.find(_Config);
 	if (tempConfig != this->ConfigMap.end()) {
@@ -107,7 +107,7 @@ std::map<Tstr, Tstr> Typical_Tool::StringHandling::ConfigFileTextManage::GetConf
 	}
 }
 
-std::map<Tstr, std::map<Tstr, Tstr>> Typical_Tool::StringHandling::ConfigFileTextManage::GetConfig(const Tstr& _Config)
+std::map<Tstr, std::map<Tstr, Tstr>> Typical_Tool::StringManage::ConfigFileTextManage::GetConfig(const Tstr& _Config)
 {
 	auto tempConfig = this->ConfigMap.find(_Config);
 	if (tempConfig != this->ConfigMap.end()) {
@@ -125,12 +125,12 @@ std::map<Tstr, std::map<Tstr, Tstr>> Typical_Tool::StringHandling::ConfigFileTex
 	}
 }
 
-std::map<Tstr, std::map<Tstr, Tstr>> Typical_Tool::StringHandling::ConfigFileTextManage::GetConfigMap()
+std::map<Tstr, std::map<Tstr, Tstr>> Typical_Tool::StringManage::ConfigFileTextManage::GetConfigMap()
 {
 	return this->ConfigMap;
 }
 
-void Typical_Tool::StringHandling::ConfigFileTextManage::OutConfigFile_All() const
+void Typical_Tool::StringManage::ConfigFileTextManage::OutConfigFile_All() const
 {
 	lgcr();
 	lgcr("OutConfigFile_All: 输出内容 " + this->ConfigFilePath + " 开始...\n", lm::ts);
@@ -147,7 +147,7 @@ void Typical_Tool::StringHandling::ConfigFileTextManage::OutConfigFile_All() con
 	lgcr("OutConfigFile_All: 输出内容 " + this->ConfigFilePath + " 结束!\n", lm::ts);
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::AddConfig(const Tstr& _Config, std::vector<Tstr>& _ConfigItem)
+bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Config, std::vector<Tstr>& _ConfigItem)
 {
 	//先解析为 map
 	std::map<Tstr, Tstr> AnalyzeLaterConfigItemMap; //解析后的配置项 Map
@@ -213,7 +213,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::AddConfig(const Tstr& _
 	return true;
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::AddConfig(const Tstr& _Config, std::map<Tstr, Tstr>& _ConfigItem)
+bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Config, std::map<Tstr, Tstr>& _ConfigItem)
 {
 	std::map<Tstr, Tstr> RepeatConfigItemMap; //重复配置Map
 	//添加有匹配的配置时, 不添加重复配置项
@@ -265,7 +265,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::AddConfig(const Tstr& _
 	return true;
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::DeleteConfigItem(const Tstr& _Config, const Tstr& _ConfigItem)
+bool Typical_Tool::StringManage::ConfigFileTextManage::DeleteConfigItem(const Tstr& _Config, const Tstr& _ConfigItem)
 {
 	//需要删除的配置项是否匹配
 	auto temp = this->ConfigMap.find(_Config); //对应配置
@@ -289,7 +289,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::DeleteConfigItem(const 
 	}
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::DeleteConfig(const Tstr& _Config, bool _IsDelete)
+bool Typical_Tool::StringManage::ConfigFileTextManage::DeleteConfig(const Tstr& _Config, bool _IsDelete)
 {
 	if (_IsDelete) {
 		if (this->ConfigMap.erase(_Config)) {  //删除对应配置
@@ -310,7 +310,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::DeleteConfig(const Tstr
 	}
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::SetConfigItemValue(const Tstr& _Config, const Tstr& _ConfigItem_Key, const Tstr& _ConfigItem_Value)
+bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfigItemValue(const Tstr& _Config, const Tstr& _ConfigItem_Key, const Tstr& _ConfigItem_Value)
 {
 	auto tempConfig = this->ConfigMap.find(_Config); //对应配置
 	if (tempConfig != this->ConfigMap.end()) {
@@ -341,7 +341,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::SetConfigItemValue(cons
 	}
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::SetConfigItemKey(const Tstr& _Config, const Tstr& _ConfigItem_Key, const Tstr& _ConfigItem_NewKey)
+bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfigItemKey(const Tstr& _Config, const Tstr& _ConfigItem_Key, const Tstr& _ConfigItem_NewKey)
 {
 	auto tempConfig = this->ConfigMap.find(_Config); //对应配置
 	if (tempConfig != this->ConfigMap.end()) {
@@ -380,7 +380,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::SetConfigItemKey(const 
 	}
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::SetConfig(const Tstr& _Config, const Tstr& _NewConfig)
+bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfig(const Tstr& _Config, const Tstr& _NewConfig)
 {
 	auto tempConfig = this->ConfigMap.find(_Config); //对应配置
 	if (tempConfig != this->ConfigMap.end()) {
@@ -412,7 +412,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::SetConfig(const Tstr& _
 	}
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::CreateFile(const Tstr& _FileEncode)
+bool Typical_Tool::StringManage::ConfigFileTextManage::CreateFile(const Tstr& _FileEncode)
 {
 	if (!WriteFile(this->ConfigFilePath, std::vector<Tstr>(), _FileEncode)) {
 		lgcr("CreateFile: 创建文件失败!\n", lm::wr);
@@ -423,7 +423,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::CreateFile(const Tstr& 
 	return true;
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::CreateFile(const Tstr& _NewFilePath, const Tstr& _FileEncode)
+bool Typical_Tool::StringManage::ConfigFileTextManage::CreateFile(const Tstr& _NewFilePath, const Tstr& _FileEncode)
 {
 	if (!WriteFile(_NewFilePath, std::vector<Tstr>(), _FileEncode)) {
 		lgcr("CreateFile: 创建文件失败!\n", lm::wr);
@@ -434,7 +434,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::CreateFile(const Tstr& 
 	return true;
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::WriteConfigFile(const Tstr& _FileEncode)
+bool Typical_Tool::StringManage::ConfigFileTextManage::WriteConfigFile(const Tstr& _FileEncode)
 {
 	std::vector<Tstr> tempWriteConfig_Vec;
 	if (this->Format(tempWriteConfig_Vec)) {
@@ -473,7 +473,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::WriteConfigFile(const T
 	}
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::WriteTextFile(std::vector<Tstr>& _Text, const Tstr& _FileEncode)
+bool Typical_Tool::StringManage::ConfigFileTextManage::WriteTextFile(std::vector<Tstr>& _Text, const Tstr& _FileEncode)
 {
 	if (!WriteFile(this->ConfigFilePath, _Text, _FileEncode)) {
 		lgcr("WriteTextFile: 可能没有对应的文件, 或文件正在被使用!\n", lm::wr);
@@ -495,7 +495,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::WriteTextFile(std::vect
 	}
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::ReadConfigFile(const Tstr& _FileEncode)
+bool Typical_Tool::StringManage::ConfigFileTextManage::ReadConfigFile(const Tstr& _FileEncode)
 {
 	//读取配置文件
 	if (!ReadFile(this->ConfigFilePath, this->TextCache)) {
@@ -517,7 +517,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::ReadConfigFile(const Ts
 	return true;
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::Format(std::vector<Tstr>& _FormatMap)
+bool Typical_Tool::StringManage::ConfigFileTextManage::Format(std::vector<Tstr>& _FormatMap)
 {
 	bool FirstLineText = true; //第一行文本
 	int TextLine = 1; //文本行数
@@ -577,7 +577,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::Format(std::vector<Tstr
 }
 
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::Analyze()
+bool Typical_Tool::StringManage::ConfigFileTextManage::Analyze()
 {
 	//配置项非空
 	if (!this->TextCache.size() < 2) {
@@ -656,7 +656,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::Analyze()
 	}
 }
 
-ConfigStringFormat Typical_Tool::StringHandling::ConfigFileTextManage::AnalyzeFormat(Tstr& _AnalyzeConfig)
+ConfigStringFormat Typical_Tool::StringManage::ConfigFileTextManage::AnalyzeFormat(Tstr& _AnalyzeConfig)
 {
 	if (!_AnalyzeConfig.empty()) {
 		//首字符符号
@@ -682,7 +682,7 @@ ConfigStringFormat Typical_Tool::StringHandling::ConfigFileTextManage::AnalyzeFo
 	}
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::ConfigTextManage(Tstr& _Config)
+bool Typical_Tool::StringManage::ConfigFileTextManage::ConfigTextManage(Tstr& _Config)
 {
 	//格式是否正确
 	int tempConfigFormat_Right = _Config.find(']'); //右括号
@@ -713,7 +713,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::ConfigTextManage(Tstr& 
 	return true;
 }
 
-bool Typical_Tool::StringHandling::ConfigFileTextManage::ConfigItemTextManage(Tstr& _ConfigItem, Tstr& _AnalyzeLaterConfigItem_Key, Tstr& _AnalyzeLaterConfigItem_Value)
+bool Typical_Tool::StringManage::ConfigFileTextManage::ConfigItemTextManage(Tstr& _ConfigItem, Tstr& _AnalyzeLaterConfigItem_Key, Tstr& _AnalyzeLaterConfigItem_Value)
 {
 	//格式是否正确
 	int tempEqualSign = _ConfigItem.find('='); //找到 "=" 号的下标
@@ -761,7 +761,7 @@ bool Typical_Tool::StringHandling::ConfigFileTextManage::ConfigItemTextManage(Ts
 	return true;
 }
 
-void Typical_Tool::StringHandling::ConfigFileTextManage::ConfigFormatSample()
+void Typical_Tool::StringManage::ConfigFileTextManage::ConfigFormatSample()
 {
 	lgcr();
 	lgcr("ConfigFormatSample: 配置格式 示例开始...\n", lm::ts);
@@ -778,7 +778,7 @@ void Typical_Tool::StringHandling::ConfigFileTextManage::ConfigFormatSample()
 }
 
 
-bool Typical_Tool::StringHandling::WriteFile(
+bool Typical_Tool::StringManage::WriteFile(
 	const Tstr& _ConfigFilePath,
 	std::vector<Tstr>& _WriteText,
 	const Tstr& _FileEncode)
@@ -813,11 +813,11 @@ bool Typical_Tool::StringHandling::WriteFile(
 		return true;
 	}
 	catch (...) {
-		lgcr("bool Typical_Tool::StringHandling::WriteFile()\n", lm::er);
+		lgcr("bool Typical_Tool::StringManage::WriteFile()\n", lm::er);
 	}
 }
 
-bool Typical_Tool::StringHandling::ReadFile(
+bool Typical_Tool::StringManage::ReadFile(
 	const Tstr& _ConfigFilePath,
 	std::vector<Tstr>& _ReadText,
 	const Tstr& _FileEncode)
@@ -858,6 +858,6 @@ bool Typical_Tool::StringHandling::ReadFile(
 		return true;
 	}
 	catch (...) {
-		lgcr("bool Typical_Tool::StringHandling::ReadFile()\n", lm::er);
+		lgcr("bool Typical_Tool::StringManage::ReadFile()\n", lm::er);
 	}
 }

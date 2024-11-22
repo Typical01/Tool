@@ -12,7 +12,7 @@
 #include "Log.h"
 #include "Shell.h"
 
-using namespace Typical_Tool::StringHandling;
+using namespace Typical_Tool::StringManage;
 using Typical_Tool::WindowsSystem::WindowShell;
 
 namespace Typical_Tool {
