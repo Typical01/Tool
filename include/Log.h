@@ -216,7 +216,7 @@ namespace Typical_Tool
 						}
 						else {
 							Tcerr << ANSI_YELLOW
-								<< "Log: 文件夹 " + Log_FolderName + "创建失败!\n"
+								<< "Log: 文件夹[" + Log_FolderName + "]创建失败!\n"
 								<< ANSI_RESET;
 
 							Log_FolderName = (Tstr)".";
@@ -229,7 +229,7 @@ namespace Typical_Tool
 																					
 						try {
 							//打开文件
-							Tstr _文件编码 = "UTF-8BOM";
+							Tstr _文件编码 = "UTF-8";
 							//Tcerr << "Log: 日志输出文件名 " << Log_FilePath << "\n" << std::endl;
 							LogFileStream_Out = std::move(std::ofstream(Log_FilePath, std::ios::out));
 							if (!LogFileStream_Out) {
@@ -418,7 +418,7 @@ namespace Typical_Tool
 					/*if (ShowTime) {
 						Tcout << GetFormattingTime();
 					}*/
-					temp = (Tstr)Log_ts + " " + text;
+					temp = (Tstr)Log_ts + " " + text + "\n";
 					ConsoleOutput(temp);
 					ReSetConsoleTextColor();
 
@@ -459,7 +459,7 @@ namespace Typical_Tool
 					/*if (ShowTime) {
 						Tcout << GetFormattingTime();
 					}*/
-					temp = (Tstr)Log_wr + " " + text;
+					temp = (Tstr)Log_wr + " " + text + "\n";
 					ConsoleOutput(temp);
 					ReSetConsoleTextColor();
 
@@ -500,7 +500,7 @@ namespace Typical_Tool
 					/*if (ShowTime) {
 						Tcout << GetFormattingTime();
 					}*/
-					temp = (Tstr)Log_er + " " + text;
+					temp = (Tstr)Log_er + " " + text + "\n";
 					ConsoleOutput(temp);
 					ReSetConsoleTextColor();
 
@@ -534,7 +534,7 @@ namespace Typical_Tool
 					/*if (ShowTime) {
 						Tcout << GetFormattingTime();
 					}*/
-					ConsoleOutput(text);
+					ConsoleOutput(text + "\n");
 
 					//WriteConfigFile log日志
 					if (LogFileWrite) {
@@ -564,16 +564,10 @@ namespace Typical_Tool
 				
 				break;
 			}
-			case LogMessage::lf:
-			{
+			case LogMessage::lf: {
 				if (CMD)
 				{
-					Tstr temp;
-					/*if (ShowTime) {
-						Tcout << GetFormattingTime();
-					}*/
-					temp = text + "\n";
-					ConsoleOutput(temp);
+					ConsoleOutput(text);
 
 					//WriteConfigFile log日志
 					if (LogFileWrite) {
@@ -583,7 +577,7 @@ namespace Typical_Tool
 							std::lock_guard<std::mutex> lock(mutex_LogFileStream_Out); // 上锁
 
 							if (LogAllOutput) {
-								LogFileWrite_Queue.push(temp);
+								LogFileWrite_Queue.push(text);
 							}
 						}
 						cv_LogFileQueue.notify_one(); // 通知线程有新消息
@@ -592,16 +586,11 @@ namespace Typical_Tool
 							if (ShowTime) {
 								LogFileStream_Out << GetFormattingTime();
 							}
-							LogFileStream_Out << temp;
+							LogFileStream_Out << text;
 						}
 					}
-					break;
+					return;
 				}
-#ifdef _WINDOWS
-				MessageBox(NULL, text.c_str(), Log_nl, MB_OK);
-#endif
-				
-				break;
 			}
 			}
 		}
@@ -731,24 +720,24 @@ namespace Typical_Tool
 				// 路径不存在或出错，尝试创建目录  
 				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS)
 				{
-					Tcout << "Log: 文件夹 " + folderPath + " 创建成功!" + "\n";
+					Tcout << "Log: 文件夹[" + folderPath + "]创建成功!" + "\n";
 					// 创建成功
 					return true;
 				}
-				Tcerr << "Log: 文件夹 " + folderPath + " 创建失败!" + "\n";
+				Tcerr << "Log: 文件夹[" + folderPath + "]创建失败!" + "\n";
 				// 创建失败且不是因为路径已存在  
 				return false;
 			}
 			else if (attributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				Tcout << "Log: 文件夹" + folderPath + " 已存在" + "\n";
+				Tcout << "Log: 文件夹[" + folderPath + "]已存在" + "\n";
 				// 路径已经是一个目录  
 				return true;
 			}
 			// 路径存在但不是目录（可能是一个文件）  
-			Tcout << "Log: 文件夹 " + folderPath + " 创建失败(路径存在, 但不是目录)!" + "\n";
+			Tcout << "Log: 文件夹[" + folderPath + "]创建失败(路径存在, 但不是目录)!" + "\n";
 #else
-			Tcout << "Log: 文件夹 " + folderPath + " 创建失败(#ifndef _WINDOWS)!" + "\n";
+			Tcout << "Log: 文件夹[" + folderPath + "]创建失败(#ifndef _WINDOWS)!" + "\n";
 #endif
 			return false;
 		}
@@ -797,12 +786,12 @@ namespace Typical_Tool
 		* !=3: All(lm: ts/wr/tx) log level output
 		*/
 		template<class T = bool>
-		static void SetAllLogFileWrite(bool logFileWrite, int logLevel = lm::wr)
+		static void SetAllLogFileWrite(bool logFileWrite, int logLevel = lm::er)
 		{
 			LogFileWrite = logFileWrite;
 
 			//输出所有级别
-			if (logLevel != lm::wr) {
+			if (logLevel != lm::er) {
 				LogAllOutput = true;
 
 				Tcout << ANSI_YELLOW 

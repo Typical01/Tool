@@ -37,6 +37,7 @@ namespace Typical_Tool {
 			int ConfigSum; //配置总数
 			
 			bool ShowManageLog = false; //显示配置处理过程日志
+			bool FormatText = false;
 
 		public:
 			template<class T = bool>
@@ -62,9 +63,12 @@ namespace Typical_Tool {
 			*/
 			bool Init(const Tstr& _ConfigFilePath, bool _Analyze = true);
 			/* 初始化
-			* _ReadText: 读取到的文本
+			* _ReadText: 只读取文本
 			*/
 			bool InitText(const Tstr& _ConfigFilePath, std::vector<Tstr>& _ReadText);
+
+			//设置 显示处理过程的日志
+			void SetShowManageLog(bool _IsShowManageLog);
 
 		public:
 			//获取 配置项 Value
@@ -102,12 +106,16 @@ namespace Typical_Tool {
 			bool CreateFile(const Tstr& _NewFilePath, const Tstr& _FileEncode = "UTF-8");
 
 		public:
-			//写入文件: 格式化后的配置
-			bool WriteConfigFile(const Tstr& _FileEncode = "UTF-8");
+			/* 写入文件 : 格式化后的配置
+			* _IsSureWrite: 强制写入
+			*/
+			bool WriteConfigFile(bool _IsSureWrite = true, const Tstr& _FileEncode = "UTF-8");
 			//写入文件: 文本
 			bool WriteTextFile(std::vector<Tstr>& _Text, const Tstr& _FileEncode = "UTF-8");
 			//读取文件: 配置
 			bool ReadConfigFile(const Tstr& _FileEncode = "UTF-8");
+			//读取文件: 文本
+			bool ReadConfigFile(std::vector<Tstr>& _Text, const Tstr& _FileEncode = "UTF-8");
 
 		private:
 			//将文本格式化为配置
