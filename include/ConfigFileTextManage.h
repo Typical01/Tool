@@ -48,7 +48,6 @@ namespace Typical_Tool {
 
 			/* 输出: CMD
 			* ShowManageLog: 显示配置处理过程日志
-			* ShowErrorLog: 显示错误日志
 			*/
 			ConfigFileTextManage(bool _ShowManageLog = true)
 				: ConfigSum(0), ShowManageLog(_ShowManageLog)
@@ -102,7 +101,7 @@ namespace Typical_Tool {
 			bool CreateFile(const Tstr& _FileEncode = "UTF-8");
 			bool CreateFile(const Tstr& _NewFilePath, const Tstr& _FileEncode = "UTF-8");
 
-		private:
+		public:
 			//写入文件: 格式化后的配置
 			bool WriteConfigFile(const Tstr& _FileEncode = "UTF-8");
 			//写入文件: 文本
