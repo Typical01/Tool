@@ -104,7 +104,7 @@ namespace Typical_Tool {
 		{
 			for (long long temp = 1; temp < sec; temp++) {
 				std::this_thread::sleep_for(std::chrono::seconds(1));
-				lgc("暂停: " + Uto_string(temp) + "秒", lgm::ts);
+				lgc("暂停: " + Tto_string(temp) + "秒", lm::ts);
 			}
 		}
 #define 延迟_毫秒 sleep_s
@@ -122,8 +122,8 @@ namespace Typical_Tool {
 
 		// [time]text
 		template<class Temp = bool>
-		static void FormattingTime(Ustr& text, const Ustr& timeFormat = "%Y-%m-%d %H:%M:%S", 
-			const Ustr& textLeftFormat = "[", const Ustr& textRigthFormat = "]")
+		static void FormattingTime(Tstr& text, const Tstr& timeFormat = "%Y-%m-%d %H:%M:%S", 
+			const Tstr& textLeftFormat = "[", const Tstr& textRigthFormat = "]")
 		{
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();;
 			// 获取当前时间点（自epoch以来的时间）
@@ -133,7 +133,7 @@ namespace Typical_Tool {
 			std::tm* now_tm = std::localtime(&tm);
 
 			// 使用 std::put_time 格式化时间
-			Uostringstream oss;
+			Tostringstream oss;
 			oss << std::put_time(now_tm, timeFormat.c_str()); // 自定义时间格式
 
 			//不需要修饰字符时, 直接返回格式化后的时间文本
@@ -144,8 +144,8 @@ namespace Typical_Tool {
 		}
 		// [time]text
 		template<class Temp = bool>
-		static Ustr GetFormattingTime(const Ustr& timeFormat = "%Y-%m-%d %H:%M:%S", 
-			const Ustr& textLeftFormat = "[", const Ustr& textRigthFormat = "]")
+		static Tstr GetFormattingTime(const Tstr& timeFormat = "%Y-%m-%d %H:%M:%S", 
+			const Tstr& textLeftFormat = "[", const Tstr& textRigthFormat = "]")
 		{
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();;
 			// 获取当前时间点（自epoch以来的时间）
@@ -155,7 +155,7 @@ namespace Typical_Tool {
 			std::tm* now_tm = std::localtime(&tm);
 
 			// 使用 std::put_time 格式化时间
-			Uostringstream oss;
+			Tostringstream oss;
 			oss << std::put_time(now_tm, timeFormat.c_str()); // 自定义时间格式
 
 			//不需要修饰字符时, 直接返回格式化后的时间文本

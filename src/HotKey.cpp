@@ -29,12 +29,12 @@ void Typical_Tool::WindowsSystem::WindowHotkey::创建组合按键(HWND hWndEdit
 	//数字
 	if (基础按键) {
 		if (wParam >= 'A' && wParam <= 'Z') {
-			KeyName_lib.push_back(Uto_string(wParam));
+			KeyName_lib.push_back(Tto_string(wParam));
 			KeyID_lib.push_back(wParam);
 			基础按键 = true;
 		}
 		else if (wParam >= '0' && wParam <= '9') {
-			KeyName_lib.push_back(Uto_string(wParam));
+			KeyName_lib.push_back(Tto_string(wParam));
 			KeyID_lib.push_back(wParam);
 			基础按键 = true;
 		}
@@ -110,15 +110,15 @@ void Typical_Tool::WindowsSystem::WindowHotkey::创建组合按键(HWND hWndEdit
 	}
 
 	// 获取编辑控件的文本
-	Uchar buffer[256];
-	lgc("Typical_Tool::WindowsSystem::WindowHotkey::创建组合按键名()::GetWindowText()之前用于对比返回值的错误代码: " + Uto_string(GetLastError()), lgm::er);
+	Tchar buffer[256];
+	lgc("Typical_Tool::WindowsSystem::WindowHotkey::创建组合按键名()::GetWindowText()之前用于对比返回值的错误代码: " + Tto_string(GetLastError()), lm::er);
 	int charLen = GetWindowText(hWndEdit, buffer, sizeof(buffer) / sizeof(buffer[0]));
 	if (charLen == 0) {
-		lgc("Typical_Tool::WindowsSystem::WindowHotkey::创建组合按键名()::GetWindowText() 错误代码: " + Uto_string(GetLastError()), lgm::er);
+		lgc("Typical_Tool::WindowsSystem::WindowHotkey::创建组合按键名()::GetWindowText() 错误代码: " + Tto_string(GetLastError()), lm::er);
 	}
 	// 根据修饰符个数判断 存储的位置
 	if (修饰符 > 1) {
-		组合按键名 = (Ustr)buffer + " + " + KeyName_lib[修饰符 - 1];
+		组合按键名 = (Tstr)buffer + " + " + KeyName_lib[修饰符 - 1];
 	}
 	else {
 		组合按键名 = KeyName_lib[0];

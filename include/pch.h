@@ -48,9 +48,15 @@
 #include <TlHelp32.h>
 #elif _CONSOLE
 
-#elif _UNIX
-	//Linux 和 macOS
-#include <iconv.h>
 #endif
+
+
+
+
+
+
+
+
+
 
 #endif

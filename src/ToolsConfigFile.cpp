@@ -2,7 +2,7 @@
 
 #include "ToolsConfigFile.h"
 #include "CommonTools.h"
-#include "CharHandleOfConfigFile.h"
+#include "ConfigFileTextManage.h"
 
 
 using namespace Typical_Tool::WindowsSystem;

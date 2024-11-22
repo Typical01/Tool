@@ -18,9 +18,9 @@ namespace Typical_Tool {
 			static int HotkeyID;
 			std::vector<int> HotKeyID_lib;
 
-			std::vector<Ustr> KeyName_lib;
+			std::vector<Tstr> KeyName_lib;
 			std::vector<int> KeyID_lib;
-			Ustr 组合按键名 = "";
+			Tstr 组合按键名 = "";
 			int 修饰符 = 0;
 			bool 基础按键 = false;
 

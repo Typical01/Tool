@@ -6,22 +6,23 @@
 int Typical_Tool::WindowsSystem::WindowHosting::hMenu = 1000;
 bool Typical_Tool::WindowsSystem::WindowHosting::注册进度条类 = false;
 int Typical_Tool::WindowsSystem::WindowHosting::进度条步进 = 1;
-const Uchar* Typical_Tool::WindowsSystem::WindowHosting::进度条类名 = "进度条";
-const Uchar* Typical_Tool::WindowsSystem::WindowHosting::进度条主窗口类名 = "进度条主窗口";
+const Tchar* Typical_Tool::WindowsSystem::WindowHosting::进度条类名 = "进度条";
+const Tchar* Typical_Tool::WindowsSystem::WindowHosting::进度条主窗口类名 = "进度条主窗口";
 int Typical_Tool::WindowsSystem::WindowHosting::进度条进度百分比 = 0;
 HWND Typical_Tool::WindowsSystem::WindowHosting::进度条;
 HWND Typical_Tool::WindowsSystem::WindowHosting::进度条主窗口;
 HINSTANCE Typical_Tool::WindowsSystem::WindowHosting::hIns;
 UINT Typical_Tool::WindowsSystem::WindowHosting::WM_TASKBARCREATED_WH = RegisterWindowMessage("TaskbarCreated");
 
-bool Typical_Tool::WindowsSystem::WindowHosting::添加窗口托管(Ustr windowName, HWND& window, int showWindow)
+bool Typical_Tool::WindowsSystem::WindowHosting::添加窗口托管(Tstr windowName, HWND& window, int showWindow)
 {
 	if (!IsWindow(window)) {
 		//创建失败
-		lg("窗口创建失败!  窗口名: " + windowName, lgm::er);
+		lg("窗口创建失败!  窗口名: " + windowName, lm::er);
 		return false;
 	}
-	lgc("窗口创建成功!  窗口名: " + windowName, lgm::wr);
+	lgc("窗口创建成功!  窗口名: " + windowName, lm::ts);
+	lgc();
 	
 	ShowWindow(window, showWindow);
 	UpdateWindow(window);
@@ -41,7 +42,7 @@ void Typical_Tool::WindowsSystem::WindowHosting::设置字体(HFONT hFont)
 	}
 }
 
-std::map<Ustr, HWND>& Typical_Tool::WindowsSystem::WindowHosting::Get窗口()
+std::map<Tstr, HWND>& Typical_Tool::WindowsSystem::WindowHosting::Get窗口()
 {
     return this->窗口;
 }
@@ -56,10 +57,11 @@ int Typical_Tool::WindowsSystem::WindowHosting::注册窗口类(WNDCLASS& wndCla
 {
 	if (!RegisterClass(&wndClass))
 	{
-		lg((Ustr)"窗口类注册失败!\n 窗口类名: " + wndClass.lpszClassName, lgm::er);
+		lg((Tstr)"窗口类注册失败!\n 窗口类名: " + wndClass.lpszClassName, lm::er);
 		return 0;
 	}
-	lgc((Ustr)"注册窗口类名: " + wndClass.lpszClassName, lgm::wr);
+	lgc((Tstr)"注册窗口类名: " + wndClass.lpszClassName, lm::ts);
+	lgc();
 }
 
 LRESULT Typical_Tool::WindowsSystem::WindowProcedureMain(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -150,7 +152,7 @@ void Typical_Tool::WindowsSystem::WindowHosting::注册进度条窗口类()
 		注册进度条类 = true;
 	}
 }
-void Typical_Tool::WindowsSystem::WindowHosting::创建进度条(Ustr 进度条标题栏名)
+void Typical_Tool::WindowsSystem::WindowHosting::创建进度条(Tstr 进度条标题栏名)
 {
 	if (进度条主窗口 == NULL) {
 		进度条主窗口 = CreateWindowEx(0,
@@ -171,7 +173,7 @@ void Typical_Tool::WindowsSystem::WindowHosting::创建进度条(Ustr 进度条�
 			进度条主窗口, NULL, hIns, NULL);
 		if (!IsWindow(进度条)) {
 			//创建失败
-			lg("进度条创建失败! 进度条标题栏名: " + 进度条标题栏名, lgm::er);
+			lg("进度条创建失败! 进度条标题栏名: " + 进度条标题栏名, lm::er);
 			return;
 		}
 		进度条进度百分比 = 0;
@@ -197,7 +199,8 @@ void Typical_Tool::WindowsSystem::WindowHosting::增加进度条进度(int 进�
 		}
 		InvalidateRect(进度条, NULL, TRUE);
 		SendMessage(进度条, WM_PAINT, 0, 0);
-		lgc("进度条进度百分比: " + Uto_string(进度条进度百分比), lgm::ts);
+		lgc("进度条进度百分比: " + Tto_string(进度条进度百分比), lm::ts);
+		lgc();
 	}
 }
 void Typical_Tool::WindowsSystem::WindowHosting::增加进度条进度()
@@ -213,7 +216,8 @@ void Typical_Tool::WindowsSystem::WindowHosting::增加进度条进度()
 		}
 		InvalidateRect(进度条, NULL, TRUE);
 		SendMessage(进度条, WM_PAINT, 0, 0);
-		lgc("进度条进度百分比: " + Uto_string(进度条进度百分比), lgm::ts);
+		lgc("进度条进度百分比: " + Tto_string(进度条进度百分比), lm::ts);
+		lgc();
 	}
 }
 void Typical_Tool::WindowsSystem::WindowHosting::设置进度条步进(int 步进)

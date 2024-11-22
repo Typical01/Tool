@@ -16,31 +16,35 @@ namespace Typical_Tool {
 		class  RegisterHotKeyMessage
 		{
 		private:
-			Ustr 信息;
+			Tstr 信息;
 
 		public:
-			RegisterHotKeyMessage(Ustr& RegisterHotKey热键信息, int message)
+			RegisterHotKeyMessage(Tstr& RegisterHotKey热键信息, int message)
 				: 信息(RegisterHotKey热键信息)
 			{
 				if (message > 0)
 				{
 					lgc("热键注册[" + this->信息 + "]: 成功👌");
+					lgc();
 				}
 				else
 				{
-					lgc("热键注册[" + this->信息 + "]: 错误😒 -> 代码(" + Uto_string(message) + ")", lgm::er);
+					lgc("热键注册[" + this->信息 + "]: 错误😒 -> 代码(" + Tto_string(message) + ")", lm::er);
+					lgc();
 				}
 			}
-			RegisterHotKeyMessage(Ustr&& RegisterHotKey热键信息, int message)
+			RegisterHotKeyMessage(Tstr&& RegisterHotKey热键信息, int message)
 				: 信息(RegisterHotKey热键信息)
 			{
 				if (message > 0)
 				{
 					lgc("热键注册[" + this->信息 + "]: 成功👌");
+					lgc();
 				}
 				else
 				{
-					lgc("热键注册[" + this->信息 + "]: 错误😒 -> 代码(" + Uto_string(message) + ")", lgm::er);
+					lgc("热键注册[" + this->信息 + "]: 错误😒 -> 代码(" + Tto_string(message) + ")", lm::er);
+					lgc();
 				}
 			}
 		};
@@ -49,13 +53,13 @@ namespace Typical_Tool {
 		class  ShellMessage
 		{
 		private:
-			Ustr 信息;
+			Tstr 信息;
 			int ErrorCode; //错误代码
 			bool Status; //是否成功
 
 		public:
 			ShellMessage() {}
-			ShellMessage(Ustr& Shell信息, int message)
+			ShellMessage(Tstr& Shell信息, int message)
 				: 信息(Shell信息), ErrorCode(0), Status(false)
 			{
 				if (message < 32)
@@ -64,16 +68,18 @@ namespace Typical_Tool {
 
 					//ShellExecute() 成功操作, 则传入为句柄
 					this->ErrorCode = message;
-					lgc("Shell消息[" + this->信息 + "]: 错误😒 -> 代码(" + Uto_string(message) + ")", lgm::er);
+					lgc("Shell消息[" + this->信息 + "]: 错误😒 -> 代码(" + Tto_string(message) + ")", lm::er);
+					lgc();
 				}
 				else
 				{
 					this->Status = true;
 					this->ErrorCode = message;
 					lgc("Shell消息[" + this->信息 + "]: 成功 👌");
+					lgc();
 				}
 			}
-			ShellMessage(Ustr&& Shell信息, int message)
+			ShellMessage(Tstr&& Shell信息, int message)
 				: 信息(Shell信息), ErrorCode(0), Status(false)
 			{
 				if (message < 32)
@@ -82,13 +88,15 @@ namespace Typical_Tool {
 
 					//ShellExecute() 成功操作, 则传入为句柄
 					this->ErrorCode = message;
-					lgc("Shell消息[" + this->信息 + "]: 错误😒 -> 代码(" + Uto_string(message) + ")", lgm::er);
+					lgc("Shell消息[" + this->信息 + "]: 错误😒 -> 代码(" + Tto_string(message) + ")", lm::er);
+					lgc();
 				}
 				else
 				{
 					this->Status = true;
 					this->ErrorCode = message;
 					lgc("Shell消息[" + this->信息 + "]: 成功 👌");
+					lgc();
 				}
 			}
 

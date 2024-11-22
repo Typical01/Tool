@@ -42,6 +42,15 @@ if (MSVC)
     $<$<CONFIG:Debug>:/U_WINDOWS>
     $<$<CONFIG:Release>:/U_WINDOWS>
   )
+
+  # 对于所有配置设置 UTF-8 编码
+  target_compile_options(libTypical_Tool
+  PRIVATE
+  $<$<CONFIG:Debug>:/utf-8>
+  $<$<CONFIG:Release>:/utf-8>
+  $<$<CONFIG:Debug_Win>:/utf-8>
+  $<$<CONFIG:Release_Win>:/utf-8>
+)
 endif()
 
 # 分组源文件和头文件

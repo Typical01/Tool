@@ -24,36 +24,36 @@ namespace Typical_Tool
 	enum  LogMessage
 	{
 		nl, //空行: NULL String
-		ts, //提示: Tips
-		wr, //警告: Warning
-		er  //错误: Error
+		lf, //换行: Line Feed
+		ts, //提示: Tips [INFO]
+		wr, //警告: Warning [WARRING]
+		er  //错误: Error [ERROR]
 	};
-	typedef LogMessage lgm;
+	typedef LogMessage lm;
 
 #ifndef UNICODE
-	#define Uchar char
-	#define Ustr std::string
-	#define Ucout std::cout
-	#define Ucerr std::cerr
-	#define Uto_string std::to_string
-	#define Ustrlen std::strlen
-	#define Uostringstream std::ostringstream
-	#define Ufopen_s fopen_s
-	#define Ufputs fputs
-	#define Ufgets fgets
+	#define Tchar char
+	#define Tstr std::string
+	#define Tcout std::cout
+	#define Tcerr std::cerr
+	#define Tto_string std::to_string
+	#define Tstrlen std::strlen
+	#define Tostringstream std::ostringstream
+	#define Tfopen_s fopen_s
+	#define Tfputs fputs
+	#define Tfgets fgets
 
 #else
-
-	#define Uchar wchar_t
-	#define Ustr std::wstring
-	#define Ucout std::wcout
-	#define Ucerr std::wcerr
-	#define Uto_string std::to_wstring
-	#define Ustrlen std::wcslen
-	#define Uostringstream std::wostringstream
-	#define Ufopen_s _wfopen_s
-	#define Ufputs fputws
-	#define Ufgets fgetws
+	#define Tchar wchar_t
+	#define Tstr std::wstring
+	#define Tcout std::wcout
+	#define Tcerr std::wcerr
+	#define Tto_string std::to_wstring
+	#define Tstrlen std::wcslen
+	#define Tostringstream std::wostringstream
+	#define Tfopen_s _wfopen_s
+	#define Tfputs fputws
+	#define Tfgets fgetws
 
 #endif
 
@@ -79,18 +79,35 @@ namespace Typical_Tool
 #define PATH_BACKSLASH "/"
 
 #define Log_nl "temp"
+#define Log_lf '\n'
 #define Log_ts "[INFO]"
 #define Log_wr "[WARNING]"
 #define Log_er "[ERROR]"
+
+#ifdef _WINDOWS
+#ifdef _CONSOLE
 
 #define ANSI_RESET "\033[0m"
 #define ANSI_GREEN "\033[32m"
 #define ANSI_YELLOW "\033[33m"
 #define ANSI_RED "\033[31m"
 
-	/// <summary>
-	/// 非线程安全
-	/// </summary>
+#endif
+
+#define ANSI_RESET ""
+#define ANSI_GREEN ""
+#define ANSI_YELLOW ""
+#define ANSI_RED ""
+
+#else
+
+#define ANSI_RESET ""
+#define ANSI_GREEN ""
+#define ANSI_YELLOW ""
+#define ANSI_RED ""
+
+#endif
+
 	class  Log {
 	private:
 		static bool FirstInit;
@@ -112,7 +129,7 @@ namespace Typical_Tool
 
 #ifdef _Thread
 		static std::mutex mutex_LogFileStream_Out; //保护 LogFileStream_Out/LogFileWrite_Queue
-		static std::queue<Ustr> LogFileWrite_Queue; //日志文件写入队列
+		static std::queue<Tstr> LogFileWrite_Queue; //日志WriteConfigFile队列
 		static std::thread LogFileProcessing; //日志文件处理: 主要是输出到{./Log/时间_程序名.txt}文件
 		static std::atomic<bool> LogFileWriteThreadStop;
 		static std::condition_variable cv_LogFileQueue;
@@ -121,7 +138,9 @@ namespace Typical_Tool
 	public:
 		Log(bool cmd, bool release)
 			: CMD(cmd), Release(release), ShowTime(true), ShowLog(true)
-		{}
+		{
+			Init();
+		}
 
 		~Log();
 
@@ -139,77 +158,104 @@ namespace Typical_Tool
 					// 设置全局区域为 "zh_CN.UTF-8"
 					std::locale::global(std::locale("zh_CN.UTF-8"));
 
-					// 使用区域设置进行格式化
-					Ucout.imbue(std::locale()); // 使用全局区域设置
-					Ucerr.imbue(std::locale());
+					// 使用Config进行格式化
+					Tcout.imbue(std::locale()); // 使用全局Config
+					Tcerr.imbue(std::locale());
 
-					//Ucout << "Log 区域设置: zh_CN.UTF-8 完成!\n";
+					//Tcout << "Log Config: zh_CN.UTF-8 完成!\n";
 
 #ifdef _WINDOWS
+					//Windows 控制台编码修改: UTF-8
 
-				//Windows 控制台编码修改: UTF-8
 					SetConsoleOutputCP(CP_UTF8);
 					SetConsoleCP(CP_UTF8);
 
+#ifndef _CONSOLE
 					//分离控制台
-					/*if (FreeConsole() == 0)
+					if (FreeConsole() == 0)
 					{
 						MessageBox(0, "log: 分离控制台失败!", Log_er, MB_ICONSTOP);
-						MessageBox(0, "错误代码: " + Uto_string(GetLastError()).c_str(), Log_er, MB_ICONSTOP);
-					}*/
+						MessageBox(0, ((Tstr)"错误代码: " + Tto_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
+					}
+					else {
+						Tcout << "Log: 分离控制台\n";
+					}
+
 
 					//分配控制台: 当不是控制台程序时
-#ifndef _CONSOLE
 					if (AllocConsole() == 0)
 					{
 						MessageBox(0, "log: 分配控制台失败!", Log_er, MB_ICONSTOP);
-						MessageBox(0, ((Ustr)"错误代码: " + Uto_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
+						MessageBox(0, ((Tstr)"错误代码: " + Tto_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
 					}
+					else {
+						Tcout << "Log: 分配控制台\n";
+					}
+
+					// 获取标准输出流的句柄
+					FILE* FilePtr;
+					// 重定向标准输出流
+					freopen_s(&FilePtr, "CONOUT$", "w", stdout);
+					if (FilePtr == nullptr) {
+						MessageBox(0, "日志: 重定向标准输出流失败!", Log_er, MB_ICONSTOP);
+						MessageBox(0, ((Tstr)"错误代码: " + std::to_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
+						return;
+					}
+					// 重定向标准错误流
+					freopen_s(&FilePtr, "CONOUT$", "w", stderr);
+					if (FilePtr == nullptr) {
+						MessageBox(0, "日志: 重定向标准错误流失败!", Log_er, MB_ICONSTOP);
+						MessageBox(0, ((Tstr)"错误代码: " + std::to_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
+						return;
+					}
+
+					SetConsoleOutputCP(CP_UTF8);
+					SetConsoleCP(CP_UTF8);
 #endif
 
 					// 获取控制台窗口的句柄
 					hConsole = GetConsoleWindow();
 #endif
 					if (LogFileWrite) {
-						//Ucerr << "Log 日志文件写入: 开始\n";
+						//Tcerr << "Log 日志WriteConfigFile: 开始\n";
 
 						//获取 当前路径/Log/Log文件名.txt 
 						//创建文件夹 ./Log  .
-						Ustr Log_FolderName = (Ustr)"." + PATH_BACKSLASH + "Log";
+						Tstr Log_FolderName = (Tstr)"." + PATH_BACKSLASH + "Log";
 						if (CreateFolder(Log_FolderName)) {
 						}
 						else {
-							Ucerr << ANSI_YELLOW
+							Tcerr << ANSI_YELLOW
 								<< "Log: 文件夹 " + Log_FolderName + "创建失败!\n"
 								<< ANSI_RESET;
 
-							Log_FolderName = (Ustr)".";
+							Log_FolderName = (Tstr)".";
 						}
 
 						//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + .txt
-						Ustr Log_FileName = GetFormattingTime("%Y-%m-%d_%H-%M-%S", "", "") + ".txt";
+						Tstr Log_FileName = GetFormattingTime("%Y-%m-%d_%H-%M-%S", "", "") + ".txt";
 						// ./Log/时间.txt  ||  ./时间.txt
-						Ustr Log_FilePath = Log_FolderName + PATH_BACKSLASH + Log_FileName; //总是添加 /
+						Tstr Log_FilePath = Log_FolderName + PATH_BACKSLASH + Log_FileName; //总是添加 /
 																					
 						try {
 							//打开文件
-							Ustr _文件编码 = "UTF-8BOM";
-							//Ucerr << "Log: 日志输出文件名 " << Log_FilePath << "\n" << std::endl;
+							Tstr _文件编码 = "UTF-8BOM";
+							//Tcerr << "Log: 日志输出文件名 " << Log_FilePath << "\n" << std::endl;
 							LogFileStream_Out = std::move(std::ofstream(Log_FilePath, std::ios::out));
 							if (!LogFileStream_Out) {
-								Ucerr << ANSI_RED
-									<< (Ustr)"Log: " + Log_FilePath + " 打开文件失败!\n"
+								Tcerr << ANSI_RED
+									<< (Tstr)"Log: " + Log_FilePath + " 打开文件失败!\n"
 									<< ANSI_RESET;
 								return;
 							}
-							Ucerr << ANSI_GREEN
-								<< (Ustr)"Log: " + Log_FilePath + " 打开文件成功!\n"
+							Tcerr << ANSI_GREEN
+								<< (Tstr)"Log: " + Log_FilePath + " 打开文件成功!\n"
 								<< ANSI_RESET;
-							//Ucerr << "Log: 文件 开始写入!\n";
+							//Tcerr << "Log: 文件 开始写入!\n";
 
 							if (_文件编码 == "UTF-8BOM") {
 								// 写入 UTF-8 BOM (EF BB BF)
-								Ucerr << "Log: 写入 UTF-8BOM 编码(EF BB BF)\n";
+								Tcerr << "Log: 写入 UTF-8BOM 编码(EF BB BF)\n";
 
 								LogFileStream_Out.put(0xEF);
 								LogFileStream_Out.put(0xBB);
@@ -217,30 +263,29 @@ namespace Typical_Tool
 							}
 						}
 						catch (...) {
-							Ucerr << "Typical_Tool::Log::Init()::LogFileStream_Out\n";
+							Tcerr << "Typical_Tool::Log::Init()::LogFileStream_Out\n";
 						}
 
 #ifdef _Thread
-						//初始化: 日志文件写入线程
+						//初始化: 日志WriteConfigFile线程
 						try {
 							LogFileProcessing = std::thread(&Log::LogWirteToFile,
 								this);
 							LogFileProcessing.detach(); //分离线程
-							Ucout << "Log: 日志写入线程 分离到后台\n";
+							Uerr << "Log: 日志写入线程 分离到后台\n";
 						}
 						catch (...) {
-							Ucerr << "Typical_Tool::Log::Init()::LogFileProcessing\n";
+							Tcerr << "Typical_Tool::Log::Init()::LogFileProcessing\n";
 						}
 #endif
 					}
-					Ucout << std::endl;
 
 					//完成初始化
 					FirstInit = true;
 				}
 			}
 			catch (...) {
-				Ucerr << "void Typical_Tool::Log::Init()\n";
+				Tcerr << "void Typical_Tool::Log::Init()\n";
 			}
 		}
 
@@ -275,10 +320,10 @@ namespace Typical_Tool
 				}
 			}
 			catch (const std::exception& e) {
-				Ucerr << "Typical_Tool::Log::LogWriteToFile() - " << e.what() << "\n";
+				Tcerr << "Typical_Tool::Log::LogWriteToFile() - " << e.what() << "\n";
 			}
 			catch (...) {
-				Ucerr << "Typical_Tool::Log::LogWirteToFile()\n";
+				Tcerr << "Typical_Tool::Log::LogWirteToFile()\n";
 			}
 #endif
 		}
@@ -289,63 +334,63 @@ namespace Typical_Tool
 #ifdef _Thread
 			LogFileWriteThreadStop.store(true);
 			cv_LogFileQueue.notify_one(); // 通知线程退出
-			Ucout << "Log: 日志写入线程 退出\n" << std::endl;
+			Tcout << "Log: 日志写入线程 退出\n" << std::endl;
 #endif
 		}
 
 	private:
 
 		template<class T = bool>
-		void SetConsoleTextColor(const Ustr& _Color)
+		void SetConsoleTextColor(const Tstr& _Color)
 		{
-			Ucout << _Color; //修改颜色
+			Tcout << _Color; //修改颜色
 		}
 		template<class T = bool>
-		void SetConsoleTextColor_Error(const Ustr& _Color)
+		void SetConsoleTextColor_Error(const Tstr& _Color)
 		{
-			Ucerr << _Color; //修改颜色
+			Tcerr << _Color; //修改颜色
 		}
 		template<class T = bool>
 		void ReSetConsoleTextColor()
 		{
-			Ucout << ANSI_RESET; //还原颜色
+			Tcout << ANSI_RESET; //还原颜色
 		}
 		template<class T = bool>
 		void ReSetConsoleTextColor_Error()
 		{
-			Ucerr << ANSI_RESET; //还原颜色
+			Tcerr << ANSI_RESET; //还原颜色
 		}
 
 		template<class T = bool>
-		void ConsoleOutput(const Ustr& _Test)
+		void ConsoleOutput(const Tstr& _Test)
 		{
-			Ucout << _Test;
+			Tcout << _Test;
 		}
 		template<class T = bool>
-		void ConsoleOutput_Error(const Ustr& _Test)
+		void ConsoleOutput_Error(const Tstr& _Test)
 		{
-			Ucerr << _Test;
+			Tcerr << _Test;
 		}
 
 
 		// _WINDOWS || _CONSOLE
 		template<class T = bool>
-		void Logs_ustr_ustr(const Ustr& text, const Ustr& title)
+		void Logs_ustr_ustr(const Tstr& text, const Tstr& title)
 		{
 			if (CMD)
 			{
-				Ustr temp;
+				Tstr temp;
 				/*if (ShowTime) {
-					Ucout << GetFormattingTime();
+					Tcout << GetFormattingTime();
 				}*/
 				temp = title + ": " + text;
 				ConsoleOutput(temp);
 
-				//文件写入 log日志
+				//WriteConfigFile log日志
 				if (LogFileWrite) {
 #ifdef _Thread
 					{
-						//锁 日志文件写入队列
+						//锁 日志WriteConfigFile队列
 						std::lock_guard<std::mutex> lock(mutex_LogFileStream_Out); // 上锁
 
 						if (LogAllOutput) {
@@ -370,28 +415,28 @@ namespace Typical_Tool
 		}
 	
 		template<class T = bool>
-		void Logs_ustr(const Ustr& text, const LogMessage& lgm)
+		void Logs_ustr(const Tstr& text, const LogMessage& lm)
 		{
-			switch (lgm)
+			switch (lm)
 			{
 			case LogMessage::ts:
 			{
 				if (CMD)
 				{
-					Ustr temp;
+					Tstr temp;
 					SetConsoleTextColor(ANSI_GREEN); //在时间输出之前
 					/*if (ShowTime) {
-						Ucout << GetFormattingTime();
+						Tcout << GetFormattingTime();
 					}*/
-					temp = (Ustr)Log_ts + " " + text;
+					temp = (Tstr)Log_ts + " " + text;
 					ConsoleOutput(temp);
 					ReSetConsoleTextColor();
 
-					//文件写入 log日志
+					//WriteConfigFile log日志
 					if (LogFileWrite) {
 #ifdef _Thread
 						{
-							//锁 日志文件写入队列
+							//锁 日志WriteConfigFile队列
 							std::lock_guard<std::mutex> lock(mutex_LogFileStream_Out); // 上锁
 
 							if (LogAllOutput) {
@@ -419,20 +464,20 @@ namespace Typical_Tool
 			{
 				if (CMD)
 				{
-					Ustr temp;
+					Tstr temp;
 					SetConsoleTextColor(ANSI_YELLOW); //在时间输出之前
 					/*if (ShowTime) {
-						Ucout << GetFormattingTime();
+						Tcout << GetFormattingTime();
 					}*/
-					temp = (Ustr)Log_wr + " " + text;
+					temp = (Tstr)Log_wr + " " + text;
 					ConsoleOutput(temp);
 					ReSetConsoleTextColor();
 
-					//文件写入 log日志
+					//WriteConfigFile log日志
 					if (LogFileWrite) {
 #ifdef _Thread
 						{
-							//锁 日志文件写入队列
+							//锁 日志WriteConfigFile队列
 							std::lock_guard<std::mutex> lock(mutex_LogFileStream_Out); // 上锁
 
 							if (LogAllOutput) {
@@ -460,20 +505,20 @@ namespace Typical_Tool
 			{
 				if (CMD)
 				{
-					Ustr temp;
+					Tstr temp;
 					SetConsoleTextColor(ANSI_RED); //在时间输出之前
 					/*if (ShowTime) {
-						Ucout << GetFormattingTime();
+						Tcout << GetFormattingTime();
 					}*/
-					temp = (Ustr)Log_er + " " + text;
+					temp = (Tstr)Log_er + " " + text;
 					ConsoleOutput(temp);
 					ReSetConsoleTextColor();
 
-					//文件写入 log日志
+					//WriteConfigFile log日志
 					if (LogFileWrite) {
 #ifdef _Thread
 						{
-							//锁 日志文件写入队列
+							//锁 日志WriteConfigFile队列
 							std::lock_guard<std::mutex> lock(mutex_LogFileStream_Out); // 上锁
 							LogFileWrite_Queue.push(temp);
 						}
@@ -496,18 +541,57 @@ namespace Typical_Tool
 			{
 				if (CMD)
 				{
-					Ustr temp;
+					Tstr temp;
 					/*if (ShowTime) {
-						Ucout << GetFormattingTime();
+						Tcout << GetFormattingTime();
 					}*/
 					temp = text;
 					ConsoleOutput(temp);
 
-					//文件写入 log日志
+					//WriteConfigFile log日志
 					if (LogFileWrite) {
 #ifdef _Thread
 						{
-							//锁 日志文件写入队列
+							//锁 日志WriteConfigFile队列
+							std::lock_guard<std::mutex> lock(mutex_LogFileStream_Out); // 上锁
+
+							if (LogAllOutput) {
+								LogFileWrite_Queue.push(temp);
+							}
+						}
+						cv_LogFileQueue.notify_one(); // 通知线程有新消息
+#endif
+						if (LogAllOutput) {
+							if (ShowTime) {
+								LogFileStream_Out << GetFormattingTime();
+							}
+							LogFileStream_Out << temp;
+						}
+					}
+					break;
+				}
+#ifdef _WINDOWS
+				MessageBox(NULL, text.c_str(), Log_nl, MB_OK);
+#endif
+				
+				break;
+			}
+			case LogMessage::lf:
+			{
+				if (CMD)
+				{
+					Tstr temp;
+					/*if (ShowTime) {
+						Tcout << GetFormattingTime();
+					}*/
+					temp = text + "\n";
+					ConsoleOutput(temp);
+
+					//WriteConfigFile log日志
+					if (LogFileWrite) {
+#ifdef _Thread
+						{
+							//锁 日志WriteConfigFile队列
 							std::lock_guard<std::mutex> lock(mutex_LogFileStream_Out); // 上锁
 
 							if (LogAllOutput) {
@@ -534,20 +618,20 @@ namespace Typical_Tool
 			}
 		}
 		template<class T = bool>
-		void Logs_lgm(const LogMessage& lgm)
+		void Logs_lgm(const LogMessage& lm)
 		{
-			if (lgm == LogMessage::nl)
+			if (lm == LogMessage::lf)
 			{
 				if (CMD)
 				{
-					Ustr temp = "\n";
+					Tstr temp = "\n";
 					ConsoleOutput(temp);
 
-					//文件写入 log日志
+					//WriteConfigFile log日志
 					if (LogFileWrite) {
 #ifdef _Thread
 						{
-							//锁 日志文件写入队列
+							//锁 日志WriteConfigFile队列
 							std::lock_guard<std::mutex> lock(mutex_LogFileStream_Out); // 上锁
 
 							if (LogAllOutput) {
@@ -571,7 +655,7 @@ namespace Typical_Tool
 
 		// _DEBUG || NDEBUG
 		template<class T = bool>
-		void Logs(const Ustr& text, const Ustr& title)
+		void Logs(const Tstr& text, const Tstr& title)
 		{
 #ifdef _DEBUG
 			Logs_ustr_ustr(text, title);
@@ -583,27 +667,27 @@ namespace Typical_Tool
 			}
 		}
 		template<class T = bool>
-		void Logs(const Ustr& text, const LogMessage& lgm)
+		void Logs(const Tstr& text, const LogMessage& lm)
 		{
 #ifdef _DEBUG
-			Logs_ustr(text, lgm);
+			Logs_ustr(text, lm);
 			return;
 #endif
 			if (Release)
 			{
-				Logs_ustr(text, lgm);
+				Logs_ustr(text, lm);
 			}
 		}
 		template<class T = bool>
-		void Logs(const LogMessage& lgm)
+		void Logs(const LogMessage& lm)
 		{
 #ifdef _DEBUG
-			Logs_lgm(lgm);
+			Logs_lgm(lm);
 			return;
 #endif
 			if (Release)
 			{
-				Logs_lgm(lgm);
+				Logs_lgm(lm);
 			}
 		}
 
@@ -611,39 +695,35 @@ namespace Typical_Tool
 
 		//显示/隐藏 Log消息
 		template<class T = bool>
-		void operator()(const Ustr& text, const Ustr& title)
+		void operator()(const Tstr& text, const Tstr& title)
 		{
-			Init();
 			if (ShowLog)
 			{
 				Logs(text, title);
 			}
 		}
 		template<class T = bool>
-		void operator()(const Ustr& text, const LogMessage& lgm = lgm::nl)
+		void operator()(const Tstr& text, const LogMessage& lm = lm::lf)
 		{
-			Init();
 			if (ShowLog)
 			{
-				Logs(text, lgm);
+				Logs(text, lm);
 			}
 		}
 		template<class T = bool>
-		void operator()(Ustr&& text, const LogMessage& lgm = lgm::nl)
+		void operator()(Tstr&& text, const LogMessage& lm = lm::lf)
 		{
-			Init();
 			if (ShowLog)
 			{
-				Logs(text, lgm);
+				Logs(text, lm);
 			}
 		}
 		template<class T = bool>
-		void operator()(const LogMessage& lgm = lgm::nl)
+		void operator()()
 		{
-			Init();
 			if (ShowLog)
 			{
-				Logs(lgm);
+				Logs(lm::lf);
 			}
 		}
 
@@ -652,7 +732,7 @@ namespace Typical_Tool
 
 		// _WINDOWS: Win32 API
 		template<class T = bool>
-		bool CreateFolder(const Ustr& folderPath)
+		bool CreateFolder(const Tstr& folderPath)
 		{
 #ifdef _WINDOWS
 			DWORD attributes = GetFileAttributes(folderPath.c_str());
@@ -663,24 +743,24 @@ namespace Typical_Tool
 				// 路径不存在或出错，尝试创建目录  
 				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS)
 				{
-					Ucout << "Log: 文件夹 " + folderPath + " 创建成功!" + "\n";
+					Tcout << "Log: 文件夹 " + folderPath + " 创建成功!" + "\n";
 					// 创建成功
 					return true;
 				}
-				Ucerr << "Log: 文件夹 " + folderPath + " 创建失败!" + "\n";
+				Tcerr << "Log: 文件夹 " + folderPath + " 创建失败!" + "\n";
 				// 创建失败且不是因为路径已存在  
 				return false;
 			}
 			else if (attributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				Ucout << "Log: 文件夹" + folderPath + " 已存在" + "\n";
+				Tcout << "Log: 文件夹" + folderPath + " 已存在" + "\n";
 				// 路径已经是一个目录  
 				return true;
 			}
 			// 路径存在但不是目录（可能是一个文件）  
-			Ucout << "Log: 文件夹 " + folderPath + " 创建失败(路径存在, 但不是目录)!" + "\n";
+			Tcout << "Log: 文件夹 " + folderPath + " 创建失败(路径存在, 但不是目录)!" + "\n";
 #else
-			Ucout << "Log: 文件夹 " + folderPath + " 创建失败(#ifndef _WINDOWS)!" + "\n";
+			Tcout << "Log: 文件夹 " + folderPath + " 创建失败(#ifndef _WINDOWS)!" + "\n";
 #endif
 			return false;
 		}
@@ -694,14 +774,14 @@ namespace Typical_Tool
 #define 设置时间显示 SetShowTime
 
 		// _WINDOWS: Win32 API
-		void SetShowConsole(bool showConsole, bool isTips = false);
+		void SetShowConsole(bool showConsole);
 #define 设置控制台显示 SetShowConsole
 
 
 	private:
 		template<class Temp = bool>
-		Ustr GetFormattingTime(const Ustr& timeFormat = "%Y-%m-%d %H:%M:%S",
-			const Ustr& textLeftFormat = "[", const Ustr& textRigthFormat = "]")
+		Tstr GetFormattingTime(const Tstr& timeFormat = "%Y-%m-%d %H:%M:%S",
+			const Tstr& textLeftFormat = "[", const Tstr& textRigthFormat = "]")
 		{
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();;
 			// 获取当前时间点（自epoch以来的时间）
@@ -711,7 +791,7 @@ namespace Typical_Tool
 			std::tm* now_tm = std::localtime(&tm);
 
 			// 使用 std::put_time 格式化时间
-			Uostringstream oss;
+			Tostringstream oss;
 			oss << std::put_time(now_tm, timeFormat.c_str()); // 自定义时间格式
 
 			//不需要修饰字符时, 直接返回格式化后的时间文本
@@ -726,30 +806,30 @@ namespace Typical_Tool
 		/*
 		* level:
 		* er: Error log level output
-		* !=3: All(lgm: ts/wr/nl) log level output
+		* !=3: All(lm: ts/wr/nl) log level output
 		*/
 		template<class T = bool>
-		static void SetAllLogFileWrite(bool logFileWrite, int logLevel = lgm::er)
+		static void SetAllLogFileWrite(bool logFileWrite, int logLevel = lm::wr)
 		{
 			LogFileWrite = logFileWrite;
 
 			//输出所有级别
-			if (logLevel != lgm::er) {
+			if (logLevel != lm::wr) {
 				LogAllOutput = true;
 
-				Ucout << ANSI_YELLOW 
+				Tcout << ANSI_YELLOW 
 					<< "Log: File Output level >> All <<"
 					<< ANSI_RESET << std::endl;
 			}
 			else {
 				LogAllOutput = false;
 
-				Ucout << ANSI_YELLOW
+				Tcout << ANSI_YELLOW
 					<< "Log: File Output level >> Error <<"
 					<< ANSI_RESET << std::endl;
 			}
 
-			Ucout << std::endl;
+			Tcout << std::endl;
 		}
 #define 设置所有日志写入 SetAllLogFileWrite
 
@@ -767,53 +847,53 @@ namespace Typical_Tool
 	template<class Temp = bool>
 	void Log_README()
 	{
-		lgcr("\n_WINDOWS", lgm::nl);
-		lgcr(lgm::nl);
-		lgcr("\nTypical_Tool::README()", lgm::nl);
-		lgcr("\n 支持 Unicode: #define UNICODE", lgm::nl);
-		lgcr("\n 使用方法-函数对象, 代码如下:", lgm::nl);
+		lgcr("\n_WINDOWS");
+		lgcr();
+		lgcr("\nTypical_Tool::README()");
+		lgcr("\n 支持 Unicode: #define UNICODE");
+		lgcr("\n 使用方法-函数对象, 代码如下:");
 		lgcr("\n 输出[_CONSOLE | _WINDOWS](_DEBUG)", "lg()");
 		lgcr("\n 输出[_CONSOLE | _WINDOWS](_DEBUG | Release)", "lgr()");
 		lgcr("\n CMD输出[_WINDOWS](_DEBUG)", "lgc()");
 		lgcr("\n CMD输出[_WINDOWS](_DEBUG | Release)", "lgcr()");
-		lgcr(lgm::nl);
-		lgcr("lgm", "enum");
-		lgcr("\t#ifndef _English", lgm::nl);
-		lgcr("\tlgm::nl,  //空标题(不带标题): 只输出内容", lgm::nl);
-		lgcr("\tlgm::ts,  //提示", lgm::nl);
-		lgcr("\tlgm::wr,  //警告", lgm::nl);
-		lgcr("\tlgm::er   //错误", lgm::nl);
-		lgcr(lgm::nl);
-		lgcr("\n日志显示开关", lgm::nl);
-		lgcr("\tTypical_Tool::设置日志显示(bool)", lgm::nl);
-		lgcr("\tTypical_Tool::设置时间显示(bool)", lgm::nl);
-		lgcr("\tTypical_Tool::Log::设置日志显示(bool)", lgm::nl);
-		lgcr("\tTypical_Tool::Log::设置时间显示(bool)", lgm::nl);
-		lgcr(lgm::nl);
-		lgcr(lgm::nl);
-		lgcr(lgm::nl);
-		lgcr(lgm::nl);
-		lgcr("\nTypical_Tool::README()", lgm::nl);
-		lgcr("\n Unicode support: #define UNICODE", lgm::nl);
-		lgcr("\n Using method - function object, the code is as follows:", lgm::nl);
+		lgcr();
+		lgcr("lm", "enum");
+		lgcr("\t#ifndef _English");
+		lgcr("\tlgm::nl,  //空标题(不带标题): 只输出内容");
+		lgcr("\tlgm::ts,  //提示");
+		lgcr("\tlgm::wr,  //警告");
+		lgcr("\tlgm::er   //错误");
+		lgcr();
+		lgcr("\n日志显示开关");
+		lgcr("\tTypical_Tool::设置日志显示(bool)", );
+		lgcr("\tTypical_Tool::设置时间显示(bool)", );
+		lgcr("\tTypical_Tool::Log::设置日志显示(bool)");
+		lgcr("\tTypical_Tool::Log::设置时间显示(bool)");
+		lgcr();
+		lgcr();
+		lgcr();
+		lgcr();
+		lgcr("\nTypical_Tool::README()", );
+		lgcr("\n Unicode support: #define UNICODE", );
+		lgcr("\n Using method - function object, the code is as follows:");
 		lgcr("\n Print [_CONSOLE | _WINDOWS](_DEBUG)", "lg()");
 		lgcr("\n Print [_CONSOLE | _WINDOWS](_DEBUG | Release)", "lgr()");
 		lgcr("\n Command Print [_WINDOWS](_DEBUG)", "lgc()");
 		lgcr("\n Command Print [_WINDOWS](_DEBUG | Release)", "lgcr()");
-		lgcr(lgm::nl);
-		lgcr(lgm::nl);
-		lgcr("lgm", "enum");
-		lgcr("\t#ifdef _English", lgm::nl);
-		lgcr("\tlgm::nl,  //Empty title (without title): Only the content is output", lgm::nl);
-		lgcr("\tlgm::ts,  //Tips", lgm::nl);
-		lgcr("\tlgm::wr,  //Warning", lgm::nl);
-		lgcr("\tlgm::er   //Error", lgm::nl);
-		lgcr(lgm::nl);
-		lgcr("\nLog display switch:", lgm::nl);
-		lgcr("\tTypical_Tool::SetShowLog(bool)", lgm::nl);
-		lgcr("\tTypical_Tool::SetConsoleTimeShow(bool)", lgm::nl);
-		lgcr("\tTypical_Tool::Log::SetShowLog(bool)", lgm::nl);
-		lgcr("\tTypical_Tool::Log::SetConsoleTimeShow(bool)", lgm::nl);
+		lgcr();
+		lgcr();
+		lgcr("lm", "enum");
+		lgcr("\t#ifdef _English");
+		lgcr("\tlgm::nl,  //Empty title (without title): Only the content is output");
+		lgcr("\tlgm::ts,  //Tips");
+		lgcr("\tlgm::wr,  //Warning");
+		lgcr("\tlgm::er   //Error");
+		lgcr();
+		lgcr("\nLog display switch:");
+		lgcr("\tTypical_Tool::SetShowLog(bool)");
+		lgcr("\tTypical_Tool::SetConsoleTimeShow(bool)");
+		lgcr("\tTypical_Tool::Log::SetShowLog(bool)");
+		lgcr("\tTypical_Tool::Log::SetConsoleTimeShow(bool)");
 	}
 }
 

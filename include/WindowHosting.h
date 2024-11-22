@@ -21,11 +21,11 @@ namespace Typical_Tool {
 
 		private:
 			WindowFont WinFont;
-			std::map<Ustr, HWND> 窗口;
+			std::map<Tstr, HWND> 窗口;
 
 			static bool 注册进度条类;
-			static const Uchar* 进度条主窗口类名;
-			static const Uchar* 进度条类名;
+			static const Tchar* 进度条主窗口类名;
+			static const Tchar* 进度条类名;
 			static HWND 进度条;
 			static HWND 进度条主窗口;
 			static int 进度条步进;
@@ -38,7 +38,7 @@ namespace Typical_Tool {
 				: WinFont()
 			{}
 
-			bool 添加窗口托管(Ustr windowName, HWND& window, int showWindow = 5);
+			bool 添加窗口托管(Tstr windowName, HWND& window, int showWindow = 5);
 			void 设置字体(HFONT hFont);
 		public:
 			
@@ -58,12 +58,12 @@ namespace Typical_Tool {
 			}
 
 		public:
-			std::map<Ustr, HWND>& Get窗口();
+			std::map<Tstr, HWND>& Get窗口();
 			static int GetHMENU();
 
 			// WNDCLASS wndclass = { 0 }
 			static void 注册进度条窗口类();
-			static void 创建进度条(Ustr 进度条标题栏名);
+			static void 创建进度条(Tstr 进度条标题栏名);
 			static void 增加进度条进度(int 进度百分比);
 			static void 增加进度条进度();
 			static void 设置进度条步进(int 步进);

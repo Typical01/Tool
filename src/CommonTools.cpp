@@ -69,22 +69,8 @@ std::wstring Typical_Tool::StringHandling::StringToWstring(const std::string& st
 	}
 	buffer[len] = _T('\0');
 	wContext.assign(buffer.get());
-#elif _UNIX
-	// POSIX 版本
-	std::unique_ptr<char[]> buffer(new char[str.size() * 4]);  // 大小预留空间
-	size_t out_len = str.size() * 4;
-	iconv_t cd = iconv_open("UTF-16LE", "ISO-8859-1");
-	if (cd == (iconv_t)-1) {
-		throw std::runtime_error("Failed to open iconv descriptor.");
-	}
-	if (iconv(cd, const_cast<const char**>(&str.c_str()), &str.size(), reinterpret_cast<char**>(buffer.get()), &out_len) == (size_t)-1) {
-		iconv_close(cd);
-		throw std::runtime_error("Failed to convert string using iconv.");
-	}
-	iconv_close(cd);
-	wContext.assign(reinterpret_cast<wchar_t*>(buffer.get()));
 #else
-	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lgm::er);
+	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
 #endif
 
 	return wContext;
@@ -110,22 +96,8 @@ std::wstring Typical_Tool::StringHandling::StringToWstring(std::string&& str)
 	}
 	buffer[len] = _T('\0');
 	wContext.assign(buffer.get());
-#elif _UNIX
-	// POSIX 版本
-	std::unique_ptr<char[]> buffer(new char[str.size() * 4]);  // 大小预留空间
-	size_t out_len = str.size() * 4;
-	iconv_t cd = iconv_open("UTF-16LE", "ISO-8859-1");
-	if (cd == (iconv_t)-1) {
-		throw std::runtime_error("Failed to open iconv descriptor.");
-	}
-	if (iconv(cd, const_cast<const char**>(&str.c_str()), &str.size(), reinterpret_cast<char**>(buffer.get()), &out_len) == (size_t)-1) {
-		iconv_close(cd);
-		throw std::runtime_error("Failed to convert string using iconv.");
-	}
-	iconv_close(cd);
-	wContext.assign(reinterpret_cast<wchar_t*>(buffer.get()));
 #else
-	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lgm::er);
+	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
 #endif
 
 	return wContext;
@@ -151,24 +123,8 @@ std::string Typical_Tool::StringHandling::WstringToString(const std::wstring& wS
 	}
 	buffer[len] = '\0';
 	context.assign(buffer.get());
-#elif _UNIX
-	// POSIX 版本
-	std::unique_ptr<char[]> buffer(new char[wStr.size() * 4]);  // 大小预留空间
-	size_t out_len = wStr.size() * 4;
-	iconv_t cd = iconv_open("ISO-8859-1", "UTF-16LE");
-	if (cd == (iconv_t)-1) {
-		throw std::runtime_error("Failed to open iconv descriptor.");
-	}
-	size_t in_len = wStr.size() * sizeof(wchar_t);
-	const char* in = reinterpret_cast<const char*>(wStr.c_str());
-	if (iconv(cd, const_cast<const char**>(&in), &in_len, reinterpret_cast<char**>(buffer.get()), &out_len) == (size_t)-1) {
-		iconv_close(cd);
-		throw std::runtime_error("Failed to convert wide string using iconv.");
-	}
-	iconv_close(cd);
-	context.assign(buffer.get(), buffer.get() + (wStr.size() * 4 - out_len));
 #else
-	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lgm::er);
+	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
 #endif
 
 	return context;
@@ -194,24 +150,8 @@ std::string Typical_Tool::StringHandling::WstringToString(std::wstring&& wStr)
 	}
 	buffer[len] = '\0';
 	context.assign(buffer.get());
-#elif _UNIX
-	// POSIX 版本
-	std::unique_ptr<char[]> buffer(new char[wStr.size() * 4]);  // 大小预留空间
-	size_t out_len = wStr.size() * 4;
-	iconv_t cd = iconv_open("ISO-8859-1", "UTF-16LE");
-	if (cd == (iconv_t)-1) {
-		throw std::runtime_error("Failed to open iconv descriptor.");
-	}
-	size_t in_len = wStr.size() * sizeof(wchar_t);
-	const char* in = reinterpret_cast<const char*>(wStr.c_str());
-	if (iconv(cd, const_cast<const char**>(&in), &in_len, reinterpret_cast<char**>(buffer.get()), &out_len) == (size_t)-1) {
-		iconv_close(cd);
-		throw std::runtime_error("Failed to convert wide string using iconv.");
-	}
-	iconv_close(cd);
-	context.assign(buffer.get(), buffer.get() + (wStr.size() * 4 - out_len));
 #else
-	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lgm::er);
+	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
 #endif
 
 	return context;
