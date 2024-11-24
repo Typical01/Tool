@@ -2,26 +2,26 @@
 #include "WindowHosting.h"
 
 
-
 int Typical_Tool::WindowsSystem::WindowHosting::hMenu = 1000;
 bool Typical_Tool::WindowsSystem::WindowHosting::注册进度条类 = false;
 int Typical_Tool::WindowsSystem::WindowHosting::进度条步进 = 1;
-const Tchar* Typical_Tool::WindowsSystem::WindowHosting::进度条类名 = "进度条";
-const Tchar* Typical_Tool::WindowsSystem::WindowHosting::进度条主窗口类名 = "进度条主窗口";
+const wchar_t* Typical_Tool::WindowsSystem::WindowHosting::进度条类名 = L"进度条";
+const wchar_t* Typical_Tool::WindowsSystem::WindowHosting::进度条主窗口类名 = L"进度条主窗口";
 int Typical_Tool::WindowsSystem::WindowHosting::进度条进度百分比 = 0;
 HWND Typical_Tool::WindowsSystem::WindowHosting::进度条;
 HWND Typical_Tool::WindowsSystem::WindowHosting::进度条主窗口;
 HINSTANCE Typical_Tool::WindowsSystem::WindowHosting::hIns;
 UINT Typical_Tool::WindowsSystem::WindowHosting::WM_TASKBARCREATED_WH = RegisterWindowMessage("TaskbarCreated");
 
+
 bool Typical_Tool::WindowsSystem::WindowHosting::添加窗口托管(Tstr windowName, HWND& window, int showWindow)
 {
 	if (!IsWindow(window)) {
 		//创建失败
-		lg("窗口创建失败!  窗口名: " + windowName, lm::er);
+		lg("创建窗口失败! 窗口名: " + windowName, lm::er);
 		return false;
 	}
-	lgc("窗口创建成功!  窗口名: " + windowName, lm::ts);
+	lgc("创建窗口成功! 窗口名: " + windowName, lm::ts);
 	lgc();
 	
 	ShowWindow(window, showWindow);
@@ -53,14 +53,14 @@ int Typical_Tool::WindowsSystem::WindowHosting::GetHMENU()
 	return WindowHosting::hMenu;
 }
 
-int Typical_Tool::WindowsSystem::WindowHosting::注册窗口类(WNDCLASS& wndClass)
+int Typical_Tool::WindowsSystem::WindowHosting::注册窗口类(WNDCLASSW& wndClass)
 {
-	if (!RegisterClass(&wndClass))
+	if (!RegisterClassW(&wndClass))
 	{
-		lg((Tstr)"窗口类注册失败!\n 窗口类名: " + wndClass.lpszClassName, lm::er);
+		lg("窗口类注册失败!\n 窗口类名: " + wtos(wndClass.lpszClassName), lm::er);
 		return 0;
 	}
-	lgc((Tstr)"注册窗口类名: " + wndClass.lpszClassName, lm::ts);
+	lgc("窗口类注册成功! 窗口类名: " + wtos(wndClass.lpszClassName), lm::ts);
 	lgc();
 }
 
@@ -131,8 +131,8 @@ void Typical_Tool::WindowsSystem::WindowHosting::注册进度条窗口类()
 	if (!注册进度条类) {
 		hIns = GetModuleHandle(NULL);
 
-		WNDCLASS wndclassMain = { 0 };
-		WNDCLASS wndclass = { 0 };
+		WNDCLASSW wndclassMain = { 0 };
+		WNDCLASSW wndclass = { 0 };
 
 		wndclassMain.style = CS_HREDRAW | CS_VREDRAW;
 		wndclassMain.lpfnWndProc = WindowProcedureMain;
@@ -155,15 +155,15 @@ void Typical_Tool::WindowsSystem::WindowHosting::注册进度条窗口类()
 void Typical_Tool::WindowsSystem::WindowHosting::创建进度条(Tstr 进度条标题栏名)
 {
 	if (进度条主窗口 == NULL) {
-		进度条主窗口 = CreateWindowEx(0,
-			进度条主窗口类名, 进度条标题栏名.c_str(),
+		进度条主窗口 = CreateWindowExW(0,
+			进度条主窗口类名, stow(进度条标题栏名).c_str(),
 			WS_BORDER | WS_CAPTION | WS_MINIMIZEBOX,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
 			400,
 			80,
 			NULL, NULL, hIns, NULL);
-		进度条 = CreateWindowEx(0,
+		进度条 = CreateWindowExW(0,
 			进度条类名, NULL,
 			WS_CHILD | WS_VISIBLE,
 			CW_USEDEFAULT,

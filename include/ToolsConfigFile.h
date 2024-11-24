@@ -87,9 +87,7 @@ namespace Typical_Tool {
 		template<class T = bool>
 		void 打开配置文件()
 		{
-			lgc("打开配置文件");
-
-			auto temp = WindowShell::执行("打开文件", "open", this->工具箱配置文件_路径名);
+			auto temp = WindowShell::ExecuteAnalyze("打开配置文件", "打开文件", this->工具箱配置文件_路径名);
 			if (temp.IsSucceed()) {
 				lgc("成功: 打开配置文件", lm::wr);
 			}

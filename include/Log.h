@@ -58,6 +58,7 @@ namespace Typical_Tool
 #endif
 
 
+#define _L(x) L ## x
 #ifndef UNICODE
 	// ""
 	#define _T(x) x
@@ -73,11 +74,9 @@ namespace Typical_Tool
 #else
 #define PATH_BACKSLASH "/"
 #endif
-
 #endif
 #define PATH_BACKSLASH "/"
 
-#define Log_nl "temp"
 #define Log_lf '\n'
 #define Log_ts "[INFO]"
 #define Log_wr "[WARNING]"
@@ -134,6 +133,117 @@ namespace Typical_Tool
 
 		~Log();
 
+	private:
+		std::wstring StringToWstring(const std::string& str)
+		{
+			std::wstring wContext;
+
+			if (str.empty()) {
+				return wContext;
+			}
+
+#ifdef _WINDOWS
+			// Windows 版本
+			int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), nullptr, 0);
+			if (len <= 0) {
+				throw std::runtime_error("Failed to convert string to wide string.");
+			}
+			std::unique_ptr<wchar_t[]> buffer(new wchar_t[len + 1]);
+			if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), buffer.get(), len) <= 0) {
+				throw std::runtime_error("Failed to convert string to wide string.");
+			}
+			buffer[len] = _T('\0');
+			wContext.assign(buffer.get());
+#else
+			//lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
+#endif
+
+			return wContext;
+		}
+
+		std::wstring StringToWstring(std::string&& str)
+		{
+			std::wstring wContext;
+
+			if (str.empty()) {
+				return wContext;
+			}
+
+#ifdef _WINDOWS
+			// Windows 版本
+			int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), nullptr, 0);
+			if (len <= 0) {
+				throw std::runtime_error("Failed to convert string to wide string.");
+			}
+			std::unique_ptr<wchar_t[]> buffer(new wchar_t[len + 1]);
+			if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), buffer.get(), len) <= 0) {
+				throw std::runtime_error("Failed to convert string to wide string.");
+			}
+			buffer[len] = _T('\0');
+			wContext.assign(buffer.get());
+#else
+			//lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
+#endif
+
+			return wContext;
+		}
+
+		std::string WstringToString(const std::wstring& wStr)
+		{
+			std::string context;
+
+			if (wStr.empty()) {
+				return context;
+			}
+
+#ifdef _WINDOWS
+			// Windows 版本
+			int len = WideCharToMultiByte(CP_UTF8, 0, wStr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+			if (len <= 0) {
+				throw std::runtime_error("Failed to convert wide string to string.");
+			}
+			std::unique_ptr<char[]> buffer(new char[len + 1]);
+			if (WideCharToMultiByte(CP_UTF8, 0, wStr.c_str(), -1, buffer.get(), len, nullptr, nullptr) <= 0) {
+				throw std::runtime_error("Failed to convert wide string to string.");
+			}
+			buffer[len] = '\0';
+			context.assign(buffer.get());
+#else
+			//lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
+#endif
+
+			return context;
+		}
+
+		std::string WstringToString(std::wstring&& wStr)
+		{
+			std::string context;
+
+			if (wStr.empty()) {
+				return context;
+			}
+
+#ifdef _WINDOWS
+			// Windows 版本
+			int len = WideCharToMultiByte(CP_UTF8, 0, wStr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+			if (len <= 0) {
+				throw std::runtime_error("Failed to convert wide string to string.");
+			}
+			std::unique_ptr<char[]> buffer(new char[len + 1]);
+			if (WideCharToMultiByte(CP_UTF8, 0, wStr.c_str(), -1, buffer.get(), len, nullptr, nullptr) <= 0) {
+				throw std::runtime_error("Failed to convert wide string to string.");
+			}
+			buffer[len] = '\0';
+			context.assign(buffer.get());
+#else
+			//lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
+#endif
+
+			return context;
+		}
+#define stow StringToWstring
+#define wtos WstringToString
+
 	public:
 		/*
 		* 控制台初始化状态: false(需要初始化), true(跳过初始化)
@@ -164,8 +274,8 @@ namespace Typical_Tool
 					//分离控制台
 					if (FreeConsole() == 0)
 					{
-						MessageBox(0, "log: 分离控制台失败!", Log_er, MB_ICONSTOP);
-						MessageBox(0, ((Tstr)"错误代码: " + Tto_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
+						MessageBoxW(0, stow("log: 分离控制台失败!").c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
+						MessageBoxW(0, stow("错误代码: " + Tto_string(GetLastError())).c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
 					}
 					else {
 						Tcout << "Log: 分离控制台\n";
@@ -175,8 +285,8 @@ namespace Typical_Tool
 					//分配控制台: 当不是控制台程序时
 					if (AllocConsole() == 0)
 					{
-						MessageBox(0, "log: 分配控制台失败!", Log_er, MB_ICONSTOP);
-						MessageBox(0, ((Tstr)"错误代码: " + Tto_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
+						MessageBoxW(0, stow("log: 分配控制台失败!").c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
+						MessageBoxW(0, stow("错误代码: " + Tto_string(GetLastError())).c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
 					}
 					else {
 						Tcout << "Log: 分配控制台\n";
@@ -187,15 +297,15 @@ namespace Typical_Tool
 					// 重定向标准输出流
 					freopen_s(&FilePtr, "CONOUT$", "w", stdout);
 					if (FilePtr == nullptr) {
-						MessageBox(0, "日志: 重定向标准输出流失败!", Log_er, MB_ICONSTOP);
-						MessageBox(0, ((Tstr)"错误代码: " + std::to_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
+						MessageBoxW(0, stow("日志: 重定向标准输出流失败!").c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
+						MessageBoxW(0, stow("错误代码: " + std::to_string(GetLastError())).c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
 						return;
 					}
 					// 重定向标准错误流
 					freopen_s(&FilePtr, "CONOUT$", "w", stderr);
 					if (FilePtr == nullptr) {
-						MessageBox(0, "日志: 重定向标准错误流失败!", Log_er, MB_ICONSTOP);
-						MessageBox(0, ((Tstr)"错误代码: " + std::to_string(GetLastError())).c_str(), Log_er, MB_ICONSTOP);
+						MessageBoxW(0, stow("日志: 重定向标准错误流失败!").c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
+						MessageBoxW(0, stow("错误代码: " + std::to_string(GetLastError())).c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
 						return;
 					}
 
@@ -400,7 +510,11 @@ namespace Typical_Tool
 				return;
 			}
 #ifdef _WINDOWS
-			MessageBox(NULL, text.c_str(), title.c_str(), MB_OK);
+#ifndef UNICODE
+			MessageBoxW(NULL, stow(text).c_str(), stow(title).c_str(), MB_OK);
+#else
+			MessageBoxW(NULL, text.c_str(), title.c_str(), MB_OK);
+#endif
 #endif
 		}
 	
@@ -445,7 +559,11 @@ namespace Typical_Tool
 					break;
 				}
 #ifdef _WINDOWS
-				MessageBox(NULL, text.c_str(), Log_ts, MB_OK);
+#ifndef UNICODE
+				MessageBoxW(NULL, stow(text).c_str(), stow(Log_ts).c_str(), MB_OK);
+#else
+				MessageBoxW(NULL, text.c_str(), Log_ts, MB_OK);
+#endif
 #endif
 
 				break;
@@ -486,7 +604,11 @@ namespace Typical_Tool
 					break;
 				}
 #ifdef _WINDOWS
-				MessageBox(NULL, text.c_str(), Log_wr, MB_ICONWARNING);
+#ifndef UNICODE
+				MessageBoxW(NULL, stow(text).c_str(), stow(Log_wr).c_str(), MB_ICONWARNING);
+#else
+				MessageBoxW(NULL, text.c_str(), Log_wr, MB_ICONWARNING);
+#endif
 #endif
 
 				break;
@@ -496,13 +618,13 @@ namespace Typical_Tool
 				if (CMD)
 				{
 					Tstr temp;
-					SetConsoleTextColor(ANSI_RED); //在时间输出之前
+					SetConsoleTextColor_Error(ANSI_RED); //在时间输出之前
 					/*if (ShowTime) {
 						Tcout << GetFormattingTime();
 					}*/
 					temp = (Tstr)Log_er + " " + text + "\n";
-					ConsoleOutput(temp);
-					ReSetConsoleTextColor();
+					ConsoleOutput_Error(temp);
+					ReSetConsoleTextColor_Error();
 
 					//WriteConfigFile log日志
 					if (LogFileWrite) {
@@ -522,7 +644,11 @@ namespace Typical_Tool
 					break;
 				}
 #ifdef _WINDOWS
-				MessageBox(NULL, text.c_str(), Log_er, MB_ICONSTOP);
+#ifndef UNICODE
+				MessageBoxW(NULL, stow(text).c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
+#else
+				MessageBoxW(NULL, text.c_str(), Log_er, MB_ICONSTOP);
+#endif
 #endif
 
 				break;
@@ -559,7 +685,11 @@ namespace Typical_Tool
 					break;
 				}
 #ifdef _WINDOWS
-				MessageBox(NULL, text.c_str(), Log_nl, MB_OK);
+#ifndef UNICODE
+				MessageBoxW(NULL, stow(text).c_str(), stow("Text").c_str(), MB_OK);
+#else
+				MessageBoxW(NULL, text.c_str(), _T("Text"), MB_OK);
+#endif
 #endif
 				
 				break;
@@ -809,7 +939,6 @@ namespace Typical_Tool
 			Tcout << std::endl;
 		}
 #define 设置所有日志写入 SetAllLogFileWrite
-
 	};
 
 	//模式 mode: (_CONSOLE | _WINDOWS) && #ifdef _DEBUG

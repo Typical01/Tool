@@ -12,29 +12,30 @@ void Typical_Tool::WindowsSystem::WindowShell::Shell处理(HMENU 菜单, std::ve
 	for (auto tempShell = Shell配置.begin(); tempShell != Shell配置.end(); tempShell++) {
 		//判断类型
 		Tstr 操作名 = tempShell->操作名;
-		bool 菜单按键 = tempShell->菜单按键;
+		Tstr 菜单按键 = tempShell->菜单按键;
 
 		//区分: 程序启动项/程序菜单项s
-		if (菜单按键) {
+		if (菜单按键 == "否") {
 			程序启动项.push_back(*tempShell);
 			lgc("操作名: " + 操作名);
-			lgc();
 			lgc("  注册: 程序启动项");
-			lgc();
 			tempShell->OutConfig(); //输出配置
 		}
 		else {
 			int 菜单项ID = WinHost::GetHMENU();
-			int 菜单项总数 = GetMenuItemCount(菜单);
+			//int 菜单项总数 = GetMenuItemCount(菜单);
 
 			程序菜单项.insert(std::make_pair(菜单项ID, *tempShell));
-			//插入菜单项
-			InsertMenu(菜单, 菜单项总数 - 4, MF_STRING, 菜单项ID, 操作名.c_str());
 			lgc("操作名: " + 操作名);
-			lgc();
 			lgc("  注册: 程序菜单项");
-			tempShell->OutConfig(); //输出配置
-			lgc();
+			//添加菜单项
+			if (AppendMenuW(菜单, MF_STRING, 菜单项ID, StringManage::stow(操作名).c_str())) {
+				tempShell->OutConfig(); //输出配置
+				lgc("  程序菜单项: 成功");
+			}
+			else {
+				lgc("  程序菜单项: 失败");
+			}
 		}
 	}
 }
@@ -50,24 +51,12 @@ void Typical_Tool::WindowsSystem::WindowShell::执行程序启动项Shell()
 			auto 参数 = tempShell->参数;
 			auto 窗口显示 = tempShell->窗口显示;
 
-			if (Shell操作 == "打开文件") {
-				执行_打开文件(操作名, 文件, 参数, 窗口显示);
-			}
-			else if (Shell操作 == "打开文件夹") {
-				执行_打开文件夹(操作名, 文件, 参数, 窗口显示);
-			}
-			else if (Shell操作 == "管理员运行") {
-				执行_管理员运行(操作名, 文件, 参数, 窗口显示);
-			}
-			else {
-				lgc("配置模式错误(打开文件/打开文件夹/管理员运行): ", 操作名);
-				lgc();
-			}
+			ExecuteAnalyze(操作名, Shell操作, 文件, 参数, 窗口显示);
 		}
 	}
 	else {
-		lgc("程序启动项Shell: 没有执行项!", lm::wr);
-		lgc();
+		lgcr("程序启动项Shell: 没有执行项!", lm::wr);
+		lgcr();
 	}
 }
 
@@ -84,64 +73,52 @@ void Typical_Tool::WindowsSystem::WindowShell::执行程序菜单项Shell(int _�
 		auto 参数 = tempShellConfig.参数;
 		auto 窗口显示 = tempShellConfig.窗口显示;
 
-		if (Shell操作 == "打开文件") {
-			执行_打开文件(操作名, 文件, 参数, 窗口显示);
-		}
-		else if (Shell操作 == "打开文件夹") {
-			执行_打开文件夹(操作名, 文件, 参数, 窗口显示);
-		}
-		else if (Shell操作 == "管理员运行") {
-			执行_管理员运行(操作名, 文件, 参数, 窗口显示);
-		}
-		else {
-			lgc("配置模式错误(打开文件/打开文件夹/管理员运行): ", 操作名);
-			lgc();
-		}
+		ExecuteAnalyze(操作名, Shell操作, 文件, 参数, 窗口显示);
 	}
 	else {
-		lgc("程序菜单项Shell: 没有找到菜单选项 " + _菜单选项ID, lm::er);
-		lgc();
+		lgcr("程序菜单项Shell: 没有找到菜单选项 " + _菜单选项ID, lm::er);
+		lgcr();
 	}
 }
 
-Shell消息 Typical_Tool::WindowsSystem::WindowShell::执行(Tstr 操作名, Tstr Shell操作, Tstr Shell文件, Tstr Shell参数, int 窗口显示)
+Shell消息 Typical_Tool::WindowsSystem::WindowShell::ExecuteAnalyze(Tstr 操作名, Tstr Shell操作, Tstr Shell文件, Tstr Shell参数, Tstr 窗口显示)
 {
-	Shell消息 temp(操作名, (int)ShellExecute(NULL, Shell操作.c_str(), Shell文件.c_str(), Shell参数.c_str(), NULL, 窗口显示));
+	if (Shell操作 == "打开文件" || Shell操作 == "open") {
+		Shell操作 = "open";
+		lgc("ExecuteAnalyze: Shell操作模式(打开文件)", lm::ts);
+	}
+	else if (Shell操作 == "管理员运行" || Shell操作 == "runas") {
+		Shell操作 = "runas";
+		lgc("ExecuteAnalyze: Shell操作模式(管理员运行)", lm::ts);
+	}
+	else if (Shell操作 == "打开文件夹" || Shell操作 == "explore") {
+		Shell操作 = "explore";
+		lgc("ExecuteAnalyze: Shell操作模式(打开文件夹)", lm::ts);
+	}
+	else {
+		lgcr("ExecuteAnalyze: Shell操作模式错误(打开文件/打开文件夹/管理员运行)", lm::wr);
+		lgcr("ExecuteAnalyze: 操作名: " + 操作名, lm::wr);
+		return Shell消息();
+	}
+
+	int ShowWindow = 0;
+	if (窗口显示 == "是") {
+		ShowWindow = 5;
+	}
+	lgc("ExecuteAnalyze: 窗口显示 " + 窗口显示, lm::wr);
+
+	Shell消息 temp(操作名, (int)ShellExecuteW(NULL,  stow(Shell操作).c_str(), stow(Shell文件).c_str(), stow(Shell参数).c_str(), NULL, ShowWindow));
 	return temp;
-}
-
-Shell消息 Typical_Tool::WindowsSystem::WindowShell::执行_管理员运行(Tstr 操作名, Tstr Shell文件, Tstr Shell参数, int 窗口显示)
-{
-	return 执行(操作名, "runas", Shell文件, Shell参数, 窗口显示);
-}
-
-Shell消息 Typical_Tool::WindowsSystem::WindowShell::执行_打开文件夹(Tstr 操作名, Tstr Shell文件, Tstr Shell参数, int 窗口显示)
-{
-	return 执行(操作名, "explore", Shell文件, Shell参数, 窗口显示);
-}
-
-Shell消息 Typical_Tool::WindowsSystem::WindowShell::执行_打开文件(Tstr 操作名, Tstr Shell文件, Tstr Shell参数, int 窗口显示)
-{
-	return 执行(操作名, "open", Shell文件, Shell参数, 窗口显示);
 }
 
 void Typical_Tool::WindowsSystem::ShellConfig::OutConfig()
 {
-	lgc();
-	lgc();
 	lgc("ShellConfig::OutConfig()", lm::ts);
-	lgc();
 	lgc("操作名: " + this->操作名);
-	lgc();
 	lgc("菜单按键: " + this->菜单按键);
-	lgc();
 	lgc("Shell操作: " + this->Shell操作);
-	lgc();
 	lgc("文件: " + this->文件);
-	lgc();
 	lgc("参数: " + this->参数);
-	lgc();
 	lgc("窗口显示: " + this->窗口显示);
-	lgc();
 	lgc();
 }

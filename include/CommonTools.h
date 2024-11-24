@@ -6,7 +6,6 @@
 
 
 #include "pch.h"
-//#include "Typical_Tool.h"
 #include "Log.h"
 #include "Timers.h"
 #include "Shell.h"
@@ -144,25 +143,25 @@ namespace Typical_Tool {
 			LONG result;
 			HKEY hKey;
 
-			Tstr regPath = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
+			wstring regPath = L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
 
 			// 打开注册表项  
-			result = RegOpenKeyEx(HKEY_CURRENT_USER, regPath.c_str(), 0, KEY_SET_VALUE, &hKey);
+			result = RegOpenKeyExW(HKEY_CURRENT_USER, regPath.c_str(), 0, KEY_SET_VALUE, &hKey);
 			if (result != ERROR_SUCCESS) {
-				lgc("打开密钥失败: %ld" + result, lm::er); // 假设 lgc 能够处理 wstring 和日志级别  
+				lgc("打开密钥失败: %ld" + result, lm::er);
 				return false;
 			}
 
 			// 设置注册表值  
-			result = RegSetValueEx(hKey, valueName.c_str(), 0, REG_SZ, (const BYTE*)exePath.c_str(), (Tstrlen(exePath.c_str()) + 1) * sizeof(Tchar));
+			result = RegSetValueExW(hKey, stow(valueName).c_str(), 0, REG_SZ, (const BYTE*)stow(exePath).c_str(), (stow(exePath).size() + 1) * sizeof(wchar_t));
 			if (result != ERROR_SUCCESS) {
-				lgc("设置注册表值失败: %ld" + result, lm::er); // 假设 lgc 能够处理 wstring 和日志级别 
+				lgc("设置注册表值失败: %ld" + result, lm::er);
 				RegCloseKey(hKey);
 				return false;
 			}
 
 			RegCloseKey(hKey);
-			lgc("注册表注册成功!", lm::wr);
+			lgc("注册表注册成功!", lm::ts);
 			return true;
 		}
 
@@ -283,22 +282,6 @@ namespace Typical_Tool {
 	}
 	namespace WinSys = WindowsSystem;
 
-	//字符处理---------------------------------------------------------------------------------------------------------------
-	namespace StringManage 
-	{
-
-		//字符转换-------------------------------------------------------------------------------------------------------
-		 std::wstring StringToWstring(const std::string& str);
-		 std::wstring StringToWstring(std::string&& str);
-#define stow StringToWstring
-		 std::string WstringToString(const std::wstring& wstr);
-		 std::string WstringToString(std::wstring&& wstr);
-#define wtos WstringToString
-
-		//编码转换---------------------------------------------------------------------------------------------------------
-	}
-	namespace 字符处理 = StringManage;
-
 	namespace GameTools
 	{
 		//帧率-----------------------------------------------------------------------------------------------------------
@@ -309,7 +292,6 @@ namespace Typical_Tool {
 		//获取 FPS
 		 float GetFps();
 	}
-	namespace 游戏工具 = GameTools;
 }
 
 #endif
