@@ -31,12 +31,13 @@ namespace Typical_Tool {
 
 		bool HighPrecision; //高精度
 		TimeMeasure timeMeasure;
+		static bool showLog;
 
 		std::vector<std::chrono::system_clock::time_point> TimerContainer; //计时器 集合(Container)
 		std::vector<std::chrono::steady_clock::time_point> TimerContainer_s; //计时器 集合(Container)
 
 	public:
-		Timers(TimeMeasure tms = tms::sec)
+		Timers(TimeMeasure tms = tms::sec, bool _showLog = false)
 		{
 			if (tms != tms::sec) { //高精度
 				InitTime_s = GetTime_s();
@@ -50,9 +51,13 @@ namespace Typical_Tool {
 				HighPrecision = false;
 				this->timeMeasure = tms;
 			}
+
+			showLog = _showLog;
 		}
 
 	public:
+		static void SetShowLog(bool _showLog = false);
+
 		static std::chrono::system_clock::time_point GetTime();
 #define 获取时间 GetTime
 	
@@ -102,9 +107,9 @@ namespace Typical_Tool {
 		template<class T = bool>
 		static void sleep(long long sec)
 		{
-			for (long long temp = 1; temp < sec; temp++) {
-				std::this_thread::sleep_for(std::chrono::seconds(1));
-				lgc("暂停: " + Tto_string(temp) + "秒", lm::ts);
+			std::this_thread::sleep_for(std::chrono::seconds(sec));
+			if (showLog) {
+				lgc("暂停: [" + Tto_string(temp) + "]秒", lm::ts);
 			}
 		}
 #define 延迟_毫秒 sleep_s

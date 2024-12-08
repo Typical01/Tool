@@ -5,51 +5,88 @@
 using namespace std;
 
 
-void Typical_Tool::WindowsSystem::Key::keys(BYTE bVk)
+void Typical_Tool::WindowsSystem::Key::KeyClick(const BYTE& _bVk, const long long& _intervalTime, const ktm& _keyMode, void(*_func)())
 {
-	keybd_event(bVk, 0, 0, 0);
-	Sleep(50);
-	keybd_event(bVk, 0, KEYEVENTF_KEYUP, 0);
+	switch (_keyMode) {
+	case ktm::ClickOne: {
+		keybd_event(_bVk, 0, 0, 0);
+		Timers::sleep_s(_intervalTime);
+		keybd_event(_bVk, 0, KEYEVENTF_KEYUP, 0);
+		Timers::sleep_s(_intervalTime);
+
+		break;
+	}
+	case ktm::Down: {
+
+		break;
+	}
+	case ktm::Up: {
+		break;
+	}
+	}
 }
 
-bool Typical_Tool::WindowsSystem::Key::GetTypingStatus(int i)
+void Typical_Tool::WindowsSystem::Key::MouseClick(DWORD _bVk, const long long& _intervalTime, void(*_func)())
 {
-	if (-32767 == GetAsyncKeyState(i))
-	{
+	mouse_event(_bVk, 0, 0, 0, 0);
+
+	_func();
+}
+
+bool Typical_Tool::WindowsSystem::Key::GetKeyStateDown(const BYTE& _bVk, void(*_func)())
+{
+	if (GetAsyncKeyState(_bVk) & 0x8000) {
+		_func();
 		return true;
 	}
-	else
+	else {
+		_func();
 		return false;
+	}
 }
-bool Typical_Tool::WindowsSystem::Key::GetTypingStatus(int i, void(*func)())
+bool Typical_Tool::WindowsSystem::Key::GetKeyStateUp(const BYTE& _bVk, void(*_func)())
 {
-	if (-32767 == GetAsyncKeyState(i))
-	{
-		func();
+	if (GetAsyncKeyState(_bVk) & 0x8000) {
+		_func();
+		return false;
+	}
+	else {
+		_func();
 		return true;
 	}
-	else
-		return false;
 }
 
-void Typical_Tool::WindowsSystem::Key::ExitProcedure(int i, const char* c)
+bool Typical_Tool::WindowsSystem::Key::GetKeyStateDown_Foreground(const HWND& _hWnd, const BYTE& _bVk, void(*_func)())
 {
-	if (-32767 == GetAsyncKeyState(i))
-	{
-		string str = "taskkill -f -im ";
-		string str2 = c;
-		string str3 = ".exe";
-		string strCount = str + str2 + str3;
-		cout << strCount << endl;
-		system(strCount.c_str());
+	if (GetKeyState(_bVk) && GetForegroundWindow() == _hWnd) {
+		_func();
+		return true;
+	}
+	else {
+		_func();
+		return false;
+	}
+}
+bool Typical_Tool::WindowsSystem::Key::GetKeyStateUp_Foreground(const HWND& _hWnd, const BYTE& _bVk, void(*_func)())
+{
+	if (GetKeyState(_bVk) && GetForegroundWindow() == _hWnd) {
+		_func();
+		return false;
+	}
+	else {
+		_func();
+		return true;
 	}
 }
 
-
-void Typical_Tool::WindowsSystem::Key::keyJudge_Mouse(int i, int i2, int i3)
+bool Typical_Tool::WindowsSystem::Key::GetKeyStateLock(const BYTE& _bVk, void(*_func)())
 {
-	mouse_event(i, 0, 0, 0, 0); 
-	Sleep(i3);
-	mouse_event(i2, 0, 0, 0, 0); 
-	Sleep(i3);
+	if (GetKeyState(VK_CAPITAL) & 0x8000) { //锁定打开
+		_func();
+		return true;
+	}
+	else {
+		_func();
+		return false;
+	}
 }

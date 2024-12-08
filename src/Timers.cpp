@@ -2,6 +2,12 @@
 
 #include "Timers.h"
 
+bool Typical_Tool::Timers::showLog = false;
+
+void Typical_Tool::Timers::SetShowLog(bool _showLog)
+{
+	showLog = _showLog;
+}
 
 std::chrono::system_clock::time_point Typical_Tool::Timers::GetTime()
 {
@@ -444,6 +450,10 @@ long long Typical_Tool::Timers::TransformTimes(const long long& time, bool& isSu
 void Typical_Tool::Timers::sleep_s(long long ms)
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+
+	if (showLog) {
+		lgc("暂停: [" + Tto_string(ms) + "]毫秒", lm::ts);
+	}
 }
 
 std::vector<std::chrono::system_clock::time_point> Typical_Tool::Timers::GetTimerContainer()

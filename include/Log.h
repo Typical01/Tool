@@ -875,6 +875,8 @@ namespace Typical_Tool
 
 	public:
 
+		void SetShowANSIESC(bool _showESC);
+#define 设置转义字符显示
 		void SetShowLog(bool showLog);
 #define 设置日志显示 SetShowLog
 		void SetShowTime(bool showTime);

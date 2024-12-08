@@ -33,6 +33,22 @@ Typical_Tool::Log::~Log()
 	}
 }
 
+void Typical_Tool::Log::SetShowANSIESC(bool _showESC)
+{
+	if (_showESC) {
+#define ANSI_RESET "\033[0m"
+#define ANSI_GREEN "\033[32m"
+#define ANSI_YELLOW "\033[33m"
+#define ANSI_RED "\033[31m"
+	}
+	else {
+#define ANSI_RESET ""
+#define ANSI_GREEN ""
+#define ANSI_YELLOW ""
+#define ANSI_RED ""
+	}
+}
+
 void Typical_Tool::Log::SetShowLog(bool showLog)
 {
 	Tcout << "Log 设置: 显示日志\n" << std::endl;
