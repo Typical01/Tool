@@ -4,23 +4,8 @@
 
 
 //控制台初始化
-bool Typical_Tool::Log::FirstInit = false;
-
-#ifdef _WINDOWS
-HWND Typical_Tool::Log::hConsole = nullptr;
-#endif
-bool Typical_Tool::Log::LogFileWrite = false;
-bool Typical_Tool::Log::LogAllOutput = false;
-
-std::ofstream Typical_Tool::Log::LogFileStream_Out;
-
-#ifdef _Thread
-std::queue<Tstr> Typical_Tool::Log::LogFileWrite_Queue; //日志文件写入队列
-std::thread Typical_Tool::Log::LogFileProcessing; //日志文件处理: 主要是输出到{./Log/时间_程序名.txt}文件
-std::atomic<bool> Typical_Tool::Log::LogFileWriteThreadStop{ false };
-std::mutex Typical_Tool::Log::mutex_LogFileStream_Out;
-std::condition_variable Typical_Tool::Log::cv_LogFileQueue;
-#endif
+bool Typical_Tool::Log::init = false;
+Typical_Tool::LogMessage Typical_Tool::Log::LastMessage = lm::end;
 
 
 Typical_Tool::Log::~Log()
@@ -33,47 +18,27 @@ Typical_Tool::Log::~Log()
 	}
 }
 
-void Typical_Tool::Log::SetShowANSIESC(bool _showESC)
+Typical_Tool::LogMessage Typical_Tool::ts()
 {
-	if (_showESC) {
-#define ANSI_RESET "\033[0m"
-#define ANSI_GREEN "\033[32m"
-#define ANSI_YELLOW "\033[33m"
-#define ANSI_RED "\033[31m"
-	}
-	else {
-#define ANSI_RESET ""
-#define ANSI_GREEN ""
-#define ANSI_YELLOW ""
-#define ANSI_RED ""
-	}
+	return LogMessage::tips;
 }
 
-void Typical_Tool::Log::SetShowLog(bool showLog)
+Typical_Tool::LogMessage Typical_Tool::wr()
 {
-	Tcout << "Log 设置: 显示日志\n" << std::endl;
-
-	this->ShowLog = showLog;
+	return LogMessage::war;
 }
 
-void Typical_Tool::Log::SetShowTime(bool showTime)
+Typical_Tool::LogMessage Typical_Tool::er()
 {
-	Tcout << "Log 设置: 显示时间\n" << std::endl;
-
-	this->ShowTime = showTime;
+	return LogMessage::err;
 }
 
-void Typical_Tool::Log::SetShowConsole(bool showConsole)
+Typical_Tool::LogMessage Typical_Tool::ed()
 {
-	Tcout << "Log 设置: 显示控制台\n" << std::endl;
+	return LogMessage::end;
+}
 
-#ifdef _WINDOWS
-	//显示/隐藏 窗口
-	if (showConsole) {
-		ShowWindow(hConsole, SW_SHOWDEFAULT);
-	}
-	else {
-		ShowWindow(hConsole, SW_HIDE);
-	}
-#endif
+Typical_Tool::LogMessage Typical_Tool::lf()
+{
+	return LogMessage::lnf;
 }

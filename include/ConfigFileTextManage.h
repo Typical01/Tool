@@ -41,8 +41,8 @@ namespace Typical_Tool {
 			template<class T = bool>
 			void README() const
 			{
-				lgc("编码问题:", lm::ts);
-				lgc("Windows: 使用之前先统一编码[Unicode(UTF-8)]: 文件编码, 控制台/其它显示输出程序 编码, 源文件编码", lm::ts);
+				lgc("编码问题:", lm::tips);
+				lgc("Windows: 使用之前先统一编码[Unicode(UTF-8)]: 文件编码, 控制台/其它显示输出程序 编码, 源文件编码", lm::tips);
 			}
 
 			/* 输出: CMD
@@ -90,7 +90,7 @@ namespace Typical_Tool {
 			//删除 配置项: 删除项时为 true, 否则为 false
 			bool DeleteConfigItem(const Tstr& _Config, const Tstr& _ConfigItem);
 			//删除 配置: 删除配置时为 true, 否则为 false; 需要二次确认
-			bool DeleteConfig(const Tstr& _Config,  bool _IsDelete);
+			bool DeleteConfig(const Tstr& _Config, bool _IsDelete);
 
 			//修改 配置项 Value
 			bool SetConfigItemValue(const Tstr& _Config, const Tstr& _ConfigItem_Key, const Tstr& _ConfigItem_Value);
@@ -126,7 +126,7 @@ namespace Typical_Tool {
 			bool Analyze();
 			/* 解析格式
 			* 除最后一行没有换行符以外
-			* 其他每行删除 '\\n' 的字节数(1) 
+			* 其他每行删除 '\\n' 的字节数(1)
 			*/
 			ConfigStringFormat AnalyzeFormat(Tstr& _AnalyzeConfig);
 
@@ -141,7 +141,6 @@ namespace Typical_Tool {
 			void ConfigFormatSample();
 			void AddConfig_FormatSampleText();
 		};
-		using CfgFile = ConfigFileTextManage;
 
 
 		//* Encode: 编码
@@ -152,9 +151,9 @@ namespace Typical_Tool {
 		bool ReadFile(const Tstr& _ConfigFilePath, std::vector<Tstr>& _ReadText, const Tstr& _FileEncode = "UTF-8");
 	}
 }
-namespace Tool_lib = Typical_Tool;
 
 #endif
+
 
 /*
 * FileMode:

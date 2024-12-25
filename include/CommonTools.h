@@ -4,11 +4,9 @@
 #ifndef _COMMONTOOLS_H
 #define _COMMONTOOLS_H
 
-
 #include "pch.h"
 #include "Log.h"
-#include "Timers.h"
-#include "Shell.h"
+#include "Time_Typical.h"
 
 using namespace std;
 
@@ -21,10 +19,9 @@ namespace Typical_Tool {
 		//显示--------------------------------------------------------------------------------------------------------------------
 
 		/*设置屏幕分辨率 运行
-			* **必看**
-			* 分辨率(width/height): 一定成比例, 如: 1920 x 1080(16:9), 1280 x 1024(4:3)
+			* 分辨率: 需要是系统中有的比例, 如: 1920 x 1080(16:9), 1280 x 720(16:9)
 		*/
-		 void SetDisplaySize(int widthValue, int HeightValue);
+		void SetDisplaySize(int widthValue, int HeightValue);
 
 
 		//程序操作----------------------------------------------------------------------------------------------------------------
@@ -36,61 +33,29 @@ namespace Typical_Tool {
 		{
 			//设置DPI感知级别(可选，仅Windows 10 1703及更高版本）
 			if (SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) == NULL) { //传入的值无效
-				lgc("传入的值无效\n", "Windows DPI");
+				lgc("Windows DPI: 传入的值无效\n");
 			}
 			else {
-				lgc("DPI感知(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) 设置成功!\n", "Windows DPI");
+				lgc("Windows DPI: DPI感知(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) 设置成功!\n");
 				lgc();
 			}
 		}
 
 		template<class T = bool>
-		int 单实例运行(Tstr windowClassName, Tstr windowTitleName)
+		int AloneRun(Tstr windowClassName, Tstr windowTitleName)
 		{
 			//程序启动初始化
 			HWND handle = FindWindow(windowClassName.c_str(), windowTitleName.c_str());
 			if (handle != NULL)
 			{
-				lgr((Tstr)"应用程序已在运行" + windowTitleName + "\n", lm::wr);
+				lgr((Tstr)"应用程序已在运行" + windowTitleName + "\n", lm::war);
 				return 0;
 			}
 			return 1;
 		}
 
-#ifdef _WINDOWS
-		//获取程序ID
-		template<class T = bool>
-		DWORD FindProcessIDByName(const Tstr& processName)
-		{
-			HANDLE hProcessSnap;
-			PROCESSENTRY32 pe32;
-			hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-			if (hProcessSnap == INVALID_HANDLE_VALUE)
-			{
-				return(0);
-			}
-			pe32.dwSize = sizeof(PROCESSENTRY32);
-			if (!Process32First(hProcessSnap, &pe32))
-			{
-				CloseHandle(hProcessSnap); // clean the snapshot object 清理快照对象
-				return(0);
-			}
-			DWORD processId = 0;
-			do
-			{
-				if ((Tstr)pe32.szExeFile == processName) //进程名称
-				{
-					processId = pe32.th32ProcessID; //进程ID
-					break;
-				}
-			} while (Process32Next(hProcessSnap, &pe32));
-			CloseHandle(hProcessSnap);
-			return(processId);
-		}
-#endif
-
 		//是否为管理员
-		 bool IsUserAdmin();
+		bool IsUserAdmin();
 
 		//获得管理员权限
 		template<class T = bool>
@@ -114,14 +79,14 @@ namespace Typical_Tool {
 		/* 成功获取到管理员权限后, 返回 true
 		* 同时, 可以将发出申请的程序退出, 使拥有管理员权限的程序单例运行
 		* code:
-		*	if (Typical_Tool::WindowsSystem::WindowHosting::获取管理员权限(true)) { return 0; }
+		*	if (Typical_Tool::WindowsSystem::WindowHost::获取管理员权限(true)) { return 0; }
 		*/
 		template<class T = bool>
-		bool 获取管理员权限(bool isGet = true)
+		bool GetAdmin(bool isGet = true)
 		{
 			if (isGet) {
 				//获取当前程序的全路径
-				Tchar 程序路径[MAX_PATH] = "";
+				Tchar 程序路径[MAX_PATH] = _T("");
 				GetModuleFileName(NULL, 程序路径, MAX_PATH);
 				//获得管理员权限
 				if (GainAdminPrivileges(程序路径)) {
@@ -138,7 +103,7 @@ namespace Typical_Tool {
 
 		//添加注册表项以实现 开机自启动
 		template<class T = bool>
-		bool SetAutoRun(Tstr valueName, Tstr exePath)
+		bool SetSelfStarting(Tstr valueName, Tstr exePath)
 		{
 			LONG result;
 			HKEY hKey;
@@ -148,27 +113,27 @@ namespace Typical_Tool {
 			// 打开注册表项  
 			result = RegOpenKeyExW(HKEY_CURRENT_USER, regPath.c_str(), 0, KEY_SET_VALUE, &hKey);
 			if (result != ERROR_SUCCESS) {
-				lgc("打开密钥失败: %ld" + result, lm::er);
+				lgc("打开密钥失败: %ld" + result, lm::err);
 				return false;
 			}
 
 			// 设置注册表值  
 			result = RegSetValueExW(hKey, stow(valueName).c_str(), 0, REG_SZ, (const BYTE*)stow(exePath).c_str(), (stow(exePath).size() + 1) * sizeof(wchar_t));
 			if (result != ERROR_SUCCESS) {
-				lgc("设置注册表值失败: %ld" + result, lm::er);
+				lgc("设置注册表值失败: %ld" + result, lm::err);
 				RegCloseKey(hKey);
 				return false;
 			}
 
 			RegCloseKey(hKey);
-			lgc("注册表注册成功!", lm::ts);
+			lgc("注册表注册成功!", lm::tips);
 			return true;
 		}
 
 		//文件操作---------------------------------------------------------------------------------------------------------
 
 		template<class T = bool>
-		Tstr 提取程序名(const Tstr& path)
+		Tstr ExtractExeName(const Tstr& path)
 		{
 			//匹配 '\' && '/' 任意
 			size_t lastSepPos = path.find_last_of("\\/");
@@ -186,7 +151,7 @@ namespace Typical_Tool {
 		}
 
 		template<class T = bool>
-		Tstr 提取程序目录路径(const Tstr& path)
+		Tstr ExtractExeDirectoryName(const Tstr& path)
 		{
 			size_t lastSepPos = path.find_last_of("\\/");
 			if (lastSepPos != std::wstring::npos) {
@@ -196,7 +161,7 @@ namespace Typical_Tool {
 			return ""; // 如果找不到路径分隔符，则返回空字符串
 		}
 		template<class T = bool>
-		Tstr Get程序名()
+		Tstr GetExeName()
 		{
 			Tchar exePath[MAX_PATH];
 			Tstr exeName;
@@ -205,7 +170,7 @@ namespace Typical_Tool {
 			DWORD length = GetModuleFileName(NULL, exePath, MAX_PATH);
 
 			if (length > 0 && length < MAX_PATH) {
-				exeName = 提取程序名(exePath);
+				exeName = ExtractExeName(exePath);
 				lgc(_T("当前可执行文件的名称: " + exeName));
 				lgc();
 			}
@@ -216,7 +181,7 @@ namespace Typical_Tool {
 			return exeName;
 		}
 		template<class T = bool>
-		Tstr Get程序目录路径()
+		Tstr GetExeDirectoryName()
 		{
 			Tchar exePath[MAX_PATH];
 			Tstr folderName;
@@ -225,7 +190,7 @@ namespace Typical_Tool {
 			DWORD length = GetModuleFileName(NULL, exePath, MAX_PATH);
 
 			if (length > 0 && length < MAX_PATH) {
-				folderName = 提取程序目录路径(exePath);
+				folderName = ExtractExeDirectoryName(exePath);
 				lgc(_T("当前程序目录路径名: " + folderName));
 				lgc();
 			}
@@ -248,23 +213,23 @@ namespace Typical_Tool {
 				// 路径不存在或出错，尝试创建目录  
 				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS)
 				{
-					lgc("文件夹: " + folderPath + " 创建成功!", lm::ts);
+					lgc("文件夹: " + folderPath + " 创建成功!", lm::tips);
 					lgc();
 					return true;
 				}
-				lgc("文件夹: " + folderPath + " 创建失败!", lm::ts);
+				lgc("文件夹: " + folderPath + " 创建失败!", lm::tips);
 				lgc();
 				// 创建失败且不是因为路径已存在  
 				return false;
 			}
 			else if (attributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				lgc("文件夹: " + folderPath + " 已存在", lm::ts);
+				lgc("文件夹: " + folderPath + " 已存在", lm::tips);
 				lgc();
 				// 路径已经是一个目录  
 				return true;
 			}
-			lgc("文件夹: " + folderPath + " 创建失败(路径存在, 但不是目录)!", lm::ts);
+			lgc("文件夹: " + folderPath + " 创建失败(路径存在, 但不是目录)!", lm::tips);
 			lgc();
 			// 路径存在但不是目录（可能是一个文件）  
 			return false;
@@ -278,7 +243,7 @@ namespace Typical_Tool {
 		//控制台----------------------------------------------------------------------------------------------------------
 
 		//移动光标到目标位置
-		 void MoveCursorLocation(int x, int y);
+		void MoveCursorLocation(int x, int y);
 	}
 	namespace WinSys = WindowsSystem;
 
@@ -290,7 +255,7 @@ namespace Typical_Tool {
 #define FPS_COUNT 60 //Fps 统计的间隔(帧率)
 #endif
 		//获取 FPS
-		 float GetFps();
+		float GetFps();
 	}
 }
 

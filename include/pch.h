@@ -7,6 +7,8 @@
 #ifndef PCH_H
 #define PCH_H
 
+#define _CRT_SECURE_NO_WARNINGS
+
 //非 CMake
 //#ifdef _DEBUG
 //#pragma comment(lib, "../x64/Debug/libTools_Log.lib")
@@ -49,8 +51,6 @@
 #elif _CONSOLE
 
 #endif
-
-
 
 
 

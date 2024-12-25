@@ -1,7 +1,6 @@
 #include "pch.h"
 
 #include "CommonTools.h"
-#include "Message.h"
 
 
 void Typical_Tool::WindowsSystem::SetDisplaySize(int displayWidth, int displayHeight)
@@ -44,7 +43,7 @@ void Typical_Tool::WindowsSystem::SetDisplaySize(int displayWidth, int displayHe
 }
 
  void Typical_Tool::WindowsSystem::MoveCursorLocation(int x, int y) {
-	 COORD pos = { x,y };
+	 COORD pos = { (SHORT)x,(SHORT)y };
 	 HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	 SetConsoleCursorPosition(hOut, pos);
  }
@@ -53,7 +52,7 @@ float Typical_Tool::GameTools::GetFps()
 {
 	//临时统计
 	static int tempCount = 0;
-	static Timers timer; //时间
+	static Timer timer; //时间
 	static float fps; //帧率
 
 	if (tempCount > FPS_COUNT)
@@ -64,7 +63,7 @@ float Typical_Tool::GameTools::GetFps()
 
 		tempCount = 0;
 		timer.SetTimer(timer.GetTime(), 2);
-		float tempTime = timer.计算首尾间隔();
+		float tempTime = (float)timer.ComputTime_FirstToEnd();
 		fps = FPS_COUNT / (tempTime / 1000.0f); //获取的系统时间为毫秒数
 		timer.SetTimer(timer.GetTime(), 1);
 	}

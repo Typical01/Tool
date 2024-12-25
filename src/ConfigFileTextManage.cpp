@@ -15,7 +15,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Init(const Tstr& _ConfigF
 
 	if (_Analyze) {
 		if (!ReadConfigFile()) { //读取配置文件
-			lgc("Init: 读取配置文件失败!", lm::wr);
+			lgc("Init: 读取配置文件失败!", lm::war);
 			return false;
 		}
 		else {
@@ -27,7 +27,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Init(const Tstr& _ConfigF
 	}
 	else { //不解析
 		if (this->ShowManageLog) {
-			lgc("Init: 不解析文本!", lm::ts);
+			lgc("Init: 不解析文本!", lm::tips);
 		}
 		return false;
 	}
@@ -40,7 +40,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::InitText(const Tstr& _Con
 	this->ConfigFilePath = _ConfigFilePath; //保存路径
 	
 	if (!ReadConfigFile(_ReadText)) { //读取配置文件
-		lgc("InitText: 读取配置文件失败!", lm::wr);
+		lgc("InitText: 读取配置文件失败!", lm::war);
 		return false;
 	}
 
@@ -70,12 +70,12 @@ Tstr Typical_Tool::StringManage::ConfigFileTextManage::GetConfigItem_Value(const
 			return tempConfigItem->second;
 		}
 		else {
-			lgc("GetConfigItem_Value: 没有找到对应配置项!", lm::wr);
+			lgc("GetConfigItem_Value: 没有找到对应配置项!", lm::war);
 			return Tstr();
 		}
 	}
 	else {
-		lgc("GetConfigItem_Value: 没有找到对应配置项!", lm::wr);
+		lgc("GetConfigItem_Value: 没有找到对应配置项!", lm::war);
 		return Tstr();
 	}
 }
@@ -98,12 +98,12 @@ std::map<Tstr, Tstr> Typical_Tool::StringManage::ConfigFileTextManage::GetConfig
 			return { {tempConfigItem->first, tempConfigItem->second} };
 		}
 		else {
-			lgc("GetConfigItem: 没有找到对应配置项!", lm::wr);
+			lgc("GetConfigItem: 没有找到对应配置项!", lm::war);
 			return std::map<Tstr, Tstr>();
 		}
 	}
 	else {
-		lgc("GetConfigItem: 没有找到对应配置项!", lm::wr);
+		lgc("GetConfigItem: 没有找到对应配置项!", lm::war);
 		return std::map<Tstr, Tstr>();
 	}
 }
@@ -123,7 +123,7 @@ std::map<Tstr, Tstr> Typical_Tool::StringManage::ConfigFileTextManage::GetConfig
 		return std::map<Tstr, Tstr>(tempConfigItemMap.begin(), tempConfigItemMap.end());
 	}
 	else {
-		lgc("GetConfig: 没有找到对应配置!", lm::wr);
+		lgc("GetConfig: 没有找到对应配置!", lm::war);
 		return std::map<Tstr, Tstr>();
 	}
 }
@@ -135,7 +135,7 @@ std::map<Tstr, std::map<Tstr, Tstr>> Typical_Tool::StringManage::ConfigFileTextM
 
 void Typical_Tool::StringManage::ConfigFileTextManage::OutConfigFile_All() const
 {
-	lgc("OutConfigFile_All: 输出内容 " + this->ConfigFilePath + " 开始...", lm::ts);
+	lgc("OutConfigFile_All: 输出内容 " + this->ConfigFilePath + " 开始...", lm::tips);
 
 	for (auto tempConfig = this->ConfigMap.begin(); tempConfig != this->ConfigMap.end(); tempConfig++) {
 		lgc("  配置[" + tempConfig->first + "]");
@@ -144,7 +144,7 @@ void Typical_Tool::StringManage::ConfigFileTextManage::OutConfigFile_All() const
 			lgc("    配置项 Value: " + tempConfigText->second);
 		}
 	}
-	lgc("OutConfigFile_All: 输出内容 " + this->ConfigFilePath + " 结束!\n", lm::ts);
+	lgc("OutConfigFile_All: 输出内容 " + this->ConfigFilePath + " 结束!\n", lm::tips);
 }
 
 bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Config, std::vector<Tstr>& _ConfigItem)
@@ -155,8 +155,8 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Co
 	Tstr tempAnalyzeLaterConfigItem_Value; //解析后的配置项 Value
 	for (auto tempConfigItem = _ConfigItem.begin(); tempConfigItem != _ConfigItem.end(); tempConfigItem++) {
 		if (!this->ConfigItemTextManage(*tempConfigItem, tempAnalyzeLaterConfigItem_Key, tempAnalyzeLaterConfigItem_Value)) {
-			lgc("AddConfig: 配置项文本处理失败!", lm::wr);
-			lgc("  配置[" + _Config + "]", lm::wr);
+			lgc("AddConfig: 配置项文本处理失败!", lm::war);
+			lgc("  配置[" + _Config + "]", lm::war);
 			return false;
 		}
 		else { //成功处理后, 临时保存
@@ -169,7 +169,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Co
 	auto tempConfig = this->ConfigMap.find(_Config);
 	if (tempConfig != this->ConfigMap.end()) { //重复配置
 		if (this->ShowManageLog) {
-			lgc("AddConfig: 重复配置[" + _Config + "]添加配置项开始...", lm::ts);
+			lgc("AddConfig: 重复配置[" + _Config + "]添加配置项开始...", lm::tips);
 		}
 
 		//找重复的配置项
@@ -183,7 +183,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Co
 	}
 	else {
 		if (this->ShowManageLog) {
-			lgc("AddConfig: 配置[" + _Config + "]添加配置项开始...", lm::ts);
+			lgc("AddConfig: 配置[" + _Config + "]添加配置项开始...", lm::tips);
 		}
 	}
 
@@ -202,11 +202,11 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Co
 	std::pair<std::map<Tstr, std::map<Tstr, Tstr>>::iterator, bool> tempPair \
 		= this->ConfigMap.emplace(std::make_pair(_Config, tempAddConfigItemMap));
 	if (!tempPair.second) {
-		lgc("AddConfig: 配置[" + _Config + "]添加失败!", lm::wr);
+		lgc("AddConfig: 配置[" + _Config + "]添加失败!", lm::war);
 		return false;
 	}
 	else {
-		lgc("AddConfig: 配置[" + _Config + "]添加成功!", lm::ts);
+		lgc("AddConfig: 配置[" + _Config + "]添加成功!", lm::tips);
 	}
 
 	return true;
@@ -219,7 +219,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Co
 	auto tempConfig = this->ConfigMap.find(_Config); 
 	if (tempConfig != this->ConfigMap.end()) { //重复配置
 		if (this->ShowManageLog) {
-			lgc("AddConfig: 重复配置[" + _Config + "]添加配置项开始...", lm::ts);
+			lgc("AddConfig: 重复配置[" + _Config + "]添加配置项开始...", lm::tips);
 		}
 
 		//找重复的配置项
@@ -233,7 +233,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Co
 	}
 	else {
 		if (this->ShowManageLog) {
-			lgc("AddConfig: 配置[" + _Config + "]添加配置项开始...", lm::ts);
+			lgc("AddConfig: 配置[" + _Config + "]添加配置项开始...", lm::tips);
 		}
 	}
 
@@ -252,11 +252,11 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::AddConfig(const Tstr& _Co
 	std::pair<std::map<Tstr, std::map<Tstr, Tstr>>::iterator, bool> tempPair \
 		= this->ConfigMap.emplace(std::make_pair(_Config, tempAddConfigItemMap));
 	if (!tempPair.second) {
-		lgc("AddConfig: 配置[" + _Config + "] 添加失败!", lm::wr);
+		lgc("AddConfig: 配置[" + _Config + "] 添加失败!", lm::war);
 		return false;
 	}
 	else {
-		lgc("AddConfig: 配置[" + _Config + "] 添加成功!", lm::ts);
+		lgc("AddConfig: 配置[" + _Config + "] 添加成功!", lm::tips);
 	}
 
 	return true;
@@ -276,12 +276,12 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::DeleteConfigItem(const Ts
 			return true;
 		}
 		else {
-			lgc("DeleteConfigItem: 没有找到对应配置项!", lm::wr);
+			lgc("DeleteConfigItem: 没有找到对应配置项!", lm::war);
 			return false;
 		}
 	}
 	else {
-		lgc("DeleteConfigItem: 没有找到对应配置!", lm::wr);
+		lgc("DeleteConfigItem: 没有找到对应配置!", lm::war);
 		return false;
 	}
 }
@@ -297,12 +297,12 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::DeleteConfig(const Tstr& 
 			return true;
 		}
 		else {
-			lgc("DeleteConfig: 没有找到对应配置!", lm::wr);
+			lgc("DeleteConfig: 没有找到对应配置!", lm::war);
 			return false;
 		}
 	}
 	else {
-		lgc("DeleteConfig: 未进行二次确认[" + _Config + "]", lm::wr);
+		lgc("DeleteConfig: 未进行二次确认[" + _Config + "]", lm::war);
 		return false;
 	}
 }
@@ -325,7 +325,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfigItemValue(const 
 			tempConfig->second.at(_ConfigItem_Key) = _ConfigItem_Value; //修改配置项
 
 			if (this->ShowManageLog) {
-				lgc("SetConfigItemValue: 修改后...", lm::ts);
+				lgc("SetConfigItemValue: 修改后...", lm::tips);
 				lgc("    配置项 Value[" + _ConfigItem_Value + "]");
 			}
 		}
@@ -333,7 +333,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfigItemValue(const 
 		return true;
 	}
 	else {
-		lgc("SetConfigItemValue: 没有找到对应配置项!", lm::wr);
+		lgc("SetConfigItemValue: 没有找到对应配置项!", lm::war);
 		return false;
 	}
 }
@@ -359,12 +359,12 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfigItemKey(const Ts
 				tempConfig->second.insert(std::make_pair(_ConfigItem_NewKey, tempConfigItem_OldValue));
 
 				if (this->ShowManageLog) {
-					lgc("SetConfigItemKey: 修改后...", lm::ts);
+					lgc("SetConfigItemKey: 修改后...", lm::tips);
 					lgc("    配置项 Key[" + _ConfigItem_NewKey + "]");
 				}
 			}
 			else {
-				lgc("SetConfigItemKey: 删除旧配置项 Key 失败! 添加新配置项 Key 操作被跳过!", lm::wr);
+				lgc("SetConfigItemKey: 删除旧配置项 Key 失败! 添加新配置项 Key 操作被跳过!", lm::war);
 				return false;
 			}
 		}
@@ -372,7 +372,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfigItemKey(const Ts
 		return true;
 	}
 	else {
-		lgc("SetConfigItemKey: 没有找到对应配置项!", lm::wr);
+		lgc("SetConfigItemKey: 没有找到对应配置项!", lm::war);
 		return false;
 	}
 }
@@ -382,8 +382,8 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfig(const Tstr& _Co
 	auto tempConfig = this->ConfigMap.find(_Config); //对应配置
 	if (tempConfig != this->ConfigMap.end()) {
 		if (this->ShowManageLog) {
-			lgc("SetConfig: 修改配置", lm::ts);
-			lgc("  配置[" + _Config + "]", lm::ts);
+			lgc("SetConfig: 修改配置", lm::tips);
+			lgc("  配置[" + _Config + "]", lm::tips);
 		}
 
 		//保存旧配置的配置项
@@ -393,18 +393,18 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfig(const Tstr& _Co
 			this->ConfigMap.insert(std::make_pair(_NewConfig, OldConfigMap)); //添加新配置和保存的旧配置项
 
 			if (this->ShowManageLog) {
-				lgc("SetConfig: 修改配置[" + _Config + "]成功!", lm::ts);
+				lgc("SetConfig: 修改配置[" + _Config + "]成功!", lm::tips);
 			}
 		}
 		else {
-			lgc("SetConfig: 删除旧配置[" + _Config + "]失败!", lm::wr);
+			lgc("SetConfig: 删除旧配置[" + _Config + "]失败!", lm::war);
 			return false;
 		}
 
 		return true;
 	}
 	else {
-		lgc("SetConfig: 没有找到对应配置项!", lm::wr);
+		lgc("SetConfig: 没有找到对应配置项!", lm::war);
 		return false;
 	}
 }
@@ -412,22 +412,22 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::SetConfig(const Tstr& _Co
 bool Typical_Tool::StringManage::ConfigFileTextManage::CreateFile(const Tstr& _FileEncode)
 {
 	if (!WriteFile(this->ConfigFilePath, std::vector<Tstr>(), _FileEncode)) {
-		lgc("CreateFile: 创建文件失败!", lm::wr);
+		lgc("CreateFile: 创建文件失败!", lm::war);
 		return false;
 	}
 
-	lgc("CreateFile: 创建文件成功!", lm::ts);
+	lgc("CreateFile: 创建文件成功!", lm::tips);
 	return true;
 }
 
 bool Typical_Tool::StringManage::ConfigFileTextManage::CreateFile(const Tstr& _NewFilePath, const Tstr& _FileEncode)
 {
 	if (!WriteFile(_NewFilePath, std::vector<Tstr>(), _FileEncode)) {
-		lgc("CreateFile: 创建文件失败!", lm::wr);
+		lgc("CreateFile: 创建文件失败!", lm::war);
 		return false;
 	}
 
-	lgc("CreateFile: 创建文件成功!", lm::ts);
+	lgc("CreateFile: 创建文件成功!", lm::tips);
 	return true;
 }
 
@@ -438,7 +438,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::WriteConfigFile(bool _IsS
 			std::vector<Tstr> tempWriteConfig_Vec;
 			if (this->Format(tempWriteConfig_Vec)) {
 				if (!WriteFile(this->ConfigFilePath, tempWriteConfig_Vec, _FileEncode)) {
-					lgc("WriteConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::wr);
+					lgc("WriteConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::war);
 					return false;
 				}
 
@@ -451,15 +451,15 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::WriteConfigFile(bool _IsS
 						{
 							auto tempOtherChar = this->OtherCharMap.find(tempOtherCharLine_Count);
 							if (tempOtherChar != this->OtherCharMap.end()) {
-								lgc("  写入其他字符: " + tempOtherChar->second, lm::lf);
+								lgc("  写入其他字符: " + tempOtherChar->second, lm::txt);
 							}
-							lgc("  写入字符: " + *tempBegin, lm::lf);
+							lgc("  写入字符: " + *tempBegin, lm::txt);
 
 							tempOtherCharLine_Count++;
 						}
 					}
 
-					lgc("WriteConfigFile: 配置写入文件成功!", lm::ts);
+					lgc("WriteConfigFile: 配置写入文件成功!", lm::tips);
 				}
 
 				this->FormatText = true; //已经格式化
@@ -468,7 +468,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::WriteConfigFile(bool _IsS
 				return true;
 			}
 			else {
-				lgc("WriteConfigFile: 格式化配置文本失败!", lm::wr);
+				lgc("WriteConfigFile: 格式化配置文本失败!", lm::war);
 				return false;
 			}
 		}
@@ -476,7 +476,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::WriteConfigFile(bool _IsS
 			std::vector<Tstr> tempWriteConfig_Vec;
 			this->Format(tempWriteConfig_Vec); //无视格式化是否成功
 			if (!WriteFile(this->ConfigFilePath, tempWriteConfig_Vec, _FileEncode)) {
-				lgc("WriteConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::wr);
+				lgc("WriteConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::war);
 				return false;
 			}
 
@@ -489,15 +489,15 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::WriteConfigFile(bool _IsS
 					{
 						auto tempOtherChar = this->OtherCharMap.find(tempOtherCharLine_Count);
 						if (tempOtherChar != this->OtherCharMap.end()) {
-							lgc("  写入其他字符: " + tempOtherChar->second, lm::lf);
+							lgc("  写入其他字符: " + tempOtherChar->second, lm::txt);
 						}
-						lgc("  写入字符: " + *tempBegin, lm::lf);
+						lgc("  写入字符: " + *tempBegin, lm::txt);
 
 						tempOtherCharLine_Count++;
 					}
 				}
 
-				lgc("WriteConfigFile: 配置写入文件成功!", lm::ts);
+				lgc("WriteConfigFile: 配置写入文件成功!", lm::tips);
 			}
 
 			this->FormatText = true; //已经格式化
@@ -508,11 +508,11 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::WriteConfigFile(bool _IsS
 	}
 	else {
 		if (this->ShowManageLog) {
-			lgc("WriteConfigFile: 已格式化配置文本!", lm::ts);
+			lgc("WriteConfigFile: 已格式化配置文本!", lm::tips);
 		}
 
 		if (!WriteFile(this->ConfigFilePath, this->TextCache, _FileEncode)) {
-			lgcr("WriteConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::wr);
+			lgcr("WriteConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::war);
 			return false;
 		}
 
@@ -523,7 +523,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::WriteConfigFile(bool _IsS
 bool Typical_Tool::StringManage::ConfigFileTextManage::WriteTextFile(std::vector<Tstr>& _Text, const Tstr& _FileEncode)
 {
 	if (!WriteFile(this->ConfigFilePath, _Text, _FileEncode)) {
-		lgc("WriteTextFile: 可能没有对应的文件, 或文件正在被使用!", lm::wr);
+		lgc("WriteTextFile: 可能没有对应的文件, 或文件正在被使用!", lm::war);
 		return false;
 	}
 	else {
@@ -537,7 +537,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::WriteTextFile(std::vector
 
 		}
 
-		lgc("WriteTextFile: 文本写入文件成功!", lm::ts);
+		lgc("WriteTextFile: 文本写入文件成功!", lm::tips);
 		return true;
 	}
 }
@@ -546,27 +546,27 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::ReadConfigFile(const Tstr
 {
 	//读取配置文件
 	if (!ReadFile(this->ConfigFilePath, this->TextCache)) {
-		lgc("ReadConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::wr);
+		lgc("ReadConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::war);
 		return false;
 	}
 
 	if (this->ShowManageLog) {
 		for (auto tempBegin = this->TextCache.begin(); tempBegin != this->TextCache.end(); tempBegin++)
 		{
-			lgc("  读取字符: " + *tempBegin, lm::lf);
+			lgc("  读取字符: " + *tempBegin, lm::txt);
 			lgc();
 		}
 
 	}
 	
-	lgc("ReadConfigFile: 文件读取配置成功!", lm::ts);
+	lgc("ReadConfigFile: 文件读取配置成功!", lm::tips);
 	return true;
 }
 
 bool Typical_Tool::StringManage::ConfigFileTextManage::ReadConfigFile(std::vector<Tstr>& _Text, const Tstr& _FileEncode)
 {//读取配置文件
 	if (!ReadFile(this->ConfigFilePath, _Text)) {
-		lgc("ReadConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::wr);
+		lgc("ReadConfigFile: 可能没有对应的文件, 或文件正在被使用!", lm::war);
 		lgc();
 		return false;
 	}
@@ -574,12 +574,12 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::ReadConfigFile(std::vecto
 	if (this->ShowManageLog) {
 		for (auto tempBegin = _Text.begin(); tempBegin != _Text.end(); tempBegin++)
 		{
-			lgc("  读取字符: " + *tempBegin, lm::lf);
+			lgc("  读取字符: " + *tempBegin, lm::txt);
 		}
 
 	}
 
-	lgc("ReadConfigFile: 文件读取配置成功!", lm::ts);
+	lgc("ReadConfigFile: 文件读取配置成功!", lm::tips);
 	return true;
 	return false;
 }
@@ -598,7 +598,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Format(std::vector<Tstr>&
 	if (!this->ConfigMap.empty())
 	{
 		if (this->ShowManageLog) {
-			lgc("Format: 格式化文本输出开始...", lm::ts);
+			lgc("Format: 格式化文本输出开始...", lm::tips);
 		}
 		for (auto tempConfig = this->ConfigMap.begin(); tempConfig != this->ConfigMap.end(); tempConfig++)
 		{
@@ -641,7 +641,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Format(std::vector<Tstr>&
 			}
 		}
 		if (this->ShowManageLog) {
-			lgc("Format: 格式化文本输出结束!", lm::ts);
+			lgc("Format: 格式化文本输出结束!", lm::tips);
 		}
 
 		return true;
@@ -650,7 +650,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Format(std::vector<Tstr>&
 	{
 		_FormatMap.push_back("");
 
-		lgc("Format: 配置项不足以形成格式!", lm::wr);
+		lgc("Format: 配置项不足以形成格式!", lm::war);
 		ConfigFormatSample();
 		return false;
 	}
@@ -660,7 +660,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Format(std::vector<Tstr>&
 bool Typical_Tool::StringManage::ConfigFileTextManage::Analyze()
 {
 	//配置项非空
-	if (!this->TextCache.size() < 2) {
+	if (!(this->TextCache.size() < 2)) {
 		Tstr AnalyzeLaterConfigItem_Key; //解析后配置项 键
 		Tstr AnalyzeLaterConfigItem_Value; //解析后配置项 值
 		std::map<Tstr, Tstr> AnalyzeLaterConfigItem; //解析后配置项
@@ -668,7 +668,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Analyze()
 		Tstr OldConfig; //旧的配置
 
 		if (this->ShowManageLog) {
-			lgc("Analyze: 解析内容开始...", lm::ts);
+			lgc("Analyze: 解析内容开始...", lm::tips);
 		}
 
 		/* 配置/配置项 划分 */
@@ -706,12 +706,12 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Analyze()
 					//配置项处理
 					if (this->ConfigItemTextManage(tempAnalyzeText, AnalyzeLaterConfigItem_Key, AnalyzeLaterConfigItem_Value)) {
 						if (AnalyzeLaterConfigItem_Key.empty()) { //Key为空
-							lgc("Analyze: 传入的配置项[Key]格式有误!", lm::wr);
-							lgc("    Key: " + AnalyzeLaterConfigItem_Key, lm::wr);
+							lgc("Analyze: 传入的配置项[Key]格式有误!", lm::war);
+							lgc("    Key: " + AnalyzeLaterConfigItem_Key, lm::war);
 						}
 						if (AnalyzeLaterConfigItem_Value.empty()) { //Value为空
-							lgc("Analyze: 传入的配置项[Value]格式有误!", lm::wr);
-							lgc("    Value: " + AnalyzeLaterConfigItem_Value, lm::wr);
+							lgc("Analyze: 传入的配置项[Value]格式有误!", lm::war);
+							lgc("    Value: " + AnalyzeLaterConfigItem_Value, lm::war);
 						}
 
 						AnalyzeLaterConfigItem.insert(std::make_pair(AnalyzeLaterConfigItem_Key, AnalyzeLaterConfigItem_Value)); //保存到 配置项map
@@ -726,7 +726,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Analyze()
 					OtherCharMap.insert(std::make_pair(i + 1, tempAnalyzeText));
 
 					if (this->ShowManageLog) {
-						lgc("* 其他字符串行: " + Tto_string(i) + "");
+						lgc("* 其他字符串行: " + To_string(i) + "");
 					}
 				}
 			}
@@ -735,7 +735,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Analyze()
 				OtherCharMap.insert(std::make_pair(i + 1, tempAnalyzeText));
 
 				if (this->ShowManageLog) {
-					lgc("* 其他字符串行: " + Tto_string(i) + "");
+					lgc("* 其他字符串行: " + To_string(i) + "");
 				}
 			}
 		}
@@ -744,13 +744,13 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::Analyze()
 		this->TextCache.clear();
 
 		if (this->ShowManageLog) {
-			lgc("Analyze: 解析完成!", lm::ts);
+			lgc("Analyze: 解析完成!", lm::tips);
 		}
 
 		return true;
 	}
 	else {
-		lgc("Analyze: 传入的配置项不足以形成格式!", lm::wr);
+		lgc("Analyze: 传入的配置项不足以形成格式!", lm::war);
 		ConfigFormatSample();
 		return false;
 	}
@@ -768,13 +768,13 @@ ConfigStringFormat Typical_Tool::StringManage::ConfigFileTextManage::AnalyzeForm
 		}
 		else if (tempConfigChar >= 0 && tempConfigChar <= 31) { //控制字符: 0~31
 			if (this->ShowManageLog) {
-				lgc("AnalyzeFormat: OtherChar[" + _AnalyzeConfig + "]", lm::wr);
+				lgc("AnalyzeFormat: OtherChar[" + _AnalyzeConfig + "]", lm::war);
 			}
 			return ConfigStringFormat::OtherChar;
 		}
 		else if (tempConfigChar == 127) { //控制字符
 			if (this->ShowManageLog) {
-				lgc("AnalyzeFormat: OtherChar[" + _AnalyzeConfig + "]", lm::wr);
+				lgc("AnalyzeFormat: OtherChar[" + _AnalyzeConfig + "]", lm::war);
 			}
 			return ConfigStringFormat::OtherChar;
 		}
@@ -783,7 +783,7 @@ ConfigStringFormat Typical_Tool::StringManage::ConfigFileTextManage::AnalyzeForm
 		}
 	}
 	else {
-		lgc("AnalyzeFormat: 传入为空字符串!", lm::wr);
+		lgc("AnalyzeFormat: 传入为空字符串!", lm::war);
 		return ConfigStringFormat::OtherChar;
 	}
 }
@@ -791,10 +791,10 @@ ConfigStringFormat Typical_Tool::StringManage::ConfigFileTextManage::AnalyzeForm
 bool Typical_Tool::StringManage::ConfigFileTextManage::ConfigTextManage(Tstr& _Config)
 {
 	//格式是否正确
-	int tempConfigFormat_Right = _Config.find(']'); //右括号
+	size_t tempConfigFormat_Right = _Config.find(']'); //右括号
 	if (tempConfigFormat_Right == Tstr::npos) {
-		lgc("ConfigTextManage: 格式错误!", lm::wr);
-		lgc("ConfigTextManage: 配置文本[" + _Config + "]", lm::wr);
+		lgc("ConfigTextManage: 格式错误!", lm::war);
+		lgc("ConfigTextManage: 配置文本[" + _Config + "]", lm::war);
 
 		return false;
 	}
@@ -810,10 +810,10 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::ConfigTextManage(Tstr& _C
 bool Typical_Tool::StringManage::ConfigFileTextManage::ConfigItemTextManage(Tstr& _ConfigItem, Tstr& _AnalyzeLaterConfigItem_Key, Tstr& _AnalyzeLaterConfigItem_Value)
 {
 	//格式是否正确
-	int tempEqualSign = _ConfigItem.find('='); //找到 "=" 号的下标
+	size_t tempEqualSign = _ConfigItem.find('='); //找到 "=" 号的下标
 	if (tempEqualSign == Tstr::npos) {
-		lgc("ConfigItemTextManage: 格式错误!", lm::wr);
-		lgc("ConfigItemTextManage: 配置项[" + _ConfigItem + "]", lm::wr);
+		lgc("ConfigItemTextManage: 格式错误!", lm::war);
+		lgc("ConfigItemTextManage: 配置项[" + _ConfigItem + "]", lm::war);
 		return false;
 	}
 
@@ -825,7 +825,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::ConfigItemTextManage(Tstr
 	if (*(_ConfigItem.end() - 1) == '\n' || *(_ConfigItem.end() - 1) == '\r') { //Windows 找到 '\n' || '\r'
 		_ConfigItem.erase(_ConfigItem.end() - 1, _ConfigItem.end());
 		if (this->ShowManageLog) {
-			lgc("ConfigItemTextManage: 删除换行", lm::ts);
+			lgc("ConfigItemTextManage: 删除换行", lm::tips);
 			lgc("    Text[" + _ConfigItem + "]");
 		}
 	}
@@ -833,7 +833,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::ConfigItemTextManage(Tstr
 	if (*(_ConfigItem.end() - 1) == '\n') { //Unix 找到 '\n'
 		_ConfigItem.erase(_ConfigItem.end() - 1, _ConfigItem.end());
 		if (this->ShowManageLog) {
-			lgc("ConfigItemTextManage: 删除换行", lm::ts);
+			lgc("ConfigItemTextManage: 删除换行", lm::tips);
 			lgc("    Text[" + _ConfigItem + "]");
 		}
 	}
@@ -852,7 +852,7 @@ bool Typical_Tool::StringManage::ConfigFileTextManage::ConfigItemTextManage(Tstr
 
 void Typical_Tool::StringManage::ConfigFileTextManage::ConfigFormatSample()
 {
-	lgc("ConfigFormatSample: 配置格式 示例开始...", lm::ts);
+	lgc("ConfigFormatSample: 配置格式 示例开始...", lm::tips);
 	lgc("  ConfigFileName: cfg.ini");
 	lgc("  ConfigItem: \n    config1(key1=value1, key2=value2)\n    config2(key3=value3)\n");
 	lgc("  cfg.ini: 下面是实际的文本内容");
@@ -861,7 +861,7 @@ void Typical_Tool::StringManage::ConfigFileTextManage::ConfigFormatSample()
 	lgc("  key2=value2");
 	lgc("  [config2]");
 	lgc("  key3=value3");
-	lgc("配置格式 示例结束!", lm::ts);
+	lgc("配置格式 示例结束!", lm::tips);
 }
 
 void Typical_Tool::StringManage::ConfigFileTextManage::AddConfig_FormatSampleText()
@@ -876,37 +876,32 @@ bool Typical_Tool::StringManage::WriteFile(
 	std::vector<Tstr>& _WriteText,
 	const Tstr& _FileEncode)
 {
-	try {
-		std::ofstream WriteFileStream(_ConfigFilePath, std::ios::out);
+	std::ofstream WriteFileStream(_ConfigFilePath, std::ios::out);
 
-		if (!WriteFileStream) {
-			lgc("WriteFile: [" + _ConfigFilePath + "] 打开文件失败!", lm::wr);
-			return false;
-		}
-		lgc("WriteFile: [" + _ConfigFilePath + "] 打开文件成功!", lm::ts);
-
-		if (_FileEncode == "UTF-8BOM") {
-			// 写入 UTF-8 BOM (EF BB BF)
-			lgc("WriteFile: 写入 UTF-8BOM编码(EF BB BF).", lm::ts);
-
-			WriteFileStream.put(0xEF);
-			WriteFileStream.put(0xBB);
-			WriteFileStream.put(0xBF);
-		}
-		else if (_FileEncode == "UTF-8") {
-			lgc("WriteFile: 写入 UTF-8编码.", lm::ts);
-		}
-
-		for (const Tstr& tempStr : _WriteText) {
-			WriteFileStream << tempStr;
-		}
-		lgc("WriteFile: 写入完成!", lm::ts);
-
-		return true;
+	if (!WriteFileStream) {
+		lgc("WriteFile: [" + _ConfigFilePath + "] 打开文件失败!", lm::war);
+		return false;
 	}
-	catch (...) {
-		lgc("bool Typical_Tool::StringManage::WriteFile()", lm::er);
+	lgc("WriteFile: [" + _ConfigFilePath + "] 打开文件成功!", lm::tips);
+
+	if (_FileEncode == "UTF-8BOM") {
+		// 写入 UTF-8 BOM (EF BB BF)
+		lgc("WriteFile: 写入 UTF-8BOM编码(EF BB BF).", lm::tips);
+
+		WriteFileStream.put((Tchar)0xEF);
+		WriteFileStream.put((Tchar)0xBB);
+		WriteFileStream.put((Tchar)0xBF);
 	}
+	else if (_FileEncode == "UTF-8") {
+		lgc("WriteFile: 写入 UTF-8编码.", lm::tips);
+	}
+
+	for (const Tstr& tempStr : _WriteText) {
+		WriteFileStream << tempStr;
+	}
+	lgc("WriteFile: 写入完成!", lm::tips);
+
+	return true;
 }
 
 bool Typical_Tool::StringManage::ReadFile(
@@ -914,41 +909,36 @@ bool Typical_Tool::StringManage::ReadFile(
 	std::vector<Tstr>& _ReadText,
 	const Tstr& _FileEncode)
 {
-	try {
-		std::ifstream ReadFileStream(_ConfigFilePath, std::ios::binary);
+	std::ifstream ReadFileStream(_ConfigFilePath, std::ios::binary);
 
-		if (!ReadFileStream) {
-			lgc("ReadFile: [" + _ConfigFilePath + "] 打开文件失败!", lm::wr);
-			return false;
-		}
-		lgc("ReadFile: [" + _ConfigFilePath + "] 打开文件成功!", lm::ts);
-
-		// 读取 BOM（如果存在）
-		if (_FileEncode == "UTF-8") {
-			std::vector<unsigned char> bom(3);
-			ReadFileStream.read(reinterpret_cast<char*>(bom.data()), 3);
-
-			// 检查 BOM 是否为 UTF-8 BOM (EF BB BF)
-			if (bom.size() == 3 && bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF) {
-				lgc("ReadFile: 检测到UTF-8 BOM.", lm::ts);
-			}
-			else {
-				// 如果文件没有 BOM，返回文件流的读位置
-				ReadFileStream.clear(); // 清除 EOF 标志
-				ReadFileStream.seekg(0);
-			}
-		}
-
-		std::string line;
-		//获取行
-		while (std::getline(ReadFileStream, line)) {
-			_ReadText.push_back(line); //添加到 _Text
-		}
-		lgc("ReadFile: 读取完成!");
-
-		return true;
+	if (!ReadFileStream) {
+		lgc("ReadFile: [" + _ConfigFilePath + "] 打开文件失败!", lm::war);
+		return false;
 	}
-	catch (...) {
-		lgc("bool Typical_Tool::StringManage::ReadFile()", lm::er);
+	lgc("ReadFile: [" + _ConfigFilePath + "] 打开文件成功!", lm::tips);
+
+	// 读取 BOM（如果存在）
+	if (_FileEncode == "UTF-8") {
+		std::vector<unsigned char> bom(3);
+		ReadFileStream.read(reinterpret_cast<char*>(bom.data()), 3);
+
+		// 检查 BOM 是否为 UTF-8 BOM (EF BB BF)
+		if (bom.size() == 3 && bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF) {
+			lgc("ReadFile: 检测到UTF-8 BOM.", lm::tips);
+		}
+		else {
+			// 如果文件没有 BOM，返回文件流的读位置
+			ReadFileStream.clear(); // 清除 EOF 标志
+			ReadFileStream.seekg(0);
+		}
 	}
+
+	std::string line;
+	//获取行
+	while (std::getline(ReadFileStream, line)) {
+		_ReadText.push_back(line); //添加到 _Text
+	}
+	lgc("ReadFile: 读取完成!");
+
+	return true;
 }

@@ -1,5 +1,6 @@
 #include "StringManage.h"
 
+
 std::wstring Typical_Tool::StringManage::StringToWstring(const std::string& str)
 {
 	std::wstring wContext;
@@ -10,18 +11,20 @@ std::wstring Typical_Tool::StringManage::StringToWstring(const std::string& str)
 
 #ifdef _WINDOWS
 	// Windows 版本
-	int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), nullptr, 0);
+	int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), nullptr, 0);
 	if (len <= 0) {
 		throw std::runtime_error("Failed to convert string to wide string.");
 	}
 	std::unique_ptr<wchar_t[]> buffer(new wchar_t[len + 1]);
-	if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), buffer.get(), len) <= 0) {
+	if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), buffer.get(), len) <= 0) {
 		throw std::runtime_error("Failed to convert string to wide string.");
 	}
 	buffer[len] = _T('\0');
 	wContext.assign(buffer.get());
 #else
-	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
+	if (IsRunTimeError) {
+		throw std::runtime_error("StringToWstring: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)");
+	}
 #endif
 
 	return wContext;
@@ -37,18 +40,20 @@ std::wstring Typical_Tool::StringManage::StringToWstring(std::string&& str)
 
 #ifdef _WINDOWS
 	// Windows 版本
-	int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), nullptr, 0);
+	int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), nullptr, 0);
 	if (len <= 0) {
 		throw std::runtime_error("Failed to convert string to wide string.");
 	}
 	std::unique_ptr<wchar_t[]> buffer(new wchar_t[len + 1]);
-	if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), buffer.get(), len) <= 0) {
+	if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), buffer.get(), len) <= 0) {
 		throw std::runtime_error("Failed to convert string to wide string.");
 	}
 	buffer[len] = _T('\0');
 	wContext.assign(buffer.get());
 #else
-	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
+	if (IsRunTimeError) {
+		throw std::runtime_error("StringToWstring: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)");
+	}
 #endif
 
 	return wContext;
@@ -75,7 +80,9 @@ std::string Typical_Tool::StringManage::WstringToString(const std::wstring& wStr
 	buffer[len] = '\0';
 	context.assign(buffer.get());
 #else
-	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
+	if (IsRunTimeError) {
+		throw std::runtime_error("WstringToString: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)");
+	}
 #endif
 
 	return context;
@@ -102,7 +109,9 @@ std::string Typical_Tool::StringManage::WstringToString(std::wstring&& wStr)
 	buffer[len] = '\0';
 	context.assign(buffer.get());
 #else
-	lgcr("stow: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)", lm::er);
+	if (IsRunTimeError) {
+		throw std::runtime_error("WstringToString: 转换失败, 没有声明对应平台(_WINDOWS/_UNIX)");
+	}
 #endif
 
 	return context;

@@ -6,12 +6,12 @@
 
 
 #include "pch.h"
-#include "Log.h"
 
 namespace Typical_Tool {
 	//字符处理---------------------------------------------------------------------------------------------------------------
 	namespace StringManage
 	{
+		static bool IsRunTimeError = false;
 
 		//字符转换-------------------------------------------------------------------------------------------------------
 		std::wstring StringToWstring(const std::string& str);
