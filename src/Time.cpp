@@ -3,11 +3,16 @@
 #include "Time_Typical.h"
 
 
-bool Typical_Tool::Timer::showLog = false;
+bool Typical_Tool::Time::showLog = true;
+bool Typical_Tool::Timer::showLog = true;
 
 
 
 void Typical_Tool::Timer::SetShowLog(bool _showLog)
+{
+	showLog = _showLog;
+}
+void Typical_Tool::Time::SetShowLog(bool _showLog)
 {
 	showLog = _showLog;
 }

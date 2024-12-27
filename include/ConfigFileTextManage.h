@@ -38,11 +38,11 @@ namespace Typical_Tool {
 			bool FormatText = false;
 
 		public:
-			template<class T = bool>
+			
 			void README() const
 			{
-				lgc("编码问题:", lm::tips);
-				lgc("Windows: 使用之前先统一编码[Unicode(UTF-8)]: 文件编码, 控制台/其它显示输出程序 编码, 源文件编码", lm::tips);
+				lgc("编码问题:", ts);
+				lgc("Windows: 使用之前先统一编码[Unicode(UTF-8)]: 文件编码, 控制台/其它显示输出程序 编码, 源文件编码", ts);
 			}
 
 			/* 输出: CMD

@@ -29,6 +29,9 @@
 #include <thread>
 #include <chrono>
 
+#include <type_traits>
+#include <cassert>
+
 #include <iomanip>
 #include <sstream>
 #include <locale>

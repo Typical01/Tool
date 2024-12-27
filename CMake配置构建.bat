@@ -2,8 +2,6 @@
 @echo off
 chcp 65001
 setlocal EnableDelayedExpansion
-if exist "build" rmdir /s /q "build"
-mkdir "build"
 cd /d "build"
 echo 切换到 C:\Users\22793\source\repos\Tool\build 目录
 where cmake >nul 2>&1

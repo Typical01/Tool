@@ -7,6 +7,9 @@
 bool Typical_Tool::Log::init = false;
 Typical_Tool::LogMessage Typical_Tool::Log::LastMessage = lm::end;
 
+bool Typical_Tool::Log::IsLogFileWrite = false;
+bool Typical_Tool::Log::IsLogAllOutput = false;
+
 
 Typical_Tool::Log::~Log()
 {
@@ -20,7 +23,7 @@ Typical_Tool::Log::~Log()
 
 Typical_Tool::LogMessage Typical_Tool::ts()
 {
-	return LogMessage::tips;
+	return LogMessage::tip;
 }
 
 Typical_Tool::LogMessage Typical_Tool::wr()

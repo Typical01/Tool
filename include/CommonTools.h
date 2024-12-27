@@ -7,6 +7,7 @@
 #include "pch.h"
 #include "Log.h"
 #include "Time_Typical.h"
+#include "WindowHost.h"
 
 using namespace std;
 
@@ -37,9 +38,10 @@ namespace Typical_Tool {
 			}
 			else {
 				lgc("Windows DPI: DPI感知(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) 设置成功!\n");
-				lgc();
+				
 			}
 		}
+
 
 		template<class T = bool>
 		int AloneRun(Tstr windowClassName, Tstr windowTitleName)
@@ -48,7 +50,7 @@ namespace Typical_Tool {
 			HWND handle = FindWindow(windowClassName.c_str(), windowTitleName.c_str());
 			if (handle != NULL)
 			{
-				lgr((Tstr)"应用程序已在运行" + windowTitleName + "\n", lm::war);
+				lgr((Tstr)"应用程序已在运行" + windowTitleName + "\n", wr);
 				return 0;
 			}
 			return 1;
@@ -61,15 +63,12 @@ namespace Typical_Tool {
 		template<class T = bool>
 		bool GainAdminPrivileges(Tstr strApp)
 		{
-			ShellMessage temp;
-
 			if (!IsUserAdmin()) { //非管理员权限, 则申请
 				ShellMessage UserAdmin("申请管理员权限", (int)ShellExecute(NULL, "runas", strApp.c_str(), NULL, NULL, SW_SHOWNORMAL));
-				temp = UserAdmin;
-			}
-			//成功申请时, 退出当前进程
-			if (temp.IsSucceed()) {
-				return true;
+				//成功申请时, 退出当前进程
+				if (UserAdmin.IsSucceed()) {
+					return true;
+				}
 			}
 
 			return false;
@@ -113,94 +112,90 @@ namespace Typical_Tool {
 			// 打开注册表项  
 			result = RegOpenKeyExW(HKEY_CURRENT_USER, regPath.c_str(), 0, KEY_SET_VALUE, &hKey);
 			if (result != ERROR_SUCCESS) {
-				lgc("打开密钥失败: %ld" + result, lm::err);
+				lgc("打开密钥失败: %ld" + result, er);
 				return false;
 			}
 
 			// 设置注册表值  
 			result = RegSetValueExW(hKey, stow(valueName).c_str(), 0, REG_SZ, (const BYTE*)stow(exePath).c_str(), (stow(exePath).size() + 1) * sizeof(wchar_t));
 			if (result != ERROR_SUCCESS) {
-				lgc("设置注册表值失败: %ld" + result, lm::err);
+				lgc("设置注册表值失败: %ld" + result, er);
 				RegCloseKey(hKey);
 				return false;
 			}
 
 			RegCloseKey(hKey);
-			lgc("注册表注册成功!", lm::tips);
+			lgc("注册表注册成功!", ts);
 			return true;
 		}
 
 		//文件操作---------------------------------------------------------------------------------------------------------
 
 		template<class T = bool>
-		Tstr ExtractExeName(const Tstr& path)
+		bool ExtractExeName(Tstr& path)
 		{
-			//匹配 '\' && '/' 任意
-			size_t lastSepPos = path.find_last_of("\\/");
-			if (lastSepPos != std::wstring::npos) {
-				return path.substr(lastSepPos + 1); // 提取文件名部分
-			}
-
 			// 去掉 .exe 后缀
-			size_t exePos = path.find_last_of(".exe");
+			size_t exePos = path.find_last_of(_T(".exe"));
 			if (exePos != Tstr::npos && exePos == path.length() - 4) {
 				path = path.substr(0, exePos); // 去掉 .exe 后缀
+				return true;
 			}
 
-			return path; // 如果找不到路径分隔符，则返回整个路径
+			return false; // 如果找不到路径分隔符，则返回整个路径
 		}
 
+
 		template<class T = bool>
-		Tstr ExtractExeDirectoryName(const Tstr& path)
+		bool ExtractExeDirectoryName(Tstr& path)
 		{
-			size_t lastSepPos = path.find_last_of("\\/");
+			size_t lastSepPos = path.find_last_of(_T("\\"));
 			if (lastSepPos != std::wstring::npos) {
-				//return path.substr(0, lastSepPos + 1); // 包括最后一个路径分隔符
-				return path.substr(0, lastSepPos); // 不包括最后一个路径分隔符
+				path = path.substr(0, lastSepPos); // 不包括最后一个路径分隔符
+				return true;
 			}
-			return ""; // 如果找不到路径分隔符，则返回空字符串
+			return false; // 如果找不到路径分隔符，则返回空字符串
 		}
+
 		template<class T = bool>
-		Tstr GetExeName()
+		bool GetExeName(Tstr& _ExeName)
 		{
 			Tchar exePath[MAX_PATH];
-			Tstr exeName;
 
 			//获取当前程序的全路径
 			DWORD length = GetModuleFileName(NULL, exePath, MAX_PATH);
-
+			_ExeName = exePath;
 			if (length > 0 && length < MAX_PATH) {
-				exeName = ExtractExeName(exePath);
-				lgc(_T("当前可执行文件的名称: " + exeName));
-				lgc();
+				if (ExtractExeName(_ExeName)) {
+					lgc(_T("当前可执行文件的名称: ") + _ExeName);
+				}
+				return true;
 			}
 			else {
 				lgc("无法获取当前可执行文件的路径!");
-				lgc();
+				return false;
 			}
-			return exeName;
 		}
+
 		template<class T = bool>
-		Tstr GetExeDirectoryName()
+		bool GetExeDirectoryName(Tstr& _FolderName)
 		{
 			Tchar exePath[MAX_PATH];
-			Tstr folderName;
 
 			//获取当前程序的全路径
 			DWORD length = GetModuleFileName(NULL, exePath, MAX_PATH);
-
+			_FolderName = exePath;
 			if (length > 0 && length < MAX_PATH) {
-				folderName = ExtractExeDirectoryName(exePath);
-				lgc(_T("当前程序目录路径名: " + folderName));
-				lgc();
+				if (ExtractExeDirectoryName(_FolderName)) {
+					lgc(_T("当前程序目录路径名: ") + _FolderName);
+				}
+				return true;
 			}
 			else {
 				lgc("无法获取当前可执行文件的路径!");
-				lgc();
+				return false;
 			}
-
-			return folderName;
 		}
+
 
 		template<class T = bool>
 		bool CreateFolder(const Tstr& folderPath)
@@ -213,31 +208,33 @@ namespace Typical_Tool {
 				// 路径不存在或出错，尝试创建目录  
 				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS)
 				{
-					lgc("文件夹: " + folderPath + " 创建成功!", lm::tips);
-					lgc();
+					lgc("文件夹: " + folderPath + " 创建成功!", ts);
+					
 					return true;
 				}
-				lgc("文件夹: " + folderPath + " 创建失败!", lm::tips);
-				lgc();
+				lgc("文件夹: " + folderPath + " 创建失败!", ts);
+				
 				// 创建失败且不是因为路径已存在  
 				return false;
 			}
 			else if (attributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				lgc("文件夹: " + folderPath + " 已存在", lm::tips);
-				lgc();
+				lgc("文件夹: " + folderPath + " 已存在", ts);
 				// 路径已经是一个目录  
 				return true;
 			}
-			lgc("文件夹: " + folderPath + " 创建失败(路径存在, 但不是目录)!", lm::tips);
-			lgc();
+			lgc("文件夹: " + folderPath + " 创建失败(路径存在, 但不是目录)!", ts);
 			// 路径存在但不是目录（可能是一个文件）  
 			return false;
 		}
+
 		template<class T = bool>
 		void OpenFolder(const Tstr& path)
 		{
-			ShellExecute(NULL, NULL, path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+			ShellMessage OpenFolder("打开文件夹", (int)ShellExecute(NULL, NULL, path.c_str(), NULL, NULL, SW_SHOWNORMAL));
+			if (!OpenFolder.IsSucceed()) {
+				lg(_T("ShellExecute: 打开文件夹 失败!"), er);
+			}
 		}
 
 		//控制台----------------------------------------------------------------------------------------------------------

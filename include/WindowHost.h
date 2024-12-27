@@ -98,12 +98,12 @@ namespace Typical_Tool {
 				if (message > 0)
 				{
 					lgc("热键注册[" + this->信息 + "]: 成功👌");
-					lgc();
+					
 				}
 				else
 				{
-					lgc("热键注册[" + this->信息 + "]: 错误😒 -> 代码(" + To_string(message) + ")", lm::err);
-					lgc();
+					lgc("热键注册[" + this->信息 + "]: 错误😒 -> 代码(" + To_string(message) + ")", er);
+					
 				}
 			}
 			RegisterHotKeyMessage(Tstr&& RegisterHotKey热键信息, int message)
@@ -112,12 +112,12 @@ namespace Typical_Tool {
 				if (message > 0)
 				{
 					lgc("热键注册[" + this->信息 + "]: 成功👌");
-					lgc();
+					
 				}
 				else
 				{
-					lgc("热键注册[" + this->信息 + "]: 错误😒 -> 代码(" + To_string(message) + ")", lm::err);
-					lgc();
+					lgc("热键注册[" + this->信息 + "]: 错误😒 -> 代码(" + To_string(message) + ")", er);
+					
 				}
 			}
 		};
@@ -141,15 +141,15 @@ namespace Typical_Tool {
 
 					//ShellExecute() 成功操作, 则传入为句柄
 					this->ErrorCode = message;
-					lgc("Shell消息[" + this->信息 + "]: 错误😒 -> 代码(" + To_string(message) + ")", lm::err);
-					lgc();
+					lgc("Shell消息[" + this->信息 + "]: 错误😒 -> 代码(" + To_string(message) + ")", er);
+					
 				}
 				else
 				{
 					this->Status = true;
 					this->ErrorCode = message;
 					lgc("Shell消息[" + this->信息 + "]: 成功 👌");
-					lgc();
+					
 				}
 			}
 			ShellMessage(Tstr&& Shell信息, int message)
@@ -161,15 +161,15 @@ namespace Typical_Tool {
 
 					//ShellExecute() 成功操作, 则传入为句柄
 					this->ErrorCode = message;
-					lgc("Shell消息[" + this->信息 + "]: 错误😒 -> 代码(" + To_string(message) + ")", lm::err);
-					lgc();
+					lgc("Shell消息[" + this->信息 + "]: 错误😒 -> 代码(" + To_string(message) + ")", er);
+					
 				}
 				else
 				{
 					this->Status = true;
 					this->ErrorCode = message;
 					lgc("Shell消息[" + this->信息 + "]: 成功 👌");
-					lgc();
+					
 				}
 			}
 
@@ -269,7 +269,7 @@ namespace Typical_Tool {
 			* 5.创建主窗口 & 子窗口后, 将其加入托管 WindowHost::添加主窗口托管/添加子窗口托管();
 			* 6.其他初始化
 			*/
-			template<class T = bool>
+			
 			static void README()
 			{
 

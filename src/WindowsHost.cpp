@@ -130,9 +130,9 @@ bool Typical_Tool::WindowsSystem::ShellMessage::IsSucceed()
 
 void Typical_Tool::WindowsSystem::WindowShell::Shell处理(HMENU 菜单, std::vector<ShellConfig>& Shell配置)
 {
-	lgc();
+	
 	lgc("Typical_Tool::WindowsSystem::WindowShell::Shell处理");
-	lgc();
+	
 
 	for (auto tempShell = Shell配置.begin(); tempShell != Shell配置.end(); tempShell++) {
 		//判断类型
@@ -180,7 +180,7 @@ void Typical_Tool::WindowsSystem::WindowShell::执行程序启动项Shell()
 		}
 	}
 	else {
-		lgcr("程序启动项Shell: 没有执行项!", lm::war);
+		lgcr("程序启动项Shell: 没有执行项!", wr);
 		lgcr();
 	}
 }
@@ -201,7 +201,7 @@ void Typical_Tool::WindowsSystem::WindowShell::执行程序菜单项Shell(int _�
 		ExecuteAnalyze(操作名, Shell操作, 文件, 参数, 窗口显示);
 	}
 	else {
-		lgcr("程序菜单项Shell: 没有找到菜单选项 " + _菜单选项ID, lm::err);
+		lgcr("程序菜单项Shell: 没有找到菜单选项 " + _菜单选项ID, er);
 		lgcr();
 	}
 }
@@ -210,19 +210,19 @@ Typical_Tool::WindowsSystem::ShellMessage Typical_Tool::WindowsSystem::WindowShe
 {
 	if (Shell操作 == "打开文件" || Shell操作 == "open") {
 		Shell操作 = "open";
-		lgc("ExecuteAnalyze: Shell操作模式(打开文件)", lm::tips);
+		lgc("ExecuteAnalyze: Shell操作模式(打开文件)", ts);
 	}
 	else if (Shell操作 == "管理员运行" || Shell操作 == "runas") {
 		Shell操作 = "runas";
-		lgc("ExecuteAnalyze: Shell操作模式(管理员运行)", lm::tips);
+		lgc("ExecuteAnalyze: Shell操作模式(管理员运行)", ts);
 	}
 	else if (Shell操作 == "打开文件夹" || Shell操作 == "explore") {
 		Shell操作 = "explore";
-		lgc("ExecuteAnalyze: Shell操作模式(打开文件夹)", lm::tips);
+		lgc("ExecuteAnalyze: Shell操作模式(打开文件夹)", ts);
 	}
 	else {
-		lgcr("ExecuteAnalyze: Shell操作模式错误(打开文件/打开文件夹/管理员运行)", lm::war);
-		lgcr("ExecuteAnalyze: 操作名: " + 操作名, lm::war);
+		lgcr("ExecuteAnalyze: Shell操作模式错误(打开文件/打开文件夹/管理员运行)", wr);
+		lgcr("ExecuteAnalyze: 操作名: " + 操作名, wr);
 		return ShellMessage();
 	}
 
@@ -230,22 +230,22 @@ Typical_Tool::WindowsSystem::ShellMessage Typical_Tool::WindowsSystem::WindowShe
 	if (窗口显示 == "是") {
 		ShowWindow = 5;
 	}
-	lgc("ExecuteAnalyze: 窗口显示 " + 窗口显示, lm::war);
+	lgc("ExecuteAnalyze: 窗口显示 " + 窗口显示, wr);
 
-	ShellMessage temp(操作名, ShellExecuteW(NULL, stow(Shell操作).c_str(), stow(Shell文件).c_str(), stow(Shell参数).c_str(), NULL, ShowWindow)->unused);
+	ShellMessage temp(操作名, (int)ShellExecuteW(NULL, stow(Shell操作).c_str(), stow(Shell文件).c_str(), stow(Shell参数).c_str(), NULL, ShowWindow));
 	return temp;
 }
 
 void Typical_Tool::WindowsSystem::ShellConfig::OutConfig()
 {
-	lgc("ShellConfig::OutConfig()", lm::tips);
+	lgc("ShellConfig::OutConfig()", ts);
 	lgc("操作名: " + this->操作名);
 	lgc("菜单按键: " + this->菜单按键);
 	lgc("Shell操作: " + this->Shell操作);
 	lgc("文件: " + this->文件);
 	lgc("参数: " + this->参数);
 	lgc("窗口显示: " + this->窗口显示);
-	lgc();
+	
 }
 
 
@@ -256,11 +256,11 @@ bool Typical_Tool::WindowsSystem::WindowHost::添加窗口托管(Tstr windowName
 {
 	if (!IsWindow(window)) {
 		//创建失败
-		lg("创建窗口失败! 窗口名: " + windowName, lm::err);
+		lg("创建窗口失败! 窗口名: " + windowName, er);
 		return false;
 	}
-	lgc("创建窗口成功! 窗口名: " + windowName, lm::tips);
-	lgc();
+	lgc("创建窗口成功! 窗口名: " + windowName, ts);
+	
 	
 	ShowWindow(window, showWindow);
 	UpdateWindow(window);
@@ -295,11 +295,11 @@ int Typical_Tool::WindowsSystem::WindowHost::注册窗口类(WNDCLASSW& wndClass
 {
 	if (!RegisterClassW(&wndClass))
 	{
-		lg("窗口类注册失败!\n 窗口类名: " + wtos(wndClass.lpszClassName), lm::err);
+		lg("窗口类注册失败!\n 窗口类名: " + wtos(wndClass.lpszClassName), er);
 		return 0;
 	}
-	lgc("窗口类注册成功! 窗口类名: " + wtos(wndClass.lpszClassName), lm::tips);
-	lgc();
+	lgc("窗口类注册成功! 窗口类名: " + wtos(wndClass.lpszClassName), ts);
+	
 
 	return 1;
 }
