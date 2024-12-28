@@ -100,16 +100,16 @@ namespace Typical_Tool {
 
 #ifdef _WINDOWS
 #ifndef _WCHAR
-#define PATH_BACKSLASH "\\"
+#define PATH_SLASH "\\"
 #else
-#define PATH_BACKSLASH L"\\"
+#define PATH_SLASH L"\\"
 #endif
 
 #else
 #ifndef _WCHAR
-#define PATH_BACKSLASH "/"
+#define PATH_SLASH "/"
 #else
-#define PATH_BACKSLASH L"/"
+#define PATH_SLASH L"/"
 #endif
 #endif
 

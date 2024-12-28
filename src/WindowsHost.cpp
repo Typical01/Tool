@@ -4,9 +4,54 @@
 
 int Typical_Tool::WindowsSystem::WindowHost::hMenu = 1000;
 HINSTANCE Typical_Tool::WindowsSystem::WindowHost::hIns;
-UINT Typical_Tool::WindowsSystem::WindowHost::WM_TASKBARCREATED_WH = RegisterWindowMessage("TaskbarCreated");
+UINT Typical_Tool::WindowsSystem::WindowHost::WM_TASKBARCREATED_WH = RegisterWindowMessage(_T("TaskbarCreated"));
 
 
+
+void Typical_Tool::WindowsSystem::SetDisplaySize(int displayWidth, int displayHeight)
+{
+	//初始化
+	DEVMODE NewDevMode;
+	EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &NewDevMode);
+
+	//记录修改信息
+	NewDevMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+	NewDevMode.dmPelsWidth = displayWidth;
+	NewDevMode.dmPelsHeight = displayHeight;
+
+	//根据修改信息 修改屏幕分辨率
+	ChangeDisplaySettings(&NewDevMode, 0);
+}
+
+bool Typical_Tool::WindowsSystem::IsUserAdmin()
+{
+	BOOL retVal = FALSE;
+	SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
+	PSID AdministratorsGroup;
+	BOOL result = AllocateAndInitializeSid(
+		&NtAuthority,
+		2,
+		SECURITY_BUILTIN_DOMAIN_RID,
+		DOMAIN_ALIAS_RID_ADMINS,
+		0, 0, 0, 0, 0, 0,
+		&AdministratorsGroup);
+
+	if (result)
+	{
+		if (!CheckTokenMembership(NULL, AdministratorsGroup, &retVal))
+		{
+			retVal = FALSE;
+		}
+		FreeSid(AdministratorsGroup);
+	}
+	return retVal;
+}
+
+void Typical_Tool::WindowsSystem::MoveCursorLocation(int x, int y) {
+	COORD pos = { (SHORT)x,(SHORT)y };
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCursorPosition(hOut, pos);
+}
 
 // WindowKey
 void Typical_Tool::WindowsSystem::Key::wait_s(long long ms)
@@ -131,7 +176,7 @@ bool Typical_Tool::WindowsSystem::ShellMessage::IsSucceed()
 void Typical_Tool::WindowsSystem::WindowShell::Shell处理(HMENU 菜单, std::vector<ShellConfig>& Shell配置)
 {
 	
-	lgc("Typical_Tool::WindowsSystem::WindowShell::Shell处理");
+	lgc(_T("Typical_Tool::WindowsSystem::WindowShell::Shell处理"));
 	
 
 	for (auto tempShell = Shell配置.begin(); tempShell != Shell配置.end(); tempShell++) {
@@ -140,10 +185,10 @@ void Typical_Tool::WindowsSystem::WindowShell::Shell处理(HMENU 菜单, std::ve
 		Tstr 菜单按键 = tempShell->菜单按键;
 
 		//区分: 程序启动项/程序菜单项s
-		if (菜单按键 == "否") {
+		if (菜单按键 == _T("否")) {
 			程序启动项.push_back(*tempShell);
-			lgc("操作名: " + 操作名);
-			lgc("  注册: 程序启动项");
+			lgc(_T("操作名: ") + 操作名);
+			lgc(_T("  注册: 程序启动项"));
 			tempShell->OutConfig(); //输出配置
 		}
 		else {
@@ -151,15 +196,15 @@ void Typical_Tool::WindowsSystem::WindowShell::Shell处理(HMENU 菜单, std::ve
 			//int 菜单项总数 = GetMenuItemCount(菜单);
 
 			程序菜单项.insert(std::make_pair(菜单项ID, *tempShell));
-			lgc("操作名: " + 操作名);
-			lgc("  注册: 程序菜单项");
+			lgc(_T("操作名: ") + 操作名);
+			lgc(_T("  注册: 程序菜单项"));
 			//添加菜单项
 			if (AppendMenuW(菜单, MF_STRING, 菜单项ID, StringManage::stow(操作名).c_str())) {
 				tempShell->OutConfig(); //输出配置
-				lgc("  程序菜单项: 成功");
+				lgc(_T("  程序菜单项: 成功"));
 			}
 			else {
-				lgc("  程序菜单项: 失败");
+				lgc(_T("  程序菜单项: 失败"));
 			}
 		}
 	}
@@ -180,7 +225,7 @@ void Typical_Tool::WindowsSystem::WindowShell::执行程序启动项Shell()
 		}
 	}
 	else {
-		lgcr("程序启动项Shell: 没有执行项!", wr);
+		lgcr(_T("程序启动项Shell: 没有执行项!"), wr);
 		lgcr();
 	}
 }
@@ -201,36 +246,36 @@ void Typical_Tool::WindowsSystem::WindowShell::执行程序菜单项Shell(int _�
 		ExecuteAnalyze(操作名, Shell操作, 文件, 参数, 窗口显示);
 	}
 	else {
-		lgcr("程序菜单项Shell: 没有找到菜单选项 " + _菜单选项ID, er);
+		lgcr(_T("程序菜单项Shell: 没有找到菜单选项 ") + _菜单选项ID, er);
 		lgcr();
 	}
 }
 
 Typical_Tool::WindowsSystem::ShellMessage Typical_Tool::WindowsSystem::WindowShell::ExecuteAnalyze(Tstr 操作名, Tstr Shell操作, Tstr Shell文件, Tstr Shell参数, Tstr 窗口显示)
 {
-	if (Shell操作 == "打开文件" || Shell操作 == "open") {
-		Shell操作 = "open";
-		lgc("ExecuteAnalyze: Shell操作模式(打开文件)", ts);
+	if (Shell操作 == _T("打开文件") || Shell操作 == _T("open")) {
+		Shell操作 = _T("open");
+		lgc(_T("ExecuteAnalyze: Shell操作模式(打开文件)"), ts);
 	}
-	else if (Shell操作 == "管理员运行" || Shell操作 == "runas") {
-		Shell操作 = "runas";
-		lgc("ExecuteAnalyze: Shell操作模式(管理员运行)", ts);
+	else if (Shell操作 == _T("管理员运行") || Shell操作 == _T("runas")) {
+		Shell操作 = _T("runas");
+		lgc(_T("ExecuteAnalyze: Shell操作模式(管理员运行)"), ts);
 	}
-	else if (Shell操作 == "打开文件夹" || Shell操作 == "explore") {
-		Shell操作 = "explore";
-		lgc("ExecuteAnalyze: Shell操作模式(打开文件夹)", ts);
+	else if (Shell操作 == _T("打开文件夹") || Shell操作 == _T("explore")) {
+		Shell操作 = _T("explore");
+		lgc(_T("ExecuteAnalyze: Shell操作模式(打开文件夹)"), ts);
 	}
 	else {
-		lgcr("ExecuteAnalyze: Shell操作模式错误(打开文件/打开文件夹/管理员运行)", wr);
-		lgcr("ExecuteAnalyze: 操作名: " + 操作名, wr);
+		lgcr(_T("ExecuteAnalyze: Shell操作模式错误(打开文件/打开文件夹/管理员运行)"), wr);
+		lgcr(_T("ExecuteAnalyze: 操作名: ") + 操作名, wr);
 		return ShellMessage();
 	}
 
 	int ShowWindow = 0;
-	if (窗口显示 == "是") {
+	if (窗口显示 == _T("是")) {
 		ShowWindow = 5;
 	}
-	lgc("ExecuteAnalyze: 窗口显示 " + 窗口显示, wr);
+	lgc(_T("ExecuteAnalyze: 窗口显示 ") + 窗口显示, wr);
 
 	ShellMessage temp(操作名, (int)ShellExecuteW(NULL, stow(Shell操作).c_str(), stow(Shell文件).c_str(), stow(Shell参数).c_str(), NULL, ShowWindow));
 	return temp;
@@ -238,13 +283,13 @@ Typical_Tool::WindowsSystem::ShellMessage Typical_Tool::WindowsSystem::WindowShe
 
 void Typical_Tool::WindowsSystem::ShellConfig::OutConfig()
 {
-	lgc("ShellConfig::OutConfig()", ts);
-	lgc("操作名: " + this->操作名);
-	lgc("菜单按键: " + this->菜单按键);
-	lgc("Shell操作: " + this->Shell操作);
-	lgc("文件: " + this->文件);
-	lgc("参数: " + this->参数);
-	lgc("窗口显示: " + this->窗口显示);
+	lgc(_T("ShellConfig::OutConfig()"), ts);
+	lgc(_T("操作名: ") + this->操作名);
+	lgc(_T("菜单按键: ") + this->菜单按键);
+	lgc(_T("Shell操作: ") + this->Shell操作);
+	lgc(_T("文件: ") + this->文件);
+	lgc(_T("参数: ") + this->参数);
+	lgc(_T("窗口显示: ") + this->窗口显示);
 	
 }
 
@@ -256,10 +301,10 @@ bool Typical_Tool::WindowsSystem::WindowHost::添加窗口托管(Tstr windowName
 {
 	if (!IsWindow(window)) {
 		//创建失败
-		lg("创建窗口失败! 窗口名: " + windowName, er);
+		lg(_T("创建窗口失败! 窗口名: ") + windowName, er);
 		return false;
 	}
-	lgc("创建窗口成功! 窗口名: " + windowName, ts);
+	lgc(_T("创建窗口成功! 窗口名: ") + windowName, ts);
 	
 	
 	ShowWindow(window, showWindow);
@@ -295,10 +340,10 @@ int Typical_Tool::WindowsSystem::WindowHost::注册窗口类(WNDCLASSW& wndClass
 {
 	if (!RegisterClassW(&wndClass))
 	{
-		lg("窗口类注册失败!\n 窗口类名: " + wtos(wndClass.lpszClassName), er);
+		lg(_T("窗口类注册失败!\n 窗口类名: ") + wtos(wndClass.lpszClassName), er);
 		return 0;
 	}
-	lgc("窗口类注册成功! 窗口类名: " + wtos(wndClass.lpszClassName), ts);
+	lgc(_T("窗口类注册成功! 窗口类名: ") + wtos(wndClass.lpszClassName), ts);
 	
 
 	return 1;

@@ -20,10 +20,15 @@ namespace Typical_Tool
 	using namespace std;
 	using namespace StringManage;
 
+#define __WFILE__ L##__FILE__
+#define __WLINE__ L##__LINE__
+
 #ifndef _DEBUG
 #define _LOGERRORINFO(x) (x)
+#define _LOGERRORINFO_T(x) (x)
 #else
 #define _LOGERRORINFO(x) (std::string)"[" + __FILE__ + "->" + to_string(__LINE__ )+ "]" + x
+#define _LOGERRORINFO_W(x) (Tstr)L"[" + __WFILE__ + L"->" + to_wstring(__WLINE__ )+ L"]" + x
 #endif
 
 
@@ -74,7 +79,7 @@ namespace Typical_Tool
 
 	public:
 		Log(bool cmd, bool release)
-			: CMD(cmd), Release(release), ShowTime(true), ShowLog(true), SingleLogFile(false)
+			: CMD(cmd), Release(release), ShowTime(true), ShowLog(true), SingleLogFile(true)
 		{
 			Init();
 		}
@@ -372,31 +377,31 @@ namespace Typical_Tool
 				// 路径不存在或出错，尝试创建目录  
 				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS) {
 					if (!this->Release) {
-						Tout << ANSIESC_GREEN << Log_ts << _T("Log: 文件夹[" + folderPath + "]创建成功!") << ANSIESC_RESET << Log_lf;
+						Tout << ANSIESC_GREEN << Log_ts << _T("Log: 文件夹[" + folderPath + _T("]创建成功!")) << ANSIESC_RESET << Log_lf;
 					}
 					// 创建成功
 					return true;
 				}
 				if (!this->Release) {
-					Terr << ANSIESC_RED << Log_er << _T("Log: 文件夹[" + folderPath + "]创建失败!") << ANSIESC_RESET << Log_lf;
+					Terr << ANSIESC_RED << Log_er << _T("Log: 文件夹[" + folderPath + _T("]创建失败!")) << ANSIESC_RESET << Log_lf;
 				}
 				// 创建失败且不是因为路径已存在  
 				return false;
 			}
 			else if (attributes & FILE_ATTRIBUTE_DIRECTORY) {
 				if (!this->Release) {
-					Terr << ANSIESC_YELLOW << Log_wr << _T("Log: 文件夹[" + folderPath + "]已存在") << ANSIESC_RESET << Log_lf;
+					Terr << ANSIESC_YELLOW << Log_wr << _T("Log: 文件夹[" + folderPath + _T("]已存在")) << ANSIESC_RESET << Log_lf;
 				}
 				// 路径已经是一个目录  
 				return true;
 			}
 			// 路径存在但不是目录（可能是一个文件）  
 			if (!this->Release) {
-				Terr << ANSIESC_YELLOW << Log_wr << _T("Log: 文件夹[" + folderPath + "]创建失败(路径存在, 但不是目录)!") << ANSIESC_RESET << Log_lf;
+				Terr << ANSIESC_YELLOW << Log_wr << _T("Log: 文件夹[" + folderPath + _T("]创建失败(路径存在, 但不是目录)!")) << ANSIESC_RESET << Log_lf;
 		}
 #else
 			if (!this->Release) {
-				Terr << ANSIESC_RED << Log_er << _T("Log: 文件夹[" + folderPath + "]创建失败(#ifndef _WINDOWS)!") << ANSIESC_RESET << Log_lf;
+				Terr << ANSIESC_RED << Log_er << _T("Log: 文件夹[" + folderPath + _T("]创建失败(#ifndef _WINDOWS)!")) << ANSIESC_RESET << Log_lf;
 			}
 #endif
 			return false;
@@ -469,28 +474,39 @@ namespace Typical_Tool
 				//获取 当前路径/Log/Log文件名.txt 
 				//创建文件夹 ./Log  .
 				Tstr Log_FilePath = _T("Log.txt");
-				if (this->SingleLogFile) {
+				if (!this->SingleLogFile) {
+					Tstr Log_FolderName = (Tstr)_T(".") + PATH_SLASH + _T("Log");
 #ifndef _WINDOWS
+					if (std::filesystem::exists(Log_FolderName)) { //目录存在
+						if (std::filesystem::is_directory(Log_FolderName)) { // 是目录
+							//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + .txt
+							Tstr Log_FileName = Time::GetFormatTime(_T("%Y-%m-%d_%H-%M-%S_"), _T(""), _T(""));
+							// ./Log/时间.txt  ||  ./时间.txt
+							Tstr Log_FilePath = Log_FolderName + PATH_SLASH + Log_FileName + Log_FilePath;
+						}
+						else { // 不是目录
+						}
+					}
+					else { //目录不存在
+						std::filesystem::create_directory(Log_FolderName); //创建目录
+						//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + .txt
+						Tstr Log_FileName = Time::GetFormatTime(_T("%Y-%m-%d_%H-%M-%S_"), _T(""), _T(""));
+						// ./Log/时间.txt  ||  ./时间.txt
+						Tstr Log_FilePath = Log_FolderName + PATH_SLASH + Log_FileName + Log_FilePath;
+					}
 #else
-					Tstr Log_FolderName = (Tstr)_T(".") + PATH_BACKSLASH + _T("Log");
 					if (CreateFolder(Log_FolderName)) {
+						//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + .txt
+						Tstr Log_FileName = Time::GetFormatTime(_T("%Y-%m-%d_%H-%M-%S_"), _T(""), _T(""));
+						// ./Log/时间.txt  ||  ./时间.txt
+						Tstr Log_FilePath = Log_FolderName + PATH_SLASH + Log_FileName + Log_FilePath;
 					}
 					else {
 						if (!this->Release) {
-							Terr << ANSIESC_RED << Log_er << _T("Log: 文件夹[" + Log_FolderName + "]创建失败!") << ANSIESC_RESET << Log_lf;
+							Terr << ANSIESC_RED << Log_er << _T("Log: 文件夹[") + Log_FolderName + _T("]创建失败!") << ANSIESC_RESET << Log_lf;
 						}
-
-						Log_FolderName = (Tstr)".";
 					}
-
-					//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + .txt
-					Tstr Log_FileName = Time::GetFormatTime(_T("%Y-%m-%d_%H-%M-%S"), _T(""), _T("")) + _T(".txt");
-					// ./Log/时间.txt  ||  ./时间.txt
-					Tstr Log_FilePath = Log_FolderName + PATH_BACKSLASH + Log_FileName; //总是添加 /
 #endif
-				}
-				else {
-
 				}
 
 				//打开文件
@@ -545,19 +561,25 @@ namespace Typical_Tool
 	/* 模式 mode : (_CONSOLE | _WINDOWS) && #ifdef _DEBUG
 	* tip, war, Terr
 	*/
-	static Log lg(false, false);
-	/* 模式 mode: (_CONSOLE) && #ifdef _DEBUG
-	* tip, war, Terr
-	*/
-	static Log lgc(true, false);
+	static std::shared_ptr<Log> LogAuto_Debug = std::make_shared<Log>(false, false);
 	/* 模式 mode: (_CONSOLE | _WINDOWS) && #ifndef _DEBUG
 	* tip, war, Terr
 	*/
-	static Log lgr(false, true);
+	static std::shared_ptr<Log> LogAuto_Release = std::make_shared<Log>(false, true);
+	/* 模式 mode: (_CONSOLE) && #ifdef _DEBUG
+	* tip, war, Terr
+	*/
+	static std::shared_ptr<Log> LogConsole_Debug = std::make_shared<Log>(true, false);
 	/* 模式 mode: (_CONSOLE) && #ifndef _DEBUG
 	* tip, war, Terr
 	*/
-	static Log lgcr(true, true);
+	static std::shared_ptr<Log> LogConsole_Release = std::make_shared<Log>(true, true);
+
+	// 包装为引用
+	static std::reference_wrapper<Log> lg = *LogAuto_Debug;
+	static std::reference_wrapper<Log> lgr = *LogAuto_Release;
+	static std::reference_wrapper<Log> lgc = *LogConsole_Debug;
+	static std::reference_wrapper<Log> lgcr = *LogConsole_Release;
 
 	template<class T = bool>
 	void Log_README()

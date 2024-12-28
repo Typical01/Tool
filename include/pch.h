@@ -25,6 +25,7 @@
 #include <queue>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <mutex>
 #include <thread>
 #include <chrono>

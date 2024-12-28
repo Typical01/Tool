@@ -19,7 +19,7 @@ std::wstring Typical_Tool::StringManage::StringToWstring(const std::string& str)
 	if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), buffer.get(), len) <= 0) {
 		throw std::runtime_error("Failed to convert string to wide string.");
 	}
-	buffer[len] = _T('\0');
+	buffer[len] = L'\0';
 	wContext.assign(buffer.get());
 #else
 	if (IsRunTimeError) {
@@ -48,7 +48,7 @@ std::wstring Typical_Tool::StringManage::StringToWstring(std::string&& str)
 	if (MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), buffer.get(), len) <= 0) {
 		throw std::runtime_error("Failed to convert string to wide string.");
 	}
-	buffer[len] = _T('\0');
+	buffer[len] = L'\0';
 	wContext.assign(buffer.get());
 #else
 	if (IsRunTimeError) {

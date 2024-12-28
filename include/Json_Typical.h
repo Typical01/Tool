@@ -13,6 +13,7 @@ namespace Typical_Tool {
 		Json::StreamWriterBuilder WriterBuilder;
 		Json::CharReaderBuilder ReaderBuilder;
 		Tstr JsonFilePath;
+		std::reference_wrapper<Log> log = lg;
 
 	public:
 		JsonManage()
@@ -25,8 +26,8 @@ namespace Typical_Tool {
 		//Json写入流配置: utf-8非英文字符显示 | 缩进 | 保存文件路径 | 读取并解析Json文件(return bool)
 		bool Init(const Tstr& _JsonFilePath, bool _IsReadJsonFile)
 		{
-			this->WriterBuilder["emitUTF8"] = true; //utf-8字符显示为非 /uxxx
-			this->WriterBuilder["indentation"] = "    "; // 设置缩进
+			this->WriterBuilder[_T("emitUTF8")] = true; //utf-8字符显示为非 /uxxx
+			this->WriterBuilder[_T("indentation")] = _T("    "); // 设置缩进
 			this->JsonFilePath = _JsonFilePath; //保存 Json文件路径
 
 			if (_IsReadJsonFile) {
@@ -43,10 +44,11 @@ namespace Typical_Tool {
 			Tofstream JsonFileOut(_JsonFilePath, _StreamOpenMode);
 			if (JsonFileOut.is_open()) {
 				JsonFileOut << Json::writeString(this->WriterBuilder, _Value);
+				return true;
 			}
 			else {
-				lg(_T("打开Json文件失败: ofstream"), er);
-				lg(_T("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
+				log(_T("打开Json文件失败: ofstream"), er);
+				log(_T("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
 				return false;
 			}
 		}
@@ -59,14 +61,14 @@ namespace Typical_Tool {
 					return true;
 				}
 				else {
-					lg(_T("解析 Json失败: ") + ErrorCode, er);
-					lg(_T("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
+					log(_T("解析 Json失败: ") + ErrorCode, er);
+					log(_T("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
 					return false;
 				}
 			}
 			else {
-				lg(_T("打开Json文件失败: ") + ErrorCode, er);
-				lg(_T("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
+				log(_T("打开Json文件失败: ") + ErrorCode, er);
+				log(_T("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
 				return false;
 			}
 		}
@@ -132,6 +134,8 @@ namespace Typical_Tool {
 			this->JsonFilePath = _JsonFilePath;
 		}
 
+		void SetLog(Log& _log) { this->log = _log; }
+
 	public:
 
 		//输出 writeString到 Terr
@@ -149,8 +153,8 @@ namespace Typical_Tool {
 				return true;
 			}
 			else {
-				lg(_T("转换字符串到 Json失败: ") + ErrorCode, er);
-				lg(_T("\tJson字符串: ") + _Bracket(_JsonConfig), er);
+				log(_T("转换字符串到 Json失败: ") + ErrorCode, er);
+				log(_T("\tJson字符串: ") + _Bracket(_JsonConfig), er);
 				return false;
 			}
 		}

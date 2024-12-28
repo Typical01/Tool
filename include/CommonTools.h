@@ -7,242 +7,158 @@
 #include "pch.h"
 #include "Log.h"
 #include "Time_Typical.h"
-#include "WindowHost.h"
 
 using namespace std;
 
 namespace Typical_Tool {
+	class FileSystem {
+	private:
+		std::filesystem::path Path;
+		std::reference_wrapper<Log> log = lgc;
 
-	//Windows系统操作----------------------------------------------------------------------------------------
-	namespace WindowsSystem
-	{
-
-		//显示--------------------------------------------------------------------------------------------------------------------
-
-		/*设置屏幕分辨率 运行
-			* 分辨率: 需要是系统中有的比例, 如: 1920 x 1080(16:9), 1280 x 720(16:9)
-		*/
-		void SetDisplaySize(int widthValue, int HeightValue);
-
-
-		//程序操作----------------------------------------------------------------------------------------------------------------
-
-
-		//进程DPI_AWARENESS_CONTEXT_SYSTEM_AWARE
-		template<class T = bool>
-		void WindowDPI()
+	public:
+		FileSystem()
 		{
-			//设置DPI感知级别(可选，仅Windows 10 1703及更高版本）
-			if (SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) == NULL) { //传入的值无效
-				lgc("Windows DPI: 传入的值无效\n");
-			}
-			else {
-				lgc("Windows DPI: DPI感知(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) 设置成功!\n");
-				
-			}
+
+		}
+		FileSystem(const std::filesystem::path& _Path)
+			: Path(_Path)
+		{
 		}
 
-
-		template<class T = bool>
-		int AloneRun(Tstr windowClassName, Tstr windowTitleName)
+		FileSystem& operator/=(const Tstr& _PathName)
 		{
-			//程序启动初始化
-			HWND handle = FindWindow(windowClassName.c_str(), windowTitleName.c_str());
-			if (handle != NULL)
-			{
-				lgr((Tstr)"应用程序已在运行" + windowTitleName + "\n", wr);
-				return 0;
-			}
-			return 1;
+			this->Path /= _PathName;
+			return *this;
 		}
 
-		//是否为管理员
-		bool IsUserAdmin();
-
-		//获得管理员权限
-		template<class T = bool>
-		bool GainAdminPrivileges(Tstr strApp)
-		{
-			if (!IsUserAdmin()) { //非管理员权限, 则申请
-				ShellMessage UserAdmin("申请管理员权限", (int)ShellExecute(NULL, "runas", strApp.c_str(), NULL, NULL, SW_SHOWNORMAL));
-				//成功申请时, 退出当前进程
-				if (UserAdmin.IsSucceed()) {
-					return true;
+	private:
+		bool Exists(const Tstr& _TipsChar, const Tstr& _Win = _T("成功!"), const Tstr& _Fail = _T("失败!"))
+		{	
+			Tstr FileType;
+			if (std::filesystem::exists(this->Path)) {
+				if (std::filesystem::is_regular_file(this->Path)) { // 检查路径是否是普通文件
+					FileType = _T("文件");
 				}
-			}
-
-			return false;
-		}
-
-
-		/* 成功获取到管理员权限后, 返回 true
-		* 同时, 可以将发出申请的程序退出, 使拥有管理员权限的程序单例运行
-		* code:
-		*	if (Typical_Tool::WindowsSystem::WindowHost::获取管理员权限(true)) { return 0; }
-		*/
-		template<class T = bool>
-		bool GetAdmin(bool isGet = true)
-		{
-			if (isGet) {
-				//获取当前程序的全路径
-				Tchar 程序路径[MAX_PATH] = _T("");
-				GetModuleFileName(NULL, 程序路径, MAX_PATH);
-				//获得管理员权限
-				if (GainAdminPrivileges(程序路径)) {
-					return true;
+				else if (std::filesystem::is_directory(this->Path)){ // 检查路径是否是目录
+					FileType = _T("目录");
 				}
 				else {
+					FileType = _T("其他(符号链接...)");
+				}
+
+				log(_TipsChar + _T(":[") + this->Path.string() + _T("][") + FileType + _T("] 存在!"), er);
+				log(_TipsChar + _T(": ") + _Win, er);
+				return true;
+			}
+			else {
+				log(_TipsChar + _T(":[") + this->Path.string() + _T("] 不存在!"), ts);
+				log(_TipsChar + _T(": ") + _Fail, ts);
+				return false;
+			}
+		}
+
+	public:
+		//创建目录: 自动递归创建下级目录
+		bool CreateDirectory()
+		{
+			if (Exists(_T("创建文件夹"), _T("失败!"), _T("成功!"))) {
+				return false;
+			}
+			auto PathSlash = this->Path.string().find_last_of(_T("\\/"));
+			if (PathSlash == std::string::npos) {
+				//单级目录
+				std::filesystem::create_directory(this->Path);
+			}
+			else {
+				//多级目录
+				std::filesystem::create_directories(this->Path);
+			}
+
+			return true;
+		}
+		//删除文件/目录
+		bool Delete(bool _IsRecursive = false)
+		{
+			if (!Exists(_T("删除文件/目录"))) {
+				return false;
+			}
+			if (_IsRecursive) {
+				std::filesystem::remove_all(this->Path);
+			}
+			else {
+				std::filesystem::remove(this->Path);
+			}
+
+			return true;
+		}
+		//复制文件/目录
+		bool Copy(const Tstr& _TargetPath)
+		{
+			if (!Exists(_T("复制文件/目录"))) {
+				return false;
+			}
+			std::filesystem::copy(this->Path, _TargetPath, std::filesystem::copy_options::overwrite_existing);
+			return true;
+		}
+		//重命名/移动 文件/目录
+		bool ReName(const Tstr& _NewPathName)
+		{
+			std::filesystem::path NewPathName = _NewPathName;
+			if (this->Path.parent_path() == NewPathName.parent_path()) {
+				if (!Exists(_T("重命名文件/目录"))) {
 					return false;
 				}
 			}
 			else {
-				return false;
+				if (!Exists(_T("移动文件/目录"))) {
+					return false;
+				}
 			}
+			std::filesystem::rename(this->Path, NewPathName);
+			return true;
 		}
-
-		//添加注册表项以实现 开机自启动
-		template<class T = bool>
-		bool SetSelfStarting(Tstr valueName, Tstr exePath)
+		//修改文件/目录权限
+		bool SetPermissions(const std::filesystem::perms& _perms)
 		{
-			LONG result;
-			HKEY hKey;
-
-			wstring regPath = L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
-
-			// 打开注册表项  
-			result = RegOpenKeyExW(HKEY_CURRENT_USER, regPath.c_str(), 0, KEY_SET_VALUE, &hKey);
-			if (result != ERROR_SUCCESS) {
-				lgc("打开密钥失败: %ld" + result, er);
+			if (!Exists(_T("修改文件/目录权限"))) {
 				return false;
 			}
-
-			// 设置注册表值  
-			result = RegSetValueExW(hKey, stow(valueName).c_str(), 0, REG_SZ, (const BYTE*)stow(exePath).c_str(), (stow(exePath).size() + 1) * sizeof(wchar_t));
-			if (result != ERROR_SUCCESS) {
-				lgc("设置注册表值失败: %ld" + result, er);
-				RegCloseKey(hKey);
-				return false;
-			}
-
-			RegCloseKey(hKey);
-			lgc("注册表注册成功!", ts);
+			std::filesystem::permissions(this->Path, _perms);
 			return true;
 		}
 
-		//文件操作---------------------------------------------------------------------------------------------------------
-
-		template<class T = bool>
-		bool ExtractExeName(Tstr& path)
+		//遍历目录: return 目录列表
+		// *_IsRecursive: 是否递归
+		std::vector<std::filesystem::path> DirectoryIterator(bool _IsRecursive = false)
 		{
-			// 去掉 .exe 后缀
-			size_t exePos = path.find_last_of(_T(".exe"));
-			if (exePos != Tstr::npos && exePos == path.length() - 4) {
-				path = path.substr(0, exePos); // 去掉 .exe 后缀
-				return true;
-			}
-
-			return false; // 如果找不到路径分隔符，则返回整个路径
-		}
-
-
-		template<class T = bool>
-		bool ExtractExeDirectoryName(Tstr& path)
-		{
-			size_t lastSepPos = path.find_last_of(_T("\\"));
-			if (lastSepPos != std::wstring::npos) {
-				path = path.substr(0, lastSepPos); // 不包括最后一个路径分隔符
-				return true;
-			}
-			return false; // 如果找不到路径分隔符，则返回空字符串
-		}
-
-		template<class T = bool>
-		bool GetExeName(Tstr& _ExeName)
-		{
-			Tchar exePath[MAX_PATH];
-
-			//获取当前程序的全路径
-			DWORD length = GetModuleFileName(NULL, exePath, MAX_PATH);
-			_ExeName = exePath;
-			if (length > 0 && length < MAX_PATH) {
-				if (ExtractExeName(_ExeName)) {
-					lgc(_T("当前可执行文件的名称: ") + _ExeName);
+			std::vector<std::filesystem::path> List; //目录列表
+			if (_IsRecursive) { // 递归遍历
+				for (const auto& entry : std::filesystem::recursive_directory_iterator(this->Path)) {
+					List.push_back(entry.path());
 				}
-				return true;
 			}
-			else {
-				lgc("无法获取当前可执行文件的路径!");
-				return false;
-			}
-		}
-
-		template<class T = bool>
-		bool GetExeDirectoryName(Tstr& _FolderName)
-		{
-			Tchar exePath[MAX_PATH];
-
-			//获取当前程序的全路径
-			DWORD length = GetModuleFileName(NULL, exePath, MAX_PATH);
-			_FolderName = exePath;
-			if (length > 0 && length < MAX_PATH) {
-				if (ExtractExeDirectoryName(_FolderName)) {
-					lgc(_T("当前程序目录路径名: ") + _FolderName);
+			else { // 非递归遍历
+				for (const auto& entry : std::filesystem::directory_iterator(this->Path)) {
+					List.push_back(entry.path());
 				}
-				return true;
-			}
-			else {
-				lgc("无法获取当前可执行文件的路径!");
-				return false;
 			}
 		}
+	public:
+		//设置 std::filesystem::path
+		std::filesystem::path SetPath(const std::filesystem::path& _Path) { return this->Path = _Path; }
+		void SetLog(Log& _log) { this->log = _log; }
 
-
-		template<class T = bool>
-		bool CreateFolder(const Tstr& folderPath)
-		{
-			DWORD attributes = GetFileAttributes(folderPath.c_str());
-
-			// 检查路径是否存在且不是目录  
-			if (attributes == INVALID_FILE_ATTRIBUTES)
-			{
-				// 路径不存在或出错，尝试创建目录  
-				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS)
-				{
-					lgc("文件夹: " + folderPath + " 创建成功!", ts);
-					
-					return true;
-				}
-				lgc("文件夹: " + folderPath + " 创建失败!", ts);
-				
-				// 创建失败且不是因为路径已存在  
-				return false;
-			}
-			else if (attributes & FILE_ATTRIBUTE_DIRECTORY)
-			{
-				lgc("文件夹: " + folderPath + " 已存在", ts);
-				// 路径已经是一个目录  
-				return true;
-			}
-			lgc("文件夹: " + folderPath + " 创建失败(路径存在, 但不是目录)!", ts);
-			// 路径存在但不是目录（可能是一个文件）  
-			return false;
-		}
-
-		template<class T = bool>
-		void OpenFolder(const Tstr& path)
-		{
-			ShellMessage OpenFolder("打开文件夹", (int)ShellExecute(NULL, NULL, path.c_str(), NULL, NULL, SW_SHOWNORMAL));
-			if (!OpenFolder.IsSucceed()) {
-				lg(_T("ShellExecute: 打开文件夹 失败!"), er);
-			}
-		}
-
-		//控制台----------------------------------------------------------------------------------------------------------
-
-		//移动光标到目标位置
-		void MoveCursorLocation(int x, int y);
-	}
-	namespace WinSys = WindowsSystem;
+	public:
+		//获取 std::filesystem::path
+		std::filesystem::path GetPath() { return this->Path; }
+		//获取 文件名
+		Tstr GetFileName() const { return this->Path.filename().string(); }
+		//获取 文件扩展名
+		Tstr GetExtensionName() const { return this->Path.extension().string(); }
+		//获取 父级目录名
+		Tstr GetParentName() const { return this->Path.parent_path().string(); }
+	};
 
 	namespace GameTools
 	{
@@ -252,7 +168,30 @@ namespace Typical_Tool {
 #define FPS_COUNT 60 //Fps 统计的间隔(帧率)
 #endif
 		//获取 FPS
-		float GetFps();
+		template<class T = bool>
+		float GetFps()
+		{
+			//临时统计
+			static int tempCount = 0;
+			static Timer timer; //时间
+			static float fps; //帧率
+
+			if (tempCount > FPS_COUNT)
+			{
+				//将时间节点拓展到两个
+				if (timer.GetTimerSize() < 2)
+					timer.AddTimer();
+
+				tempCount = 0;
+				timer.SetTimer(timer.GetTime(), 2);
+				float tempTime = (float)timer.ComputTime_FirstToEnd();
+				fps = FPS_COUNT / (tempTime / 1000.0f); //获取的系统时间为毫秒数
+				timer.SetTimer(timer.GetTime(), 1);
+			}
+
+			tempCount++;
+			return fps;
+		}
 	}
 }
 

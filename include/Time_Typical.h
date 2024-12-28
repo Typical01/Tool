@@ -19,30 +19,30 @@ namespace Typical_Tool {
 	using ns = std::chrono::nanoseconds;                                       // 纳秒
 
 	template <typename Target>
-	std::string TimeMeasureToString() {
+	Tstr TimeMeasureToString() {
 		if constexpr (std::is_same<Target, day>::value) {
-			return "天";
+			return _T("天");
 		}
 		else if constexpr (std::is_same<Target, hour>::value) {
-			return "时";
+			return _T("时");
 		}
 		else if constexpr (std::is_same<Target, min>::value) {
-			return "分";
+			return _T("分");
 		}
 		else if constexpr (std::is_same<Target, sec>::value) {
-			return "秒";
+			return _T("秒");
 		}
 		else if constexpr (std::is_same<Target, ms>::value) {
-			return "毫秒";
+			return _T("毫秒");
 		}
 		else if constexpr (std::is_same<Target, us>::value) {
-			return "微秒";
+			return _T("微秒");
 		}
 		else if constexpr (std::is_same<Target, ns>::value) {
-			return "纳秒";
+			return _T("纳秒");
 		}
 		else {
-			return "未知单位";
+			return _T("未知单位");
 		}
 	}
 
@@ -108,43 +108,41 @@ namespace Typical_Tool {
 		template<class Target>
 		static void sleep_s(long long _Number)
 		{
-			std::this_thread::sleep_for(Target(_Number));
-
 			if (showLog) {
-				Terr << ANSIESC_YELLOW << "休眠: [" << _Number << "]" << TimeMeasureToString<Target>() << ANSIESC_RESET << endl;
+				Terr << ANSIESC_YELLOW << _T("休眠: [") << _Number << _T("]") << TimeMeasureToString<Target>() << ANSIESC_RESET << endl;
 			}
+			std::this_thread::sleep_for(Target(_Number));
 		}
 		static void sleep(long long _sec)
 		{
-			std::this_thread::sleep_for(std::chrono::seconds(_sec));
 			if (showLog) {
-				Terr << ANSIESC_YELLOW << "休眠: [" << _sec << "]秒" << ANSIESC_RESET << endl;
+				Terr << ANSIESC_YELLOW << _T("休眠: [") << _sec << _T("]秒") << ANSIESC_RESET << endl;
 			}
+			std::this_thread::sleep_for(std::chrono::seconds(_sec));
 		}
 		template<class Target>
 		static void wait_s(long long _Number)
 		{
+			if (showLog) {
+				Terr << ANSIESC_YELLOW << _T("等待: [") << _Number << _T("]") << TimeMeasureToString<Target>() << ANSIESC_RESET << endl;
+			}
 			Timer timer;
 			long long timeTarget = (std::chrono::duration_cast<Target>(timer.GetTime().time_since_epoch()) + Target(_Number)).count();
-			while (timeTarget > std::chrono::duration_cast<Target>(timer.GetTime().time_since_epoch()).count()) {
-			}
-			if (showLog) {
-				Terr << ANSIESC_YELLOW << "等待: [" << _Number << "]" << TimeMeasureToString<Target>() << ANSIESC_RESET << endl;
-			}
+			while (timeTarget > std::chrono::duration_cast<Target>(timer.GetTime().time_since_epoch()).count()) {}
 		}
 		static void wait(long long _sec)
 		{
+			if (showLog) {
+				Terr << ANSIESC_YELLOW << _T("等待: [") << _sec << _T("]秒") << ANSIESC_RESET << endl;
+			}
 			Timer timer;
 			long long timeTarget = (std::chrono::duration_cast<std::chrono::seconds>(timer.GetTime().time_since_epoch()) + std::chrono::seconds(_sec)).count();
-			while (timeTarget > std::chrono::duration_cast<std::chrono::seconds>(timer.GetTime().time_since_epoch()).count()) {
-			}if (showLog) {
-				Terr << ANSIESC_YELLOW << "等待: [" << _sec << "]秒" << ANSIESC_RESET << endl;
-			}
+			while (timeTarget > std::chrono::duration_cast<std::chrono::seconds>(timer.GetTime().time_since_epoch()).count()) {}
 		}
 
 
-		static void FormatTime(Tstr& text, const Tstr& timeFormat = "%Y-%m-%d %H:%M:%S",
-			const Tstr& textLeftFormat = "[", const Tstr& textRigthFormat = "]")
+		static void FormatTime(Tstr& text, const Tstr& timeFormat = _T("%Y-%m-%d %H:%M:%S"),
+			const Tstr& textLeftFormat = _T("["), const Tstr& textRigthFormat = _T("]"))
 		{
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();;
 			// 获取当前时间点（自epoch以来的时间）
@@ -158,7 +156,7 @@ namespace Typical_Tool {
 			oss << std::put_time(now_tm, timeFormat.c_str()); // 自定义时间格式
 
 			//不需要修饰字符时, 直接返回格式化后的时间文本
-			if (textLeftFormat == "" && textRigthFormat == "") {
+			if (textLeftFormat == _T("") && textRigthFormat == _T("")) {
 				text = oss.str() + text;
 			}
 			else {
@@ -166,8 +164,8 @@ namespace Typical_Tool {
 			}
 		}
 
-		static Tstr GetFormatTime(const Tstr& timeFormat = "%Y-%m-%d %H:%M:%S",
-			const Tstr& textLeftFormat = "[", const Tstr& textRigthFormat = "]")
+		static Tstr GetFormatTime(const Tstr& timeFormat = _T("%Y-%m-%d %H:%M:%S"),
+			const Tstr& textLeftFormat = _T("["), const Tstr& textRigthFormat = _T("]"))
 		{
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();;
 			// 获取当前时间点（自epoch以来的时间）
@@ -181,7 +179,7 @@ namespace Typical_Tool {
 			oss << std::put_time(now_tm, timeFormat.c_str()); // 自定义时间格式
 
 			//不需要修饰字符时, 直接返回格式化后的时间文本
-			if (textLeftFormat == "" && textRigthFormat == "") {
+			if (textLeftFormat == _T("") && textRigthFormat == _T("")) {
 				return oss.str();
 			}
 			else {
