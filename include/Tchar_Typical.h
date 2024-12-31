@@ -21,6 +21,18 @@ namespace Typical_Tool {
 #endif
 
 
+#define __WFILE__ L##__FILE__
+#define __WLINE__ L##__LINE__
+
+#ifndef _DEBUG
+#define _LOGERRORINFO(x) (x)
+#define _LOGERRORINFO_T(x) (x)
+#else
+#define _LOGERRORINFO(x) (std::string)"[" + __FILE__ + "->" + to_string(__LINE__ )+ "]" + x
+#define _LOGERRORINFO_W(x) (Tstr)L"[" + __WFILE__ + L"->" + to_wstring(__WLINE__ )+ L"]" + x
+#endif
+
+	
 
 
 //控制台字符颜色
@@ -145,8 +157,20 @@ namespace Typical_Tool {
 	inline Tostream& Terr = std::wcerr;
 #endif
 
-}
 
+
+	template<class ComputeValue, class Callable>
+	void _IsValid_RunTime(ComputeValue _Value, Callable&& _ComputValueFunction, const Tstr& _ThrowInfo)
+	{
+		if (!_ComputValueFunction(_Value)) {
+			throw std::runtime_error(_LOGERRORINFO(_ThrowInfo));
+		}
+		else {
+			return;
+		}
+	}
+}
+namespace tytool = Typical_Tool;
 
 
 #endif

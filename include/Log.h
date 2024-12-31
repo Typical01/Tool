@@ -20,17 +20,6 @@ namespace Typical_Tool
 	using namespace std;
 	using namespace StringManage;
 
-#define __WFILE__ L##__FILE__
-#define __WLINE__ L##__LINE__
-
-#ifndef _DEBUG
-#define _LOGERRORINFO(x) (x)
-#define _LOGERRORINFO_T(x) (x)
-#else
-#define _LOGERRORINFO(x) (std::string)"[" + __FILE__ + "->" + to_string(__LINE__ )+ "]" + x
-#define _LOGERRORINFO_W(x) (Tstr)L"[" + __WFILE__ + L"->" + to_wstring(__WLINE__ )+ L"]" + x
-#endif
-
 
 #ifdef _WINDOWS
 	inline HWND hConsole; //控制台句柄
@@ -184,13 +173,9 @@ namespace Typical_Tool
 	private:
 		void LogWirteToFile()
 		{
-				//不是停止线程时
-			while (true) {
-				// 退出且队列为空
-				if (IsLogFileWriteThreadStop.load() && LogFileWrite_Queue.empty()) {
-					break;
-				}
 
+			// 不退出, 且队列不为空
+			while (!IsLogFileWriteThreadStop.load() && !LogFileWrite_Queue.empty()) {
 				lock_guard<mutex> QueueGuard(mutex_LogFileStream_Out);
 
 				//写入日志
@@ -464,7 +449,7 @@ namespace Typical_Tool
 		* er: Error log level output
 		* !=3: All(lm: ts/wr/tx) log level output
 		*/
-		void SetAllLogFileWrite(bool logFileWrite, int logLevel = lm::err)
+		void SetAllLogFileWrite(bool logFileWrite, const Tstr& _LogFileName, int logLevel = lm::err)
 		{
 			IsLogFileWrite = logFileWrite;
 
@@ -473,7 +458,7 @@ namespace Typical_Tool
 
 				//获取 当前路径/Log/Log文件名.txt 
 				//创建文件夹 ./Log  .
-				Tstr Log_FilePath = _T("Log.txt");
+				Tstr Log_FilePath = _LogFileName + _T("_Log.txt");
 				if (!this->SingleLogFile) {
 					Tstr Log_FolderName = (Tstr)_T(".") + PATH_SLASH + _T("Log");
 #ifndef _WINDOWS
@@ -584,7 +569,8 @@ namespace Typical_Tool
 	template<class T = bool>
 	void Log_README()
 	{
-		Tout << _T("#define _ANSIESC_CONSOLE_CHAR_COLOR: 控制台转义字符修改字符颜色\n\n")
+		Tout << _T("\t\tLog_README():")
+			<< _T("#define _ANSIESC_CONSOLE_CHAR_COLOR: 控制台转义字符修改字符颜色\n\n")
 			<< _T("#ifndef _DEBUG: _WINDOWS/_CONSOLE\n")
 			<< _T("lgr(\"没有文件!\", wr); \n")
 			<< _T("_DEBUG: _WINDOWS / _CONSOLE\n")

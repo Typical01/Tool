@@ -98,7 +98,7 @@ namespace Typical_Tool {
 			if (!Exists(_T("复制文件/目录"))) {
 				return false;
 			}
-			std::filesystem::copy(this->Path, _TargetPath, std::filesystem::copy_options::overwrite_existing);
+			std::filesystem::copy(this->Path, _TargetPath, std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::recursive);
 			return true;
 		}
 		//重命名/移动 文件/目录

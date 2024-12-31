@@ -46,76 +46,138 @@ namespace Typical_Tool {
 		}
 	}
 
+	enum TimePointLocation {
+		First = 0,	// 首 节点
+		Front = 1,	// 前 节点
+		Back = 2,	// 后 节点
+		End = 2		// 尾 节点
+	};
+	using tpl = TimePointLocation;
+
 	//计时器
 	class Timer
 	{
 	private:
 		std::chrono::steady_clock::time_point InitTime; //初始的时间
-		std::vector<std::chrono::steady_clock::time_point> TimerContainer; //计时器 集合(Container)
+		std::deque<std::chrono::steady_clock::time_point> TimerContainer; //计时器 集合(Container)
 
-		static bool showLog;
+		//是否保存所有的时间节点
+		bool IsSaveAllTimePoint;
 
 	public:
-		Timer(bool _showLog = false)
+		/*
+		* _IsSaveAllTimePoint: 是否保存所有的时间节点
+		*	保存: 大量数据时, 占用内存; 接口传入(int)
+		*	不保存: 只保存(第一次/前一次/后一次)的时间节点; 接口传入(TimePointLocation/tpl)
+		*/
+		Timer(bool _IsSaveAllTimePoint = false)
+			: IsSaveAllTimePoint(_IsSaveAllTimePoint)
 		{
-			InitTime = GetTime();
-			TimerContainer.push_back(InitTime);
+			InitTime = this->GetTime();
 
-			showLog = _showLog;
+			//不保存所有时间节点
+			if (!this->IsSaveAllTimePoint) {
+				this->TimerContainer.push_back(InitTime);
+				this->TimerContainer.push_back(InitTime);
+				this->TimerContainer.push_back(InitTime);
+			}
+			else {
+				this->TimerContainer.push_back(InitTime);
+			}
+		}
+	private:
+		void Time_IsValid_RunTime(int _Number, const Tstr& _FunctionName)
+		{
+			if (this->IsSaveAllTimePoint) {
+				_IsValid_RunTime<int>(_Number, [&](int _Number)->bool {
+					if (_Number < 0 && _Number > this->TimerContainer.size() - 1) {
+						return false;
+					}
+					return true;
+					}, _LOGERRORINFO(_FunctionName + ": Location < 0 || Location > TimerContainer.size() - 1"));
+			}
+			else {
+				_IsValid_RunTime<int>(_Number, [&](int _Number)->bool {
+					if (_Number < 0 && _Number > this->TimerContainer.size() - 1) {
+						return false;
+					}
+					return true;
+					}, _LOGERRORINFO(_FunctionName + ": Location < 0 || Location > 2 (Location: 0/1/2)"));
+			}
 		}
 
 	public:
-		static void SetShowLog(bool _showLog = false);
-
 		static std::chrono::steady_clock::time_point GetTime();
 
 		void AddTimer();
-		void AddTimer(const std::chrono::steady_clock::time_point& time);
-		void AddTimer(std::chrono::steady_clock::time_point&& time);
+		void AddTimer(const std::chrono::steady_clock::time_point& _TimePoint);
+		void AddTimer(std::chrono::steady_clock::time_point&& _TimePoint);
 
-		void SetTimer(const std::chrono::steady_clock::time_point& time, int Location);
-		void SetTimer(std::chrono::steady_clock::time_point&& time, int Location);
+		void SetTimer(const std::chrono::steady_clock::time_point& _TimePoint, int _Location);
+		void SetTimer(std::chrono::steady_clock::time_point&& _TimePoint, int _Location);
 
-		std::chrono::steady_clock::time_point GetTimer(int Location);
+		std::chrono::steady_clock::time_point GetTimer(int _Location);
 
-		std::vector<std::chrono::steady_clock::time_point> GetTimerContainer();
+		std::deque<std::chrono::steady_clock::time_point> GetTimerContainer();
 		int GetTimerSize();
 
 	public:
-		long long ComputTime_FirstToEnd();
-		long long ComputTime_FrontToBack();
-		long long ComputTime(int LocationBegin, int LocationEnd);
+		template<class Target = sec>
+		long long ComputTime_FirstToEnd()
+		{
+			// first - end
+			return std::chrono::duration_cast<Target>(
+				this->TimerContainer[this->TimerContainer.size() - 1] - this->TimerContainer[0]).count();
+		}
 
-		// time: 时间
+		template<class Target = sec>
+		long long ComputTime_FrontToBack()
+		{
+			// front - end
+			return std::chrono::duration_cast<Target>(
+				this->TimerContainer[this->TimerContainer.size() - 1] - this->TimerContainer[this->TimerContainer.size() - 2]).count();
+		}
+		template<class Target = sec>
+		long long ComputTime(int _LocationBegin, int _LocationEnd)
+		{
+			Time_IsValid_RunTime(_LocationBegin, "ComputTime");
+			Time_IsValid_RunTime(_LocationEnd, "ComputTime");
+
+			// front - end
+			return std::chrono::duration_cast<Target>(
+				this->TimerContainer[LocationEnd] - this->TimerContainer[LocationBegin]).count();
+		}
+
+		// TimePoint: 时间
 		// transformTarget: 转换前的时间计量
 		// transformResult: 转换后的时间计量
 		// return 转换后的时间
 		template<class Target = sec, class Result = ms>
-		static long long TransformTimes(const long long& time)
+		static long long TransformTimes(const long long& TimePoint)
 		{
-			return std::chrono::duration_cast<Result>(Target(time)).count();
+			return std::chrono::duration_cast<Result>(Target(TimePoint)).count();
 		}
 	};
 
 	//时间
 	class Time {
 	public:
-		static bool showLog;
+		static bool IsShowLog;
 
 	public:
-		static void SetShowLog(bool _showLog);
+		static void SetShowLog(bool _IsShowLog);
 
 		template<class Target>
 		static void sleep_s(long long _Number)
 		{
-			if (showLog) {
+			if (IsShowLog) {
 				Terr << ANSIESC_YELLOW << _T("休眠: [") << _Number << _T("]") << TimeMeasureToString<Target>() << ANSIESC_RESET << endl;
 			}
 			std::this_thread::sleep_for(Target(_Number));
 		}
 		static void sleep(long long _sec)
 		{
-			if (showLog) {
+			if (IsShowLog) {
 				Terr << ANSIESC_YELLOW << _T("休眠: [") << _sec << _T("]秒") << ANSIESC_RESET << endl;
 			}
 			std::this_thread::sleep_for(std::chrono::seconds(_sec));
@@ -123,21 +185,20 @@ namespace Typical_Tool {
 		template<class Target>
 		static void wait_s(long long _Number)
 		{
-			if (showLog) {
+			if (IsShowLog) {
 				Terr << ANSIESC_YELLOW << _T("等待: [") << _Number << _T("]") << TimeMeasureToString<Target>() << ANSIESC_RESET << endl;
 			}
-			Timer timer;
-			long long timeTarget = (std::chrono::duration_cast<Target>(timer.GetTime().time_since_epoch()) + Target(_Number)).count();
-			while (timeTarget > std::chrono::duration_cast<Target>(timer.GetTime().time_since_epoch()).count()) {}
+			Target timeTarget = std::chrono::duration_cast<Target>(std::chrono::steady_clock::now().time_since_epoch()) + Target(_Number);
+			while (timeTarget > std::chrono::duration_cast<Target>(std::chrono::steady_clock::now().time_since_epoch())) {}
 		}
 		static void wait(long long _sec)
 		{
-			if (showLog) {
+			if (IsShowLog) {
 				Terr << ANSIESC_YELLOW << _T("等待: [") << _sec << _T("]秒") << ANSIESC_RESET << endl;
 			}
-			Timer timer;
-			long long timeTarget = (std::chrono::duration_cast<std::chrono::seconds>(timer.GetTime().time_since_epoch()) + std::chrono::seconds(_sec)).count();
-			while (timeTarget > std::chrono::duration_cast<std::chrono::seconds>(timer.GetTime().time_since_epoch()).count()) {}
+			std::chrono::seconds timeTarget = std::chrono::duration_cast<std::chrono::seconds>(
+				std::chrono::steady_clock::now().time_since_epoch()) + std::chrono::seconds(_sec);
+			while (timeTarget > std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now().time_since_epoch())) {}
 		}
 
 
