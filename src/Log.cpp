@@ -15,10 +15,6 @@ Typical_Tool::Log::~Log()
 {
 	//当程序结束时, 退出 日志文件写入线程
 	StopLogWrite();
-
-	if (LogFileStream_Out.good()) {
-		LogFileStream_Out.close();
-	}
 }
 
 Typical_Tool::LogMessage Typical_Tool::ts()

@@ -107,14 +107,14 @@ namespace Typical_Tool {
 				// 打开注册表项  
 				result = RegOpenKeyExW(HKEY_CURRENT_USER, regPath.c_str(), 0, KEY_SET_VALUE, &hKey);
 				if (result != ERROR_SUCCESS) {
-					lgc(_T("打开密钥失败: ") + To_string(result), er);
+					lgc(_T("打开密钥失败: ") + ToStr(result), er);
 					return false;
 				}
 
 				// 设置注册表值  
 				result = RegSetValueExW(hKey, stow(valueName).c_str(), 0, REG_SZ, (const BYTE*)stow(exePath).c_str(), (stow(exePath).size() + 1) * sizeof(wchar_t));
 				if (result != ERROR_SUCCESS) {
-					lgc(_T("设置注册表值失败: ") + To_string(result), er);
+					lgc(_T("设置注册表值失败: ") + ToStr(result), er);
 					RegCloseKey(hKey);
 					return false;
 				}
@@ -330,7 +330,7 @@ namespace Typical_Tool {
 				}
 				else
 				{
-					lgc(_T("热键注册[") + this->信息 + _T("]: 错误😒 -> 代码(") + To_string(message) + _T(")"), er);
+					lgc(_T("热键注册[") + this->信息 + _T("]: 错误😒 -> 代码(") + ToStr(message) + _T(")"), er);
 					
 				}
 			}
@@ -344,7 +344,7 @@ namespace Typical_Tool {
 				}
 				else
 				{
-					lgc(_T("热键注册[") + this->信息 + _T("]: 错误😒 -> 代码(") + To_string(message) + _T(")"), er);
+					lgc(_T("热键注册[") + this->信息 + _T("]: 错误😒 -> 代码(") + ToStr(message) + _T(")"), er);
 					
 				}
 			}
@@ -369,7 +369,7 @@ namespace Typical_Tool {
 
 					//ShellExecute() 成功操作, 则传入为句柄
 					this->ErrorCode = message;
-					lgc(_T("Shell消息[") + this->信息 + _T("]: 错误😒 -> 代码(") + To_string(message) + _T(")"), er);
+					lgc(_T("Shell消息[") + this->信息 + _T("]: 错误😒 -> 代码(") + ToStr(message) + _T(")"), er);
 					
 				}
 				else
@@ -389,7 +389,7 @@ namespace Typical_Tool {
 
 					//ShellExecute() 成功操作, 则传入为句柄
 					this->ErrorCode = message;
-					lgc(_T("Shell消息[") + this->信息 + _T("]: 错误😒 -> 代码(") + To_string(message) + _T(")"), er);
+					lgc(_T("Shell消息[") + this->信息 + _T("]: 错误😒 -> 代码(") + ToStr(message) + _T(")"), er);
 					
 				}
 				else

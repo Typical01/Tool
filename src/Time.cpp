@@ -69,7 +69,7 @@ std::chrono::steady_clock::time_point Typical_Tool::Timer::GetTimer(int _Locatio
 	return this->TimerContainer[_Location];
 }
 
-std::deque<std::chrono::steady_clock::time_point> Typical_Tool::Timer::GetTimerContainer()
+std::vector<std::chrono::steady_clock::time_point> Typical_Tool::Timer::GetTimerContainer()
 {
 	return this->TimerContainer;
 }

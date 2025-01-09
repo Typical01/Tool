@@ -78,7 +78,7 @@ namespace Typical_Tool {
 #ifndef _WCHAR
 #define Tchar char
 #define Tstr std::string
-#define To_string std::to_string
+#define ToStr std::to_string
 #define Tstrlen strlen
 #define Tostream std::ostream
 #define Tofstream std::ofstream
@@ -94,7 +94,7 @@ namespace Typical_Tool {
 #else
 #define Tchar wchar_t
 #define Tstr std::wstring
-#define To_string std::to_wstring
+#define ToStr std::to_wstring
 #define Tstrlen wcslen
 #define Tostream std::wostream
 #define Tofstream std::wofstream

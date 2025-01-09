@@ -887,7 +887,7 @@ namespace Typical_Tool {
 								OtherCharMap.insert(std::make_pair(i + 1, tempAnalyzeText));
 
 								if (this->ShowManageLog) {
-									lgc(_T("* 其他字符串行: ") + To_string(i));
+									lgc(_T("* 其他字符串行: ") + ToStr(i));
 								}
 							}
 						}
@@ -896,7 +896,7 @@ namespace Typical_Tool {
 							OtherCharMap.insert(std::make_pair(i + 1, tempAnalyzeText));
 
 							if (this->ShowManageLog) {
-								lgc(_T("* 其他字符串行: ") + To_string(i));
+								lgc(_T("* 其他字符串行: ") + ToStr(i));
 							}
 						}
 					}

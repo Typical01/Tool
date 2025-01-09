@@ -48,7 +48,7 @@ namespace Typical_Tool
 		static LogMessage LastMessage;
 
 	private:
-		inline static Tofstream LogFileStream_Out; //日志文件流 输出
+		inline static Tofstream* LogFileStream_Out; //日志文件流 输出
 		inline static mutex mutex_LogFileStream_Out;
 		inline static queue<Tstr> LogFileWrite_Queue; //日志 WriteConfigFile队列
 		inline static thread LogFileProcessing; //日志文件处理: 主要是输出到{./Log/时间_程序名.txt}文件
@@ -109,7 +109,7 @@ namespace Typical_Tool
 				//分离控制台
 				if (FreeConsole() == 0) {
 					MessageBoxW(0, stow("log: 分离控制台失败!").c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
-					MessageBoxW(0, stow("错误代码: " + To_string(GetLastError())).c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
+					MessageBoxW(0, stow("错误代码: " + ToStr(GetLastError())).c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
 				}
 				else {
 					if (!this->Release) {
@@ -121,7 +121,7 @@ namespace Typical_Tool
 				//分配控制台: 当不是控制台程序时
 				if (AllocConsole() == 0) {
 					MessageBoxW(0, stow("log: 分配控制台失败!").c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
-					MessageBoxW(0, stow("错误代码: " + To_string(GetLastError())).c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
+					MessageBoxW(0, stow("错误代码: " + ToStr(GetLastError())).c_str(), stow(Log_er).c_str(), MB_ICONSTOP);
 				}
 				else {
 					if (!this->Release) {
@@ -175,13 +175,21 @@ namespace Typical_Tool
 		{
 
 			// 不退出, 且队列不为空
-			while (!IsLogFileWriteThreadStop.load() && !LogFileWrite_Queue.empty()) {
+			while (1) {
 				lock_guard<mutex> QueueGuard(mutex_LogFileStream_Out);
 
 				//写入日志
 				if (!LogFileWrite_Queue.empty()) {
-					LogFileStream_Out << LogFileWrite_Queue.front();
+					*LogFileStream_Out << LogFileWrite_Queue.front();
 					LogFileWrite_Queue.pop();
+				}
+				else {
+					if (IsLogFileWriteThreadStop.load()) { //停止写入线程
+						if (LogFileStream_Out->good()) {
+							LogFileStream_Out->close();
+						}
+						break;
+					}
 				}
 			}
 
@@ -194,7 +202,7 @@ namespace Typical_Tool
 		{
 			if (!IsLogFileWriteThreadStop.load()) {
 				IsLogFileWriteThreadStop.store(true); //退出 条件
-				Time::wait(5); //主线程等待 后台退出
+				Time::wait_s<time::ms>(10); //主线程等待 后台退出
 			}
 		}
 
@@ -349,50 +357,6 @@ namespace Typical_Tool
 		}
 
 
-	private:
-
-		// _WINDOWS: Win32 API
-		bool CreateFolder(const Tstr& folderPath)
-		{
-#ifdef _WINDOWS
-			DWORD attributes = GetFileAttributes(folderPath.c_str());
-
-			// 检查路径是否存在且不是目录  
-			if (attributes == INVALID_FILE_ATTRIBUTES) {
-				// 路径不存在或出错，尝试创建目录  
-				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS) {
-					if (!this->Release) {
-						Tout << ANSIESC_GREEN << Log_ts << _T("Log: 文件夹[" + folderPath + _T("]创建成功!")) << ANSIESC_RESET << Log_lf;
-					}
-					// 创建成功
-					return true;
-				}
-				if (!this->Release) {
-					Terr << ANSIESC_RED << Log_er << _T("Log: 文件夹[" + folderPath + _T("]创建失败!")) << ANSIESC_RESET << Log_lf;
-				}
-				// 创建失败且不是因为路径已存在  
-				return false;
-			}
-			else if (attributes & FILE_ATTRIBUTE_DIRECTORY) {
-				if (!this->Release) {
-					Terr << ANSIESC_YELLOW << Log_wr << _T("Log: 文件夹[" + folderPath + _T("]已存在")) << ANSIESC_RESET << Log_lf;
-				}
-				// 路径已经是一个目录  
-				return true;
-			}
-			// 路径存在但不是目录（可能是一个文件）  
-			if (!this->Release) {
-				Terr << ANSIESC_YELLOW << Log_wr << _T("Log: 文件夹[" + folderPath + _T("]创建失败(路径存在, 但不是目录)!")) << ANSIESC_RESET << Log_lf;
-		}
-#else
-			if (!this->Release) {
-				Terr << ANSIESC_RED << Log_er << _T("Log: 文件夹[" + folderPath + _T("]创建失败(#ifndef _WINDOWS)!")) << ANSIESC_RESET << Log_lf;
-			}
-#endif
-			return false;
-		}
-
-
 	public:
 
 		//设置日志显示
@@ -461,7 +425,6 @@ namespace Typical_Tool
 				Tstr Log_FilePath = _LogFileName + _T("_Log.txt");
 				if (!this->SingleLogFile) {
 					Tstr Log_FolderName = (Tstr)_T(".") + PATH_SLASH + _T("Log");
-#ifndef _WINDOWS
 					if (std::filesystem::exists(Log_FolderName)) { //目录存在
 						if (std::filesystem::is_directory(Log_FolderName)) { // 是目录
 							//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + .txt
@@ -479,27 +442,14 @@ namespace Typical_Tool
 						// ./Log/时间.txt  ||  ./时间.txt
 						Tstr Log_FilePath = Log_FolderName + PATH_SLASH + Log_FileName + Log_FilePath;
 					}
-#else
-					if (CreateFolder(Log_FolderName)) {
-						//Log文件名: 格式化日期时间(年-月-日_时-分-秒) + .txt
-						Tstr Log_FileName = Time::GetFormatTime(_T("%Y-%m-%d_%H-%M-%S_"), _T(""), _T(""));
-						// ./Log/时间.txt  ||  ./时间.txt
-						Tstr Log_FilePath = Log_FolderName + PATH_SLASH + Log_FileName + Log_FilePath;
-					}
-					else {
-						if (!this->Release) {
-							Terr << ANSIESC_RED << Log_er << _T("Log: 文件夹[") + Log_FolderName + _T("]创建失败!") << ANSIESC_RESET << Log_lf;
-						}
-					}
-#endif
 				}
 
 				//打开文件
 				if (!this->Release) {
 					Terr << ANSIESC_GREEN << Log_ts << _T("Log: 日志输出文件名[") << Log_FilePath << _T("]") << ANSIESC_RESET << Log_lf;
 				}
-				LogFileStream_Out = move(ofstream(Log_FilePath, ios::out));
-				if (!LogFileStream_Out.good()) {
+				LogFileStream_Out = new Tofstream(Log_FilePath, ios::out);
+				if (!LogFileStream_Out->good()) {
 					if (!this->Release) {
 						Terr << ANSIESC_RED << Log_er << _T("Log: [") << Log_FilePath << _T("]打开文件失败!") << ANSIESC_RESET << Log_lf;
 					}
