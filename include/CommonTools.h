@@ -33,27 +33,25 @@ namespace Typical_Tool {
 		}
 
 	private:
-		bool Exists(const Tstr& _TipsChar, const Tstr& _Win = _T("成功!"), const Tstr& _Fail = _T("失败!"))
+		bool Exists(const Tstr& _TipsChar, const std::filesystem::path& _Path)
 		{	
 			Tstr FileType;
-			if (std::filesystem::exists(this->Path)) {
-				if (std::filesystem::is_regular_file(this->Path)) { // 检查路径是否是普通文件
+			if (std::filesystem::exists(_Path)) {
+				if (std::filesystem::is_regular_file(_Path)) { // 检查路径是否是普通文件
 					FileType = _T("文件");
 				}
-				else if (std::filesystem::is_directory(this->Path)){ // 检查路径是否是目录
+				else if (std::filesystem::is_directory(_Path)){ // 检查路径是否是目录
 					FileType = _T("目录");
 				}
 				else {
 					FileType = _T("其他(符号链接...)");
 				}
 
-				log(_TipsChar + _T(":[") + this->Path.string() + _T("][") + FileType + _T("] 存在!"), er);
-				log(_TipsChar + _T(": ") + _Win, er);
+				log(_TipsChar + _T(":[") + _Path.string() + _T("][") + FileType + _T("] 存在!"), er);
 				return true;
 			}
 			else {
-				log(_TipsChar + _T(":[") + this->Path.string() + _T("] 不存在!"), ts);
-				log(_TipsChar + _T(": ") + _Fail, ts);
+				log(_TipsChar + _T(":[") + _Path.string() + _T("] 不存在!"), ts);
 				return false;
 			}
 		}
@@ -62,17 +60,27 @@ namespace Typical_Tool {
 		//创建目录: 自动递归创建下级目录
 		bool CreateDirectory()
 		{
-			if (Exists(_T("创建文件夹"), _T("失败!"), _T("成功!"))) {
+			if (Exists(_T("创建文件夹"), this->Path)) {
 				return false;
 			}
 			auto PathSlash = this->Path.string().find_last_of(_T("\\/"));
-			if (PathSlash == std::string::npos) {
-				//单级目录
-				std::filesystem::create_directory(this->Path);
+			try {
+				if (PathSlash == std::string::npos) {
+					//单级目录
+					std::filesystem::create_directory(this->Path);
+				}
+				else {
+					//多级目录
+					std::filesystem::create_directories(this->Path);
+				}
 			}
-			else {
-				//多级目录
-				std::filesystem::create_directories(this->Path);
+			catch (const std::filesystem::filesystem_error& e) {
+				lgcr((Tstr)"FileSystem::CreateDirectory: 失败原因: " + e.what(), er);
+				return false;
+			}
+			catch (...) {
+				lgcr("FileSystem::CreateDirectory: 其他错误!", er);
+				return false;
 			}
 
 			return true;
@@ -80,14 +88,25 @@ namespace Typical_Tool {
 		//删除文件/目录
 		bool Delete(bool _IsRecursive = false)
 		{
-			if (!Exists(_T("删除文件/目录"))) {
+			if (!Exists(_T("删除文件/目录"), this->Path)) {
 				return false;
 			}
-			if (_IsRecursive) {
-				std::filesystem::remove_all(this->Path);
+
+			try {
+				if (_IsRecursive) {
+					std::filesystem::remove_all(this->Path);
+				}
+				else {
+					std::filesystem::remove(this->Path);
+				}
 			}
-			else {
-				std::filesystem::remove(this->Path);
+			catch (const std::filesystem::filesystem_error& e) {
+				lgcr((Tstr)"FileSystem::Delete: 失败原因: " + e.what(), er);
+				return false;
+			}
+			catch (...) {
+				lgcr("FileSystem::Delete: 其他错误!", er);
+				return false;
 			}
 
 			return true;
@@ -95,10 +114,21 @@ namespace Typical_Tool {
 		//复制文件/目录
 		bool Copy(const Tstr& _TargetPath)
 		{
-			if (!Exists(_T("复制文件/目录"))) {
+			if (!Exists(_T("复制文件/目录"), this->Path) && !Exists(_T("复制文件/目录"), _TargetPath)) {
 				return false;
 			}
-			std::filesystem::copy(this->Path, _TargetPath, std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::recursive);
+
+			try {
+				std::filesystem::copy(this->Path, _TargetPath, std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::recursive);
+			}
+			catch (const std::filesystem::filesystem_error& e) {
+				lgcr((Tstr)"FileSystem::Copy: 失败原因: " + e.what(), er);
+				return false;
+			}
+			catch (...) {
+				lgcr("FileSystem::Copy: 其他错误!", er);
+				return false;
+			}
 			return true;
 		}
 		//重命名/移动 文件/目录
@@ -106,25 +136,47 @@ namespace Typical_Tool {
 		{
 			std::filesystem::path NewPathName = _NewPathName;
 			if (this->Path.parent_path() == NewPathName.parent_path()) {
-				if (!Exists(_T("重命名文件/目录"))) {
+				if (!Exists(_T("重命名文件/目录"), this->Path)) {
 					return false;
 				}
 			}
 			else {
-				if (!Exists(_T("移动文件/目录"))) {
+				if (!Exists(_T("移动文件/目录"), this->Path)) {
 					return false;
 				}
 			}
-			std::filesystem::rename(this->Path, NewPathName);
+
+			try {
+				std::filesystem::rename(this->Path, NewPathName);
+			}
+			catch (const std::filesystem::filesystem_error& e) {
+				lgcr((Tstr)"FileSystem::ReName: 失败原因: " + e.what(), er);
+				return false;
+			}
+			catch (...) {
+				lgcr("FileSystem::ReName: 其他错误!", er);
+				return false;
+			}
 			return true;
 		}
 		//修改文件/目录权限
 		bool SetPermissions(const std::filesystem::perms& _perms)
 		{
-			if (!Exists(_T("修改文件/目录权限"))) {
+			if (!Exists(_T("修改文件/目录权限"), this->Path)) {
 				return false;
 			}
-			std::filesystem::permissions(this->Path, _perms);
+
+			try {
+				std::filesystem::permissions(this->Path, _perms);
+			}
+			catch (const std::filesystem::filesystem_error& e) {
+				lgcr((Tstr)"FileSystem::SetPermissions: 失败原因: " + e.what(), er);
+				return false;
+			}
+			catch (...) {
+				lgcr("FileSystem::SetPermissions: 其他错误!", er);
+				return false;
+			}
 			return true;
 		}
 
@@ -133,20 +185,33 @@ namespace Typical_Tool {
 		std::vector<std::filesystem::path> DirectoryIterator(bool _IsRecursive = false)
 		{
 			std::vector<std::filesystem::path> List; //目录列表
-			if (_IsRecursive) { // 递归遍历
-				for (const auto& entry : std::filesystem::recursive_directory_iterator(this->Path)) {
-					List.push_back(entry.path());
+
+			try {
+				if (_IsRecursive) { // 递归遍历
+					for (const auto& entry : std::filesystem::recursive_directory_iterator(this->Path)) {
+						List.push_back(entry.path());
+					}
+				}
+				else { // 非递归遍历
+					for (const auto& entry : std::filesystem::directory_iterator(this->Path)) {
+						List.push_back(entry.path());
+					}
 				}
 			}
-			else { // 非递归遍历
-				for (const auto& entry : std::filesystem::directory_iterator(this->Path)) {
-					List.push_back(entry.path());
-				}
+			catch (const std::filesystem::filesystem_error& e) {
+				lgcr((Tstr)"FileSystem::DirectoryIterator: 失败原因: " + e.what(), er);
+				return std::vector<std::filesystem::path>();
 			}
+			catch (...) {
+				lgcr("FileSystem::DirectoryIterator: 其他错误!", er);
+				return std::vector<std::filesystem::path>();
+			}
+
+			return List;
 		}
 	public:
 		//设置 std::filesystem::path
-		std::filesystem::path SetPath(const std::filesystem::path& _Path) { return this->Path = _Path; }
+		void SetPath(const std::filesystem::path& _Path) { this->Path = _Path; }
 		void SetLog(Log& _log) { this->log = _log; }
 
 	public:

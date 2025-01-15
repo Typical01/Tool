@@ -42,13 +42,11 @@ namespace Typical_Tool
 
 	/* LogMessage = lm // 控制台颜色显示
 	* 不需要颜色显示: #undef _ANSIESC_CONSOLE_CHAR_COLOR
+	* Debug: 显示Log中的 Debug消息
 	*/
 	class Log {
-	public:
-		static LogMessage LastMessage;
-
 	private:
-		inline static Tofstream* LogFileStream_Out; //日志文件流 输出
+		inline static std::shared_ptr<Tofstream> LogFileStream_Out; //日志文件流 输出
 		inline static mutex mutex_LogFileStream_Out;
 		inline static queue<Tstr> LogFileWrite_Queue; //日志 WriteConfigFile队列
 		inline static thread LogFileProcessing; //日志文件处理: 主要是输出到{./Log/时间_程序名.txt}文件
@@ -58,17 +56,17 @@ namespace Typical_Tool
 		static bool init; //初始化
 		static bool IsLogFileWrite; //是否 写入日志文件
 		static bool IsLogAllOutput; //是否 输出所有日志
+		static bool ShowLog; //显示日志
+		static bool ShowTime; //显示时间
+		static bool SingleLogFile; //单一日志文件
+		static bool Debug; //#define _Debug(或自定义的Debug) (Debug == true)
 
 		bool CMD; //控制台
 		bool Release; //发行版
 
-		bool ShowTime; //显示时间
-		bool ShowLog; //显示日志
-		bool SingleLogFile; //单一日志文件
-
 	public:
 		Log(bool cmd, bool release)
-			: CMD(cmd), Release(release), ShowTime(true), ShowLog(true), SingleLogFile(true)
+			: CMD(cmd), Release(release)
 		{
 			Init();
 		}
@@ -161,7 +159,7 @@ namespace Typical_Tool
 
 
 	public:
-		void LogWirte(const Tstr& _str)
+		static void LogWirte(const Tstr& _str)
 		{
 			if (IsLogFileWrite) { //写入文件
 				lock_guard<mutex> QueueGuard(mutex_LogFileStream_Out);
@@ -171,44 +169,54 @@ namespace Typical_Tool
 
 
 	private:
-		void LogWirteToFile()
+		void LogWirteToFile(std::shared_ptr<Tofstream> _LogFileStream_Out, const Tstr& _Log_FilePath)
 		{
-
 			// 不退出, 且队列不为空
 			while (1) {
 				lock_guard<mutex> QueueGuard(mutex_LogFileStream_Out);
 
 				//写入日志
 				if (!LogFileWrite_Queue.empty()) {
-					*LogFileStream_Out << LogFileWrite_Queue.front();
-					LogFileWrite_Queue.pop();
+					if (_LogFileStream_Out->good()) {
+						*_LogFileStream_Out << LogFileWrite_Queue.front();
+						LogFileWrite_Queue.pop();
+					}
+					else { //日志文件写入流出错
+						_LogFileStream_Out->open(_Log_FilePath, std::ios::app);
+					}
 				}
-				else {
+				else { //没有剩余日志写入
+					if (_LogFileStream_Out->good()) {
+						_LogFileStream_Out->close();
+					}
+
 					if (IsLogFileWriteThreadStop.load()) { //停止写入线程
-						if (LogFileStream_Out->good()) {
-							LogFileStream_Out->close();
+						if (_LogFileStream_Out->good()) {
+							_LogFileStream_Out->close();
 						}
 						break;
 					}
 				}
 			}
 
-			if (!this->Release) {
+			if (Debug) {
 				Terr << ANSIESC_YELLOW << Log_wr << _T("Log: 日志写入线程->退出!") << ANSIESC_RESET << Log_lf;
 			}
 		}
 
-		void StopLogWrite()
+		static void StopLogWrite()
 		{
 			if (!IsLogFileWriteThreadStop.load()) {
 				IsLogFileWriteThreadStop.store(true); //退出 条件
-				Time::wait_s<time::ms>(10); //主线程等待 后台退出
+				LogFileProcessing.join(); //主线程等待 后台退出
+				Terr << ANSIESC_YELLOW << Log_wr << _T("Log: 日志写入完成! 程序退出...") << ANSIESC_RESET << Log_lf;
+				//Time::wait_s<time::ms>(10); //主线程等待 后台退出
 			}
 		}
 
 	private:
 
-		void Log_Out(const Tstr& _ANSIESC_Color, Tostream& _ostream, Tstr& _str, const Tstr& _ANSIESC_RESET = ANSIESC_RESET, bool _IsWirteFile = false)
+		static void Log_Out(const Tstr& _ANSIESC_Color, Tostream& _ostream, Tstr& _str, const Tstr& _ANSIESC_RESET = ANSIESC_RESET, bool _IsWirteFile = false)
 		{
 			_ostream << _ANSIESC_Color; //在时间输出之前
 			if (ShowTime) {
@@ -233,7 +241,7 @@ namespace Typical_Tool
 		{
 			switch (lm) {
 			case LogMessage::tip: {
-				if (CMD) {
+				if (this->CMD) {
 					Log_Out(ANSIESC_GREEN, Tout, Log_ts + text + Log_lf);
 				}
 				else {
@@ -249,7 +257,7 @@ namespace Typical_Tool
 				break;
 			}
 			case LogMessage::war: {
-				if (CMD) {
+				if (this->CMD) {
 					Log_Out(ANSIESC_YELLOW, Tout, Log_wr + text + Log_lf);
 				}
 				else {
@@ -265,7 +273,7 @@ namespace Typical_Tool
 				break;
 			}
 			case LogMessage::err: {
-				if (CMD) {
+				if (this->CMD) {
 					Log_Out(ANSIESC_RED, Terr, Log_er + text + Log_lf, ANSIESC_RESET, true);
 				}
 				else {
@@ -281,7 +289,7 @@ namespace Typical_Tool
 				break;
 			}
 			case LogMessage::end: {
-				if (CMD) {
+				if (this->CMD) {
 					Log_Out(_T(""), Terr, (Tstr)text, _T(""));
 
 					return;
@@ -299,7 +307,7 @@ namespace Typical_Tool
 				break;
 			}
 			case LogMessage::lnf: {
-				if (CMD) {
+				if (this->CMD) {
 					Log_Out(_T(""), Terr, text + Log_lf, _T(""));
 
 					return;
@@ -320,7 +328,7 @@ namespace Typical_Tool
 		}
 		void Logs_lgm()
 		{
-			if (CMD) {
+			if (this->CMD) {
 				Log_Out(_T(""), Tout, (Tstr)Log_lf, _T(""));
 				
 				return;
@@ -338,7 +346,7 @@ namespace Typical_Tool
 				Logs_ustr(text, lm());
 				return;
 #endif
-				if (Release) {
+				if (this->Release) {
 					Logs_ustr(text, lm());
 				}
 			}
@@ -350,7 +358,7 @@ namespace Typical_Tool
 				Logs_lgm();
 				return;
 #endif
-				if (Release) {
+				if (this->Release) {
 					Logs_lgm();
 				}
 			}
@@ -360,37 +368,39 @@ namespace Typical_Tool
 	public:
 
 		//设置日志显示
-		void SetShowLog(bool showLog)
+		static void SetShowLog(bool showLog)
 		{
-			if (!this->Release) {
+			if (Debug) {
 				Terr << ANSIESC_YELLOW << Log_wr << _T("Log 设置: 显示日志") << ANSIESC_RESET << Log_lf;
 			}
 
-			this->ShowLog = showLog;
+			ShowLog = showLog;
 		}
 		//设置时间显示
-		void SetShowTime(bool showTime)
+		static void SetShowTime(bool showTime)
 		{
-			if (!this->Release) {
+			if (Debug) {
 				Terr << ANSIESC_YELLOW << Log_wr << _T("Log 设置: 显示时间") << ANSIESC_RESET << Log_lf;
 			}
 
-			this->ShowTime = showTime;
+			ShowTime = showTime;
 		}
 		//设置是否为单一日志文件
-		void SetSingleLogFile(bool _SingleLogFile)
+		static void SetSingleLogFile(bool _SingleLogFile)
 		{
-			if (!this->Release) {
+			if (Debug) {
 				Terr << ANSIESC_YELLOW << Log_wr << _T("Log 设置: 单一日志文件: ") << std::boolalpha << _SingleLogFile << std::noboolalpha << ANSIESC_RESET << Log_lf;
 			}
 
-			this->SingleLogFile = _SingleLogFile;
+			SingleLogFile = _SingleLogFile;
 		}
 		//设置控制台显示: _WINDOWS(Win32 API)
-		void SetShowConsole(bool showConsole)
+		static void SetShowConsole(bool showConsole)
 		{
 #ifdef _WINDOWS
-			Terr << ANSIESC_YELLOW << Log_wr << _T("Log 设置 : 显示控制台") << ANSIESC_RESET << Log_lf;
+			if (Debug) {
+				Terr << ANSIESC_YELLOW << Log_wr << _T("Log 设置 : 显示控制台") << ANSIESC_RESET << Log_lf;
+			}
 			//显示/隐藏 窗口
 			if (showConsole) {
 				ShowWindow(hConsole, SW_SHOWDEFAULT);
@@ -399,15 +409,17 @@ namespace Typical_Tool
 				ShowWindow(hConsole, SW_HIDE);
 			}
 #else
-			if (!this->Release) {
+			if (Debug) {
 				Terr << ANSIESC_YELLOW << Log_wr << _T("[Warring]Log 设置 : 显示控制台->无效(#ifndef _WINDOWS)") << ANSIESC_RESET << Log_lf;
 			}
 #endif
 		}
-
+		static void SetDebug(const bool& _Debug)
+		{
+			Debug = _Debug;
+		}
 	
 	public:
-
 		/* 设置所有日志写入
 		* level:
 		* er: Error log level output
@@ -423,7 +435,7 @@ namespace Typical_Tool
 				//获取 当前路径/Log/Log文件名.txt 
 				//创建文件夹 ./Log  .
 				Tstr Log_FilePath = _LogFileName + _T("_Log.txt");
-				if (!this->SingleLogFile) {
+				if (!SingleLogFile) {
 					Tstr Log_FolderName = (Tstr)_T(".") + PATH_SLASH + _T("Log");
 					if (std::filesystem::exists(Log_FolderName)) { //目录存在
 						if (std::filesystem::is_directory(Log_FolderName)) { // 是目录
@@ -445,27 +457,27 @@ namespace Typical_Tool
 				}
 
 				//打开文件
-				if (!this->Release) {
+				if (Debug) {
 					Terr << ANSIESC_GREEN << Log_ts << _T("Log: 日志输出文件名[") << Log_FilePath << _T("]") << ANSIESC_RESET << Log_lf;
 				}
-				LogFileStream_Out = new Tofstream(Log_FilePath, ios::out);
+				LogFileStream_Out = std::make_shared<Tofstream>(Log_FilePath, ios::out);
 				if (!LogFileStream_Out->good()) {
-					if (!this->Release) {
+					if (Debug) {
 						Terr << ANSIESC_RED << Log_er << _T("Log: [") << Log_FilePath << _T("]打开文件失败!") << ANSIESC_RESET << Log_lf;
 					}
 					return;
 				}
 				else {
-					if (!this->Release) {
+					if (Debug) {
 						Tout << ANSIESC_GREEN << Log_ts << _T("Log: [") << Log_FilePath << _T("]打开文件成功!") << ANSIESC_RESET << Log_lf;
 					}
 
 					//Terr << "Log: 文件 开始写入!\n";
 					//初始化: 日志WriteConfigFile线程
-					std::thread Test(&Log::LogWirteToFile, this);
+					std::thread Test(&Log::LogWirteToFile, this, std::move(LogFileStream_Out), Log_FilePath);
 					LogFileProcessing = std::move(Test);
-					LogFileProcessing.detach(); //分离线程
-					if (!this->Release) {
+					//LogFileProcessing.detach(); //分离线程
+					if (Debug) {
 						Terr << ANSIESC_GREEN << Log_ts << _T("Log: 日志写入线程 分离到后台.") << ANSIESC_RESET << Log_lf;
 					}
 				}
@@ -475,7 +487,7 @@ namespace Typical_Tool
 			if (logLevel != lm::err) {
 				IsLogAllOutput = true;
 
-				if (!this->Release) {
+				if (Debug) {
 					Terr << ANSIESC_YELLOW << Log_wr
 						<< _T("Log: File Output level >> All <<")
 						<< ANSIESC_RESET << Log_lf;
@@ -484,7 +496,7 @@ namespace Typical_Tool
 			else {
 				IsLogAllOutput = false;
 
-				if (!this->Release) {
+				if (Debug) {
 					Terr << ANSIESC_YELLOW << Log_wr
 						<< _T("Log: File Output level >> Error <<")
 						<< ANSIESC_RESET << Log_lf;
@@ -521,6 +533,7 @@ namespace Typical_Tool
 	{
 		Tout << _T("\t\tLog_README():")
 			<< _T("#define _ANSIESC_CONSOLE_CHAR_COLOR: 控制台转义字符修改字符颜色\n\n")
+			<< _T("#define _Debug(或自定义 Debug宏): 显示Log中的 Debug消息\n\n")
 			<< _T("#ifndef _DEBUG: _WINDOWS/_CONSOLE\n")
 			<< _T("lgr(\"没有文件!\", wr); \n")
 			<< _T("_DEBUG: _WINDOWS / _CONSOLE\n")

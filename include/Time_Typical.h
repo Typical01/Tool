@@ -11,16 +11,16 @@
 namespace Typical_Tool {
 	namespace time {
 		using century = std::chrono::duration<long long, std::ratio<60LL * 60LL * 24LL * 7LL * 30LL * 12LL * 100LL, 1LL>>;	// 世纪
-		using year = std::chrono::duration<long long, std::ratio<60LL * 60LL * 24LL * 7LL * 30LL * 12LL, 1LL>>;			// 年
-		using month = std::chrono::duration<long long, std::ratio<60LL * 60LL * 24LL * 7LL * 30LL, 1LL>>;				// 月
-		using week = std::chrono::duration<long long, std::ratio<60LL * 60LL * 24LL * 7LL, 1LL>>;						// 周
-		using day = std::chrono::duration<long long, std::ratio<60LL * 60LL * 24LL, 1LL>>;							// 天
-		using hour = std::chrono::duration<long long, std::ratio<60LL * 60LL, 1LL>>;								// 时
-		using min = std::chrono::duration<long long, std::ratio<60LL, 1LL>>;									// 分
-		using sec = std::chrono::seconds;																	// 秒
-		using ms = std::chrono::milliseconds;																// 毫秒
-		using us = std::chrono::microseconds;																// 微秒
-		using ns = std::chrono::nanoseconds;																// 纳秒
+		using year = std::chrono::duration<long long, std::ratio<60LL * 60LL * 24LL * 7LL * 30LL * 12LL, 1LL>>;				// 年
+		using month = std::chrono::duration<long long, std::ratio<60LL * 60LL * 24LL * 7LL * 30LL, 1LL>>;					// 月
+		using week = std::chrono::duration<long long, std::ratio<60LL * 60LL * 24LL * 7LL, 1LL>>;							// 周
+		using day = std::chrono::duration<long long, std::ratio<60LL * 60LL * 24LL, 1LL>>;									// 天
+		using hour = std::chrono::duration<long long, std::ratio<60LL * 60LL, 1LL>>;										// 时
+		using min = std::chrono::duration<long long, std::ratio<60LL, 1LL>>;												// 分
+		using sec = std::chrono::seconds;																					// 秒
+		using ms = std::chrono::milliseconds;																				// 毫秒
+		using us = std::chrono::microseconds;																				// 微秒
+		using ns = std::chrono::nanoseconds;																				// 纳秒
 	}
 
 	enum TimeMeasure
@@ -43,16 +43,16 @@ namespace Typical_Tool {
 	Tstr TimeMeasureToString(TimeMeasure _Tm) {
 		switch (_Tm) {
 		case TimeMeasure::ns: {
-			return _T("纳秒");
+			return _T("ns");
 		}
 		case TimeMeasure::us: {
-			return _T("微秒");
+			return _T("us");
 		}
 		case TimeMeasure::ms: {
-			return _T("毫秒");
+			return _T("ms");
 		}
 		case TimeMeasure::sec: {
-			return _T("秒");
+			return _T("s");
 		}
 		case TimeMeasure::min: {
 			return _T("分");
@@ -121,9 +121,15 @@ namespace Typical_Tool {
 		}
 	}
 #define TimeToStr TimeMeasureToString
-
+	/*
+	* _Tm: 当期时间的单位
+	* _Time: 当前时间
+	* _TimeIntervalStr: 每级单位时间的间隔符号
+	* _Number(Left/Right)IntervalStr: 突出当前时间的格式
+	*/
 	template <class Target = bool>
-	Tstr AutoTimeToStr(long long _Time, TimeMeasure _Tm, const Tstr& _TimeIntervalStr = _T(" ")) {
+	Tstr AutoTimeToStr(long long _Time, TimeMeasure _Tm, const Tstr& _TimeIntervalStr = _T(" "), 
+		const Tstr& _NumberLeftIntervalStr = _T(""), const Tstr& _NumberRightIntervalStr = _T("")) {
 		if (_Tm == TimeMeasure::century) {
 			return ToStr(_Time) + _TimeIntervalStr + TimeToStr(Tm::century);
 		}
@@ -152,7 +158,7 @@ namespace Typical_Tool {
 			if (!Result.empty()) {
 				Result += _TimeIntervalStr; // 添加间隔符
 			}
-			Result += ToStr(it->second) + _TimeIntervalStr + TimeToStr(it->first); // 拼接单位
+			Result += _NumberLeftIntervalStr + ToStr(it->second) + _NumberRightIntervalStr + TimeToStr(it->first); // 拼接单位
 		}
 
 		return Result;

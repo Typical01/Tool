@@ -277,7 +277,7 @@ Typical_Tool::WindowsSystem::ShellMessage Typical_Tool::WindowsSystem::WindowShe
 	}
 	lgc(_T("ExecuteAnalyze: 窗口显示 ") + 窗口显示, wr);
 
-	ShellMessage temp(操作名, (int)ShellExecuteW(NULL, stow(Shell操作).c_str(), stow(Shell文件).c_str(), stow(Shell参数).c_str(), NULL, ShowWindow));
+	ShellMessage temp(操作名, (long long)ShellExecuteW(NULL, stow(Shell操作).c_str(), stow(Shell文件).c_str(), stow(Shell参数).c_str(), NULL, ShowWindow));
 	return temp;
 }
 

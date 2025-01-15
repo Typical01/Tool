@@ -5,10 +5,12 @@
 
 //控制台初始化
 bool Typical_Tool::Log::init = false;
-Typical_Tool::LogMessage Typical_Tool::Log::LastMessage = lm::end;
-
 bool Typical_Tool::Log::IsLogFileWrite = false;
 bool Typical_Tool::Log::IsLogAllOutput = false;
+bool Typical_Tool::Log::ShowLog = true;
+bool Typical_Tool::Log::ShowTime = true;
+bool Typical_Tool::Log::SingleLogFile = true;
+bool Typical_Tool::Log::Debug = false;
 
 
 Typical_Tool::Log::~Log()
