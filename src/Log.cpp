@@ -11,6 +11,7 @@ bool Typical_Tool::Log::ShowLog = true;
 bool Typical_Tool::Log::ShowTime = true;
 bool Typical_Tool::Log::SingleLogFile = true;
 bool Typical_Tool::Log::Debug = false;
+std::atomic<bool> Typical_Tool::Log::IsLogFileWriteThreadStop = true;
 
 
 Typical_Tool::Log::~Log()

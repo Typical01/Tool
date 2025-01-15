@@ -50,7 +50,8 @@ namespace Typical_Tool
 		inline static mutex mutex_LogFileStream_Out;
 		inline static queue<Tstr> LogFileWrite_Queue; //日志 WriteConfigFile队列
 		inline static thread LogFileProcessing; //日志文件处理: 主要是输出到{./Log/时间_程序名.txt}文件
-		inline static atomic<bool> IsLogFileWriteThreadStop; //是否 停止日志文件写入线程
+		
+		static atomic<bool> IsLogFileWriteThreadStop; //是否 停止日志文件写入线程
 
 	private:
 		static bool init; //初始化
@@ -428,6 +429,7 @@ namespace Typical_Tool
 		void SetAllLogFileWrite(bool logFileWrite, const Tstr& _LogFileName, int logLevel = lm::err)
 		{
 			IsLogFileWrite = logFileWrite;
+			IsLogFileWriteThreadStop = false;
 
 			if (IsLogFileWrite) {
 				//Terr << "Log 日志WriteConfigFile: 开始\n";
@@ -474,11 +476,10 @@ namespace Typical_Tool
 
 					//Terr << "Log: 文件 开始写入!\n";
 					//初始化: 日志WriteConfigFile线程
-					std::thread Test(&Log::LogWirteToFile, this, std::move(LogFileStream_Out), Log_FilePath);
-					LogFileProcessing = std::move(Test);
-					//LogFileProcessing.detach(); //分离线程
+					std::thread LogFileWriteThread(&Log::LogWirteToFile, this, std::move(LogFileStream_Out), Log_FilePath);
+					LogFileProcessing = std::move(LogFileWriteThread);
 					if (Debug) {
-						Terr << ANSIESC_GREEN << Log_ts << _T("Log: 日志写入线程 分离到后台.") << ANSIESC_RESET << Log_lf;
+						Terr << ANSIESC_GREEN << Log_ts << _T("Log: 日志写入线程 启动!") << ANSIESC_RESET << Log_lf;
 					}
 				}
 			}
