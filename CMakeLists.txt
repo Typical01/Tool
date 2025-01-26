@@ -64,15 +64,14 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
   target_compile_options(libTypical
       PRIVATE
       -Wall
-      -O2
       -finput-charset=UTF-8
       -fexec-charset=UTF-8
   )
 elseif (MSVC)
-    target_compile_options(libTypical
-        PRIVATE
-        /W3
-    )
+  target_compile_options(libTypical
+       PRIVATE
+       /W3
+   )
 endif()
 
 # 针对 GNU 编译器的设置
@@ -90,14 +89,13 @@ endif()
 if (MSVC)
   target_compile_options(libTypical
       PRIVATE
-      $<$<CONFIG:Debug>:/Od /Zi>                   # Debug: 禁用优化，启用调试信息
-      $<$<CONFIG:Release>:/O2 /MD>                 # Release: 启用优化
-      $<$<CONFIG:Debug>:/utf-8>                    # UTF-8 编码支持
-      $<$<CONFIG:Release>:/utf-8>
-      $<$<CONFIG:Debug>:/U_WINDOWS>                # 删除 _WINDOWS 宏
-      $<$<CONFIG:Release>:/U_WINDOWS>
+      $<$<CONFIG:Debug>:/Od /MDd /Zi /utf-8 /U_WINDOWS>    # Debug: 禁用优化，启用调试信息
+      $<$<CONFIG:Release>:/O2 /MD /utf-8 /U_WINDOWS>       # Release: 启用优化
+      $<$<CONFIG:Debug_Win>:/Od /MDd /Zi /utf-8>                    
+      $<$<CONFIG:Release_Win>:/O2 /MD /utf-8>
   )
 endif()
+
 
 
 # 分组源文件和头文件

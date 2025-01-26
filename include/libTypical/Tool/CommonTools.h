@@ -226,20 +226,44 @@ namespace Typical_Tool {
 		}
 
 		//遍历目录: return 目录列表
-		// *_IsRecursive: 是否递归
-		std::vector<std::filesystem::path> DirectoryIterator(bool _IsRecursive = false)
-		{
-			std::vector<std::filesystem::path> List; //目录列表
+		/* 
+		* _IsRecursive: 是否递归
+		* DirectoryList: 默认为空(不获取文件列表的字符串) | 非空(清楚内容后, 写入文件列表的字符串)
+		*/
+		std::vector<std::filesystem::directory_entry> DirectoryIterator(bool _IsRecursive = false, 
+			std::vector<std::filesystem::path>& DirectoryListStr = std::vector<std::filesystem::path>()
+		) {
+			std::vector<std::filesystem::directory_entry> List; //目录列表
 
 			try {
 				if (_IsRecursive) { // 递归遍历
-					for (const auto& entry : std::filesystem::recursive_directory_iterator(this->Path)) {
-						List.push_back(entry.path());
+					if (!DirectoryListStr.empty()) { //非空时: 获取文件列表的字符串
+						DirectoryListStr.clear(); //清空
+
+						for (const auto& entry : std::filesystem::recursive_directory_iterator(this->Path)) {
+							DirectoryListStr.push_back(entry.path());
+							List.push_back(entry);
+						}
+					}
+					else {
+						for (const auto& entry : std::filesystem::recursive_directory_iterator(this->Path)) {
+							List.push_back(entry);
+						}
 					}
 				}
 				else { // 非递归遍历
-					for (const auto& entry : std::filesystem::directory_iterator(this->Path)) {
-						List.push_back(entry.path());
+					if (!DirectoryListStr.empty()) { //非空时: 获取文件列表的字符串
+						DirectoryListStr.clear(); //清空
+
+						for (const auto& entry : std::filesystem::directory_iterator(this->Path)) {
+							DirectoryListStr.push_back(entry.path());
+							List.push_back(entry);
+						}
+					}
+					else {
+						for (const auto& entry : std::filesystem::directory_iterator(this->Path)) {
+							List.push_back(entry);
+						}
 					}
 				}
 			}
@@ -249,15 +273,16 @@ namespace Typical_Tool {
 #else
 				lgcr(Format(Tx("FileSystem::DirectoryIterator: 失败原因: { % }"), e.what()), er);
 #endif
-				return std::vector< std::filesystem::path>();
+				return std::vector< std::filesystem::directory_entry>();
 			}
 			catch (...) {
 				lgcr(Tx("FileSystem::DirectoryIterator: 其他错误!"), er);
-				return std::vector< std::filesystem::path>();
+				return std::vector< std::filesystem::directory_entry>();
 			}
 
 			return List;
 		}
+
 	public:
 		//设置 std::filesystem::path
 		void SetPath(const std::filesystem::path& _Path) { this->Path = _Path; }

@@ -99,11 +99,14 @@ namespace Typical_Tool
 	class Log {
 	private:
 		inline static std::shared_ptr<Tofstream> LogFileStream_Out; //日志文件流 输出
-		inline static mutex mutex_LogFileStream_Out;
-		inline static queue<Tstr> LogFileWrite_Queue; //日志 WriteConfigFile队列
-		inline static thread LogFileProcessing; //日志文件处理: 主要是输出到{./Log/时间_程序名.txt}文件
-		
-		static atomic<bool> IsLogFileWriteThreadStop; //是否 停止日志文件写入线程
+		inline static std::mutex mutex_LogFileStream_Out;
+		inline static std::queue<Tstr> LogFileWrite_Queue; //日志 WriteConfigFile队列
+		inline static std::thread LogFileProcessing; //日志文件处理: 主要是输出到{./Log/时间_程序名.txt}文件
+		static std::atomic<bool> IsLogFileWriteThreadStop; //是否 停止日志文件写入线程
+
+		//保存格式
+		inline static std::deque<std::pair<int, Tstr>> ConsoleMessages_Deque; // 控制台消息 队列
+		inline static std::unordered_map<int, size_t> ConsoleMessages_Index; // ID 到索引的映射
 
 	private:
 		static bool init; //初始化
@@ -204,6 +207,7 @@ namespace Typical_Tool
 
 				// 获取控制台窗口的句柄
 				hConsole = GetConsoleWindow();
+				EnableAnsiEscape();
 #endif
 #endif
 				
@@ -268,10 +272,57 @@ namespace Typical_Tool
 				//Time::wait_s<time::ms>(10); //主线程等待 后台退出
 			}
 		}
+	private:
+		/*
+		* 启用 ANSI转义符支持
+		*/
+		void EnableAnsiEscape() {
+#ifdef _WINDOWS
+			HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+			DWORD dwMode = 0;
+			if (GetConsoleMode(hOut, &dwMode)) {
+				dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+				SetConsoleMode(hOut, dwMode);
+			}
+#endif
+		}
+
+		static void ShowMessage() {
+			ConsoleClear(); //清空控制台消息残留
+			
+			for (auto tempIndex = ConsoleMessages_Deque.begin(); tempIndex != ConsoleMessages_Deque.end(); tempIndex++) {
+				Tout << tempIndex->second;
+			}
+		}
+
+		// 添加或更新消息
+		static void UpdataMessage(int ID, const Tstr& text) {
+			if (ConsoleMessages_Index.find(ID) != ConsoleMessages_Index.end()) { //现有消息
+				// 更新现有消息
+				size_t index = ConsoleMessages_Index[ID];
+				ConsoleMessages_Deque[index].second = text;
+			}
+			else { // 新消息
+				ConsoleMessages_Deque.push_back({ ID, text }); //保存新消息的字符串
+				ConsoleMessages_Index[ID] = ConsoleMessages_Deque.size() - 1; //将 新消息绑定到 索引
+			}
+		}
+
+		static void UpdataCursorMessage(int Line, const Tstr& Message) {
+			Tout << "\033[s";					// 保存光标位置
+			Tout << "\033[" << Line << ";1H";	// 移动光标到第 Line 行，第 1 列
+			Tout << "\033[2K";					// 清除当前行内容
+			Tout << Message;					// 输出新的消息
+			Tout << "\033[u";					// 恢复光标位置
+		}
+
+		static void ConsoleClear() {
+			Terr << Tx("\033[2J\033[H");  // ANSI 转义序列：清屏并将光标移至左上角
+		}
 
 	private:
 
-		static void Log_Out(const Tstr& _ANSIESC_Color, Tostream& _ostream, const Tstr& _str, const Tstr& _ANSIESC_RESET = ANSIESC_RESET, bool _IsWirteFile = false)
+		static void Log_Out(const Tstr& _ANSIESC_Color, Tostream& _ostream, const Tstr& _str, const Tstr& _ANSIESC_RESET, const int& MessageKey = -1, bool _IsWirteFile = false)
 		{
 			_ostream << _ANSIESC_Color; //在时间输出之前
 			if (ShowTime) {
@@ -279,7 +330,7 @@ namespace Typical_Tool
 			}
 			_ostream << _str;
 			_ostream << _ANSIESC_RESET;
-
+			
 			//WriteConfigFile log日志
 			if (IsLogAllOutput) { //所有级别
 				LogWirte(_str);
@@ -288,9 +339,14 @@ namespace Typical_Tool
 				if (_IsWirteFile) {
 					LogWirte(_str);
 				}
+			}
+
+			//显示常驻消息
+			if (MessageKey != -1) {
+				UpdataMessage(MessageKey, _ANSIESC_Color + _str + _ANSIESC_RESET);
 			}
 		}
-		static void Log_Out(const Tstr& _ANSIESC_Color, Tostream& _ostream, Tstr&& _str, const Tstr& _ANSIESC_RESET = ANSIESC_RESET, bool _IsWirteFile = false)
+		static void Log_Out(const Tstr& _ANSIESC_Color, Tostream& _ostream, Tstr&& _str, const Tstr& _ANSIESC_RESET, const int& MessageKey = -1, bool _IsWirteFile = false)
 		{
 			_ostream << _ANSIESC_Color; //在时间输出之前
 			if (ShowTime) {
@@ -307,16 +363,21 @@ namespace Typical_Tool
 				if (_IsWirteFile) {
 					LogWirte(_str);
 				}
+			}
+
+			//显示常驻消息
+			if (MessageKey != -1) {
+				UpdataMessage(MessageKey, _str);
 			}
 		}
 
 		// _WINDOWS || _CONSOLE
-		void Logs_ustr(const Tstr& text, const LogMessage& lm)
+		void Logs_ustr(const Tstr& text, const LogMessage& lm, const int& MessageKey)
 		{
 			switch (lm) {
 			case LogMessage::Tip: {
 				if (this->CMD) {
-					Log_Out(ANSIESC_GREEN, Tout, (Tstr)Log_ts + text + Log_lf);
+					Log_Out(ANSIESC_GREEN, Tout, (Tstr)Log_ts + text + Log_lf, ANSIESC_RESET, MessageKey);
 				}
 				else {
 #ifdef _WINDOWS
@@ -332,7 +393,7 @@ namespace Typical_Tool
 			}
 			case LogMessage::War: {
 				if (this->CMD) {
-					Log_Out(ANSIESC_YELLOW, Tout, (Tstr)Log_wr + text + Log_lf);
+					Log_Out(ANSIESC_YELLOW, Tout, (Tstr)Log_wr + text + Log_lf, ANSIESC_RESET, MessageKey);
 				}
 				else {
 #ifdef _WINDOWS
@@ -348,7 +409,7 @@ namespace Typical_Tool
 			}
 			case LogMessage::Err: {
 				if (this->CMD) {
-					Log_Out(ANSIESC_RED, Terr, (Tstr)Log_er + text + Log_lf, ANSIESC_RESET, true);
+					Log_Out(ANSIESC_RED, Terr, (Tstr)Log_er + text + Log_lf, ANSIESC_RESET, MessageKey, true);
 				}
 				else {
 #ifdef _WINDOWS
@@ -364,7 +425,7 @@ namespace Typical_Tool
 			}
 			case LogMessage::End: {
 				if (this->CMD) {
-					Log_Out(Tx(""), Terr, text, Tx(""));
+					Log_Out(Tx(""), Terr, text, Tx(""), MessageKey);
 
 					return;
 				}
@@ -382,7 +443,7 @@ namespace Typical_Tool
 			}
 			case LogMessage::Lnf: {
 				if (this->CMD) {
-					Log_Out(Tx(""), Terr, text + Log_lf, Tx(""));
+					Log_Out(Tx(""), Terr, text + Log_lf, Tx(""), MessageKey);
 
 					return;
 				}
@@ -403,7 +464,7 @@ namespace Typical_Tool
 		void Logs_lgm()
 		{
 			if (this->CMD) {
-				Log_Out(Tx(""), Tout, (Tstr)Log_lf, Tx(""));
+				Log_Out(Tx(""), Tout, (Tstr)Log_lf, Tx(""), -1);
 				
 				return;
 			}
@@ -413,15 +474,15 @@ namespace Typical_Tool
 	public:
 
 		//显示/隐藏 Log消息
-		void operator()(const Tstr& text, LogMessage (*lm)() = &lf)
+		void operator()(const Tstr& text, LogMessage (*lm)() = &lf, const int& MessageKey = -1)
 		{
 			if (ShowLog) {
 #ifdef _DEBUG
-				Logs_ustr(text, lm());
+				Logs_ustr(text, lm(), MessageKey);
 				return;
 #endif
 				if (this->Release) {
-					Logs_ustr(text, lm());
+					Logs_ustr(text, lm(), MessageKey);
 				}
 			}
 		}
@@ -437,15 +498,15 @@ namespace Typical_Tool
 				}
 			}
 		}*/
-		void operator()(LogMessage (*lm)(), const Tstr& text)
+		void operator()(LogMessage (*lm)(), const Tstr& text, const __int32& MessageKey = -1)
 		{
 			if (ShowLog) {
 #ifdef _DEBUG
-				Logs_ustr(text, lm());
+				Logs_ustr(text, lm(), MessageKey);
 				return;
 #endif
 				if (this->Release) {
-					Logs_ustr(text, lm());
+					Logs_ustr(text, lm(), MessageKey);
 				}
 			}
 		}
