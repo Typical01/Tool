@@ -1,6 +1,6 @@
 //#include "pch.h"
 
-#include "ConfigFileTextManage.h"
+#include <libTypical/Tool/ConfigFileTextManage.h>
 
 
 Typical_Tool::StringManage::ConfigFileTextManage::~ConfigFileTextManage()

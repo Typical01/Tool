@@ -1,0 +1,3 @@
+C:/Users/22793/source/repos/Tool/build_Android/CMakeFiles/libTypical.dir
+C:/Users/22793/source/repos/Tool/build_Android/CMakeFiles/edit_cache.dir
+C:/Users/22793/source/repos/Tool/build_Android/CMakeFiles/rebuild_cache.dir

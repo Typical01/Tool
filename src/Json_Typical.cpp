@@ -1,2 +1,2 @@
-#include "Json_Typical.h"
+#include <libTypical/Tool/Json_Typical.h>
 

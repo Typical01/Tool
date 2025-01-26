@@ -1,0 +1,19 @@
+# ninja log v6
+36	80	7595717222066736	CMakeFiles/libTypical.dir/src/WindowsHost.cpp.o	7bb9cdd0c147a22c
+42	898	7595717222167922	CMakeFiles/libTypical.dir/src/pch.cpp.o	ef63595303f2cf1a
+4	1092	7595717221759905	CMakeFiles/libTypical.dir/src/CommonTools.cpp.o	638b689c9d555096
+24	1093	7595717221966067	CMakeFiles/libTypical.dir/src/StringManage.cpp.o	66c6848d6d32f0cb
+30	1094	7595717221966067	CMakeFiles/libTypical.dir/src/Time.cpp.o	330e2b6256a0caa3
+14	1121	7595717221863772	CMakeFiles/libTypical.dir/src/Json_Typical.cpp.o	17afffb0f936571f
+19	1122	7595717221863772	CMakeFiles/libTypical.dir/src/Log.cpp.o	13607cd59ec9e3ce
+9	1280	7595717221759905	CMakeFiles/libTypical.dir/src/ConfigFileTextManage.cpp.o	2ed1f7dbc5b1b75
+1281	1350	7595717234526219	C:/Users/22793/source/repos/Tool/bin/liblibTypical.a	6d63b6845d259b93
+43	80	7595718221022612	CMakeFiles/libTypical.dir/src/WindowsHost.cpp.o	6f64d3211a9bf847
+32	935	7595718220917462	CMakeFiles/libTypical.dir/src/StringManage.cpp.o	4feef08348b79de2
+37	937	7595718220961513	CMakeFiles/libTypical.dir/src/Time.cpp.o	331090664125e8c8
+49	938	7595718221085729	CMakeFiles/libTypical.dir/src/pch.cpp.o	6ccfd6a001314ed
+12	1096	7595718220719578	CMakeFiles/libTypical.dir/src/CommonTools.cpp.o	e1505664ffe2f02c
+27	1097	7595718220861198	CMakeFiles/libTypical.dir/src/Log.cpp.o	9fb0c8bc10a2e7bb
+23	1161	7595718220820712	CMakeFiles/libTypical.dir/src/Json_Typical.cpp.o	371e33e2b160e4b3
+18	1221	7595718220769723	CMakeFiles/libTypical.dir/src/ConfigFileTextManage.cpp.o	2d78398f39d62da1
+1221	1292	7595718232800222	C:/Users/22793/source/repos/Tool/bin/liblibTypical.a	6d63b6845d259b93

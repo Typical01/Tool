@@ -1,0 +1,2 @@
+C:\msys64\mingw64\bin\ar.exe qc C:\Users\22793\source\repos\Tool\bin\liblibTypical.a CMakeFiles/libTypical.dir/src/CommonTools.cpp.obj CMakeFiles/libTypical.dir/src/ConfigFileTextManage.cpp.obj CMakeFiles/libTypical.dir/src/Json_Typical.cpp.obj CMakeFiles/libTypical.dir/src/Log.cpp.obj CMakeFiles/libTypical.dir/src/StringManage.cpp.obj CMakeFiles/libTypical.dir/src/Time.cpp.obj CMakeFiles/libTypical.dir/src/WindowsHost.cpp.obj CMakeFiles/libTypical.dir/src/pch.cpp.obj
+C:\msys64\mingw64\bin\ranlib.exe C:\Users\22793\source\repos\Tool\bin\liblibTypical.a
