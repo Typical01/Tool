@@ -6,6 +6,7 @@
 
 #include <libTypical/Tool/pch.h>
 #include <libTypical/Tool/Tchar_Typical.h>
+#include <libTypical/Tool/Log.h>
 
 
 
@@ -240,7 +241,7 @@ namespace Typical_Tool {
 			}
 		}
 	private:
-		void Time_IsValid_RunTime(int _Number, const std::string& _FunctionName)
+		void Time_IsValid_RunTime(int _Number, const Tstr& _FunctionName)
 		{
 			if (this->IsSaveAllTimePoint) {
 				_IsValid_RunTime<int>(_Number, [&](int _Number)->bool {
@@ -248,7 +249,7 @@ namespace Typical_Tool {
 						return false;
 					}
 					return true;
-					}, _LOGERRORINFO((std::string)_FunctionName + ": Location < 0 || Location > TimerContainer.size() - 1"));
+					}, _LOGERRORINFO(_FunctionName + Tx(": Location < 0 || Location > TimerContainer.size() - 1")));
 			}
 			else {
 				_IsValid_RunTime<int>(_Number, [&](int _Number)->bool {
@@ -256,7 +257,7 @@ namespace Typical_Tool {
 						return false;
 					}
 					return true;
-					}, _LOGERRORINFO((std::string)_FunctionName + ": Location < 0 || Location > 2 (Location: 0/1/2)"));
+					}, _LOGERRORINFO(_FunctionName + Tx(": Location < 0 || Location > 2 (Location: 0/1/2)")));
 			}
 		}
 
@@ -267,10 +268,24 @@ namespace Typical_Tool {
 		void AddTimer(const std::chrono::steady_clock::time_point& _TimePoint);
 		void AddTimer(std::chrono::steady_clock::time_point&& _TimePoint);
 
-		void SetTimer(const std::chrono::steady_clock::time_point& _TimePoint, int _Location);
-		void SetTimer(std::chrono::steady_clock::time_point&& _TimePoint, int _Location);
+		void SetTimer(const std::chrono::steady_clock::time_point& _TimePoint, int _Location) {
+			Time_IsValid_RunTime(_Location, Tx("SetTimer()"));
 
-		std::chrono::steady_clock::time_point GetTimer(int _Location);
+			std::lock_guard<mutex> tempMutex(this->mutex_Timer);
+			this->TimerContainer[_Location] = _TimePoint;
+		}
+		void SetTimer(std::chrono::steady_clock::time_point&& _TimePoint, int _Location) {
+			Time_IsValid_RunTime(_Location, Tx("SetTimer()"));
+
+			std::lock_guard<mutex> tempMutex(this->mutex_Timer);
+			this->TimerContainer[_Location] = _TimePoint;
+		}
+		std::chrono::steady_clock::time_point GetTimer(int _Location) {
+			Time_IsValid_RunTime(_Location, Tx("GetTimer()"));
+
+			std::lock_guard<mutex> tempMutex(this->mutex_Timer);
+			return this->TimerContainer[_Location];
+		}
 
 		std::vector<std::chrono::steady_clock::time_point> GetTimerContainer();
 		int GetTimerSize();
@@ -294,8 +309,8 @@ namespace Typical_Tool {
 		template<class Target = time::sec>
 		long long ComputTime(int _LocationBegin, int _LocationEnd)
 		{
-			Time_IsValid_RunTime(_LocationBegin, "ComputTime");
-			Time_IsValid_RunTime(_LocationEnd, "ComputTime");
+			Time_IsValid_RunTime(_LocationBegin, Tx("ComputTime"));
+			Time_IsValid_RunTime(_LocationEnd, Tx("ComputTime"));
 
 			// front - end
 			return std::chrono::duration_cast<Target>(
@@ -309,15 +324,17 @@ namespace Typical_Tool {
 	class Time {
 	public:
 		static bool IsShowLog;
+		inline static Log& Log = lgc;
 
 	public:
 		static void SetShowLog(bool _IsShowLog);
+		static void SetLog(tytool::Log& _Log);
 
 		template<class Target = time::sec>
 		static void sleep(long long _Number)
 		{
 			if (IsShowLog) {
-				Terr << (Tstr)ANSIESC_YELLOW + Tx("休眠: [") + ToStr(_Number) + Tx("]") + TimeMeasureToString<Target>() + ANSIESC_RESET + Log_lf;
+				Log(wr, Format(Tx("休眠: [%]%"), _Number, TimeMeasureToString<Target>()));
 			}
 			std::this_thread::sleep_for(Target(_Number));
 		}
@@ -325,7 +342,7 @@ namespace Typical_Tool {
 		static void wait(long long _Number)
 		{
 			if (IsShowLog) {
-				Terr << (Tstr)ANSIESC_YELLOW + Tx("等待: [") + ToStr(_Number) + Tx("]") + TimeMeasureToString<Target>() + ANSIESC_RESET + Log_lf;
+				Log(wr, Format(Tx("等待: [%]%"), _Number, TimeMeasureToString<Target>()));
 			}
 			Target timeTarget = std::chrono::duration_cast<Target>(std::chrono::steady_clock::now().time_since_epoch()) + Target(_Number);
 			while (timeTarget > std::chrono::duration_cast<Target>(std::chrono::steady_clock::now().time_since_epoch())) {}

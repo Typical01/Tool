@@ -8,7 +8,21 @@
 
 // Tchar----------------------------------------------------------------------------------------------------------
 namespace Typical_Tool {
+	namespace TcharStringManage {
+		// 将 std::string 转换为 std::wstring
+		std::wstring UTF8ToWstring(const std::string& _UTF8_String);
+
+		// 将 std::wstring 转换为 std::string
+		std::string WstringToUTF8(const std::wstring& _WString);
+#define u8tow UTF8ToWstring
+#define stow UTF8ToWstring
+#define wtou8 WstringToUTF8
+#define wtos WstringToUTF8
+	}
+
 	using namespace std;
+
+
 
 #ifndef Tx
 #ifndef UNICODE
@@ -18,60 +32,6 @@ namespace Typical_Tool {
 	// L""
 #define Tx(x) L ## x
 #endif
-#endif
-
-
-#define __WFILE__ L##__FILE__
-#define __WLINE__ L##__LINE__
-
-#ifndef _DEBUG
-#define _LOGERRORINFO(x) (x)
-#define _LOGERRORINFO_T(x) (x)
-#else
-#define _LOGERRORINFO(x) (std::string)"[" + __FILE__ + "->" + std::to_string(__LINE__ )+ "]" + x
-#define _LOGERRORINFO_W(x) (std::wstring)L"[" + __WFILE__ + L"->" + std::to_wstring(__WLINE__ )+ L"]" + x
-#endif
-
-	
-
-
-//控制台字符颜色
-#define _ANSIESC_CONSOLE_CHAR_COLOR
-#ifdef _ANSIESC_CONSOLE_CHAR_COLOR
-#ifndef UNICODE
-#define ANSIESC_RESET "\033[0m"
-#define ANSIESC_GREEN "\033[32m"
-#define ANSIESC_YELLOW "\033[33m"
-#define ANSIESC_RED "\033[31m"
-#else
-
-#define ANSIESC_RESET L"\033[0m"
-#define ANSIESC_GREEN L"\033[32m"
-#define ANSIESC_YELLOW L"\033[33m"
-#define ANSIESC_RED L"\033[31m"
-#endif
-
-#else
-#ifndef UNICODE
-#define ANSIESC_RESET ""
-#define ANSIESC_GREEN ""
-#define ANSIESC_YELLOW ""
-#define ANSIESC_RED ""
-#else
-
-#define ANSIESC_RESET L""
-#define ANSIESC_GREEN L""
-#define ANSIESC_YELLOW L""
-#define ANSIESC_RED L""
-#endif
-#endif
-
-
-#ifndef _WINDOWS
-	// 定义虚拟类型
-	using DWORD = unsigned long;
-	using WORD = unsigned short;
-	using HANDLE = void*;
 #endif
 
 
@@ -108,43 +68,65 @@ namespace Typical_Tool {
 #endif
 
 
+#define __WFILE__ L##__FILE__
+#define __WLINE__ L##__LINE__
+
+#ifndef UNICODE
+#define __TFILE__ __FILE__
+#define __TLINE__ __LINE__
+#else
+#define __TFILE__ __WFILE__
+#define __TLINE__ __WLINE__
+#endif
+
+#ifndef _DEBUG
+#define _LOGERRORINFO(x) (x)
+#else
+#define _LOGERRORINFO(x) (Tstr)Tx("[") + __TFILE__ + Tx("->") + ToStr(__TLINE__)+ Tx("]") + x
+#endif
+
+
+//控制台字符颜色
+#define _ANSIESC_CONSOLE_CHAR_COLOR
+#ifdef _ANSIESC_CONSOLE_CHAR_COLOR
+#define ANSIESC_RESET Tx("\033[0m")
+#define ANSIESC_GREEN Tx("\033[32m")
+#define ANSIESC_YELLOW Tx("\033[33m")
+#define ANSIESC_RED Tx("\033[31m")
+
+#else
+#define ANSIESC_RESET Tx("")
+#define ANSIESC_GREEN Tx("")
+#define ANSIESC_YELLOW Tx("")
+#define ANSIESC_RED Tx("")
+#endif
+
+
+#ifndef _WINDOWS
+	// 定义虚拟类型
+	using DWORD = unsigned long;
+	using WORD = unsigned short;
+	using HANDLE = void*;
+#endif
+
+
 #ifdef _WINDOWS
-#ifndef UNICODE
-#define PATH_SLASH "\\"
-#else
-#define PATH_SLASH L"\\"
-#endif
+#define PATH_SLASH Tx("\\")
 
 #else
-#ifndef UNICODE
-#define PATH_SLASH "/"
-#else
-#define PATH_SLASH L"/"
-#endif
+#define PATH_SLASH Tx("/")
 #endif
 
 
-#ifndef UNICODE
-#define Log_ts "[INFO]    "
-#define Log_wr "[WARNING] "
-#define Log_er "[ERROR]   "
-#define Log_tx "[TEXT]    "
-#define Log_lf "\n"
-#else
-#define Log_ts L"[INFO]    "
-#define Log_wr L"[WARNING] "
-#define Log_er L"[ERROR]   "
-#define Log_tx L"[TEXT]    "
-#define Log_lf L"\n"
-#endif
+#define Log_ts Tx("[INFO]    ")
+#define Log_wr Tx("[WARNING] ")
+#define Log_er Tx("[ERROR]   ")
+#define Log_tx Tx("[TEXT]    ")
+#define Log_lf Tx("\n")
 
-#ifndef UNICODE
-#define _Bracket(x) (Tstr)"[" + x + "]"
-#define _Brace(x) (Tstr)"{" + x + "}"
-#else
-#define _Bracket(x) (Tstr)L"[" + x + L"]"
-#define _Brace(x) (Tstr)L"{" + x + L"}"
-#endif
+
+#define _Bracket(x) (Tstr)Tx("[") + x + Tx("]")
+#define _Brace(x) (Tstr)Tx("{") + x + Tx("}")
 
 
 #ifndef UNICODE
@@ -156,12 +138,32 @@ namespace Typical_Tool {
 #endif
 
 
+	class wruntime_error : public exception { // base of all runtime-error exceptions
+	public:
+		explicit wruntime_error(const std::wstring& _Message) : exception(TcharStringManage::wtos(_Message).c_str()) {}
+
+		explicit wruntime_error(const wchar_t* _Message) : exception(TcharStringManage::wtos(_Message).c_str()) {}
+
+#if !_HAS_EXCEPTIONS
+	protected:
+		void _Doraise() const override { // perform class-specific exception handling
+			_RAISE(*this);
+		}
+#endif // !_HAS_EXCEPTIONS
+	};
+#ifndef UNICODE
+	#define Truntime_error runtime_error
+#else
+	#define Truntime_error wruntime_error
+#endif
+
+
 
 	template<class ComputeValue, class Callable>
-	void _IsValid_RunTime(ComputeValue _Value, Callable&& _ComputValueFunction, const std::string& _ThrowInfo)
+	void _IsValid_RunTime(ComputeValue _Value, Callable&& _ComputValueFunction, const Tstr& _ThrowInfo)
 	{
 		if (!_ComputValueFunction(_Value)) {
-			throw std::runtime_error(_LOGERRORINFO(_ThrowInfo));
+			throw Truntime_error(_LOGERRORINFO(_ThrowInfo));
 		}
 		else {
 			return;
@@ -169,6 +171,7 @@ namespace Typical_Tool {
 	}
 }
 namespace tytool = Typical_Tool;
+namespace tytl = Typical_Tool;
 
 
 #endif

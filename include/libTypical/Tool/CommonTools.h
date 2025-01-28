@@ -14,7 +14,7 @@ namespace Typical_Tool {
 	class FileSystem {
 	private:
 		std::filesystem::path Path;
-		std::reference_wrapper<Log> log = lgc;
+		Log& Log = lgc;
 
 	public:
 		FileSystem()
@@ -48,17 +48,17 @@ namespace Typical_Tool {
 				}
 
 #ifdef UNICODE
-				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("][") + FileType + Tx("] 存在!"), er);
+				Log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("][") + FileType + Tx("] 存在!"), er);
 #else
-				log(_TipsChar + Tx(":[") + _Path.string() + Tx("][") + FileType + Tx("] 存在!"), er);
+				Log(_TipsChar + Tx(":[") + _Path.string() + Tx("][") + FileType + Tx("] 存在!"), er);
 #endif
 				return true;
 			}
 			else {
 #ifdef UNICODE
-				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("] 不存在!"), ts);
+				Log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("] 不存在!"), ts);
 #else
-				log(_TipsChar + Tx(":[") + _Path.string() + Tx("] 不存在!"), ts);
+				Log(_TipsChar + Tx(":[") + _Path.string() + Tx("] 不存在!"), ts);
 #endif
 				return false;
 			}
@@ -231,17 +231,17 @@ namespace Typical_Tool {
 		* DirectoryList: 默认为空(不获取文件列表的字符串) | 非空(清楚内容后, 写入文件列表的字符串)
 		*/
 		std::vector<std::filesystem::directory_entry> DirectoryIterator(bool _IsRecursive = false, 
-			std::vector<std::filesystem::path>& DirectoryListStr = std::vector<std::filesystem::path>()
+			std::shared_ptr<std::vector<std::filesystem::path>> DirectoryListStr = std::make_shared<std::vector<std::filesystem::path>>()
 		) {
 			std::vector<std::filesystem::directory_entry> List; //目录列表
 
 			try {
 				if (_IsRecursive) { // 递归遍历
-					if (!DirectoryListStr.empty()) { //非空时: 获取文件列表的字符串
-						DirectoryListStr.clear(); //清空
+					if (!DirectoryListStr->empty()) { //非空时: 获取文件列表的字符串
+						DirectoryListStr->clear(); //清空
 
 						for (const auto& entry : std::filesystem::recursive_directory_iterator(this->Path)) {
-							DirectoryListStr.push_back(entry.path());
+							DirectoryListStr->push_back(entry.path());
 							List.push_back(entry);
 						}
 					}
@@ -252,11 +252,11 @@ namespace Typical_Tool {
 					}
 				}
 				else { // 非递归遍历
-					if (!DirectoryListStr.empty()) { //非空时: 获取文件列表的字符串
-						DirectoryListStr.clear(); //清空
+					if (!DirectoryListStr->empty()) { //非空时: 获取文件列表的字符串
+						DirectoryListStr->clear(); //清空
 
 						for (const auto& entry : std::filesystem::directory_iterator(this->Path)) {
-							DirectoryListStr.push_back(entry.path());
+							DirectoryListStr->push_back(entry.path());
 							List.push_back(entry);
 						}
 					}
@@ -286,7 +286,7 @@ namespace Typical_Tool {
 	public:
 		//设置 std::filesystem::path
 		void SetPath(const std::filesystem::path& _Path) { this->Path = _Path; }
-		void SetLog(Log& _log) { this->log = _log; }
+		void SetLog(tytool::Log& _Log) { this->Log = _Log; }
 
 	public:
 		//获取 std::filesystem::path

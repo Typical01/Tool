@@ -51,56 +51,56 @@ build cmake_object_order_depends_target_libTypical: phony || .
 
 build CMakeFiles/libTypical.dir/src/CommonTools.cpp.o: CXX_COMPILER__libTypical_unscanned_Debug C$:/Users/22793/source/repos/Tool/src/CommonTools.cpp || cmake_object_order_depends_target_libTypical
   DEP_FILE = CMakeFiles\libTypical.dir\src\CommonTools.cpp.o.d
-  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
+  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
   INCLUDES = -IC:/Users/22793/source/repos/Tool/include -IC:/Users/22793/source/repos/Tool/include/Json
   OBJECT_DIR = CMakeFiles\libTypical.dir
   OBJECT_FILE_DIR = CMakeFiles\libTypical.dir\src
 
 build CMakeFiles/libTypical.dir/src/ConfigFileTextManage.cpp.o: CXX_COMPILER__libTypical_unscanned_Debug C$:/Users/22793/source/repos/Tool/src/ConfigFileTextManage.cpp || cmake_object_order_depends_target_libTypical
   DEP_FILE = CMakeFiles\libTypical.dir\src\ConfigFileTextManage.cpp.o.d
-  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
+  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
   INCLUDES = -IC:/Users/22793/source/repos/Tool/include -IC:/Users/22793/source/repos/Tool/include/Json
   OBJECT_DIR = CMakeFiles\libTypical.dir
   OBJECT_FILE_DIR = CMakeFiles\libTypical.dir\src
 
 build CMakeFiles/libTypical.dir/src/Json_Typical.cpp.o: CXX_COMPILER__libTypical_unscanned_Debug C$:/Users/22793/source/repos/Tool/src/Json_Typical.cpp || cmake_object_order_depends_target_libTypical
   DEP_FILE = CMakeFiles\libTypical.dir\src\Json_Typical.cpp.o.d
-  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
+  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
   INCLUDES = -IC:/Users/22793/source/repos/Tool/include -IC:/Users/22793/source/repos/Tool/include/Json
   OBJECT_DIR = CMakeFiles\libTypical.dir
   OBJECT_FILE_DIR = CMakeFiles\libTypical.dir\src
 
 build CMakeFiles/libTypical.dir/src/Log.cpp.o: CXX_COMPILER__libTypical_unscanned_Debug C$:/Users/22793/source/repos/Tool/src/Log.cpp || cmake_object_order_depends_target_libTypical
   DEP_FILE = CMakeFiles\libTypical.dir\src\Log.cpp.o.d
-  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
+  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
   INCLUDES = -IC:/Users/22793/source/repos/Tool/include -IC:/Users/22793/source/repos/Tool/include/Json
   OBJECT_DIR = CMakeFiles\libTypical.dir
   OBJECT_FILE_DIR = CMakeFiles\libTypical.dir\src
 
 build CMakeFiles/libTypical.dir/src/StringManage.cpp.o: CXX_COMPILER__libTypical_unscanned_Debug C$:/Users/22793/source/repos/Tool/src/StringManage.cpp || cmake_object_order_depends_target_libTypical
   DEP_FILE = CMakeFiles\libTypical.dir\src\StringManage.cpp.o.d
-  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
+  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
   INCLUDES = -IC:/Users/22793/source/repos/Tool/include -IC:/Users/22793/source/repos/Tool/include/Json
   OBJECT_DIR = CMakeFiles\libTypical.dir
   OBJECT_FILE_DIR = CMakeFiles\libTypical.dir\src
 
 build CMakeFiles/libTypical.dir/src/Time.cpp.o: CXX_COMPILER__libTypical_unscanned_Debug C$:/Users/22793/source/repos/Tool/src/Time.cpp || cmake_object_order_depends_target_libTypical
   DEP_FILE = CMakeFiles\libTypical.dir\src\Time.cpp.o.d
-  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
+  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
   INCLUDES = -IC:/Users/22793/source/repos/Tool/include -IC:/Users/22793/source/repos/Tool/include/Json
   OBJECT_DIR = CMakeFiles\libTypical.dir
   OBJECT_FILE_DIR = CMakeFiles\libTypical.dir\src
 
 build CMakeFiles/libTypical.dir/src/WindowsHost.cpp.o: CXX_COMPILER__libTypical_unscanned_Debug C$:/Users/22793/source/repos/Tool/src/WindowsHost.cpp || cmake_object_order_depends_target_libTypical
   DEP_FILE = CMakeFiles\libTypical.dir\src\WindowsHost.cpp.o.d
-  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
+  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
   INCLUDES = -IC:/Users/22793/source/repos/Tool/include -IC:/Users/22793/source/repos/Tool/include/Json
   OBJECT_DIR = CMakeFiles\libTypical.dir
   OBJECT_FILE_DIR = CMakeFiles\libTypical.dir\src
 
 build CMakeFiles/libTypical.dir/src/pch.cpp.o: CXX_COMPILER__libTypical_unscanned_Debug C$:/Users/22793/source/repos/Tool/src/pch.cpp || cmake_object_order_depends_target_libTypical
   DEP_FILE = CMakeFiles\libTypical.dir\src\pch.cpp.o.d
-  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -O2 -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
+  FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -std=gnu++17 -fPIC -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8 -O0 -g
   INCLUDES = -IC:/Users/22793/source/repos/Tool/include -IC:/Users/22793/source/repos/Tool/include/Json
   OBJECT_DIR = CMakeFiles\libTypical.dir
   OBJECT_FILE_DIR = CMakeFiles\libTypical.dir\src

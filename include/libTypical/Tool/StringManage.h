@@ -30,5 +30,4 @@ namespace Typical_Tool {
 }
 
 
-
 #endif

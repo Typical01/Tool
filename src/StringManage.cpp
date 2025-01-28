@@ -1,7 +1,6 @@
 #include <libTypical/Tool/StringManage.h>
 
 
-
 namespace Typical_Tool {
     namespace StringManage
     {
@@ -43,7 +42,7 @@ namespace Typical_Tool {
             UErrorCode errorCode = U_ZERO_ERROR;
             icu::UnicodeString unicodeStr = icu::UnicodeString::fromUTF8(icu::StringPiece(_UTF8_String));
             if (U_FAILURE(errorCode)) {
-                throw std::runtime_error("ICU conversion from UTF-8 to UnicodeString failed");
+                throw Truntime_error(Tx("ICU conversion from UTF-8 to UnicodeString failed"));
             }
 
             // 获取转换后的wchar_t数组长度（注意：这依赖于平台的wchar_t大小）
@@ -51,13 +50,13 @@ namespace Typical_Tool {
             // 在其他平台上，可能需要调整
             std::vector<wchar_t> wcharArray(unicodeStr.extract(nullptr, unicodeStr.length(), nullptr, errorCode) + 1);
             if (U_FAILURE(errorCode)) {
-                throw std::runtime_error("ICU extraction to wchar_t array failed");
+                throw Truntime_error(Tx("ICU extraction to wchar_t array failed"));
             }
 
             // 将UnicodeString内容复制到wchar_t数组
             unicodeStr.extract(wcharArray.data(), static_cast<int32_t>(wcharArray.size()), errorCode);
             if (U_FAILURE(errorCode)) {
-                throw std::runtime_error("ICU extraction to wchar_t array (second call) failed");
+                throw Truntime_error(Tx("ICU extraction to wchar_t array (second call) failed"));
             }
 
             // 确保wchar_t数组以null字符结尾（虽然extract应该已经做到了）

@@ -13,7 +13,7 @@ namespace Typical_Tool {
 		Json::StreamWriterBuilder WriterBuilder;
 		Json::CharReaderBuilder ReaderBuilder;
 		Tstr JsonFilePath;
-		Log log = lg;
+		Log& Log = lgc;
 
 	public:
 		JsonManage()
@@ -53,8 +53,8 @@ namespace Typical_Tool {
 				return true;
 			}
 			else {
-				log(Tx("打开Json文件失败: !ofstream.is_open()"), er);
-				log(Tx("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
+				Log(Tx("打开Json文件失败: !ofstream.is_open()"), er);
+				Log(Tx("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
 				return false;
 			}
 		}
@@ -76,21 +76,21 @@ namespace Typical_Tool {
 				}
 				else {
 #ifdef UNICODE
-					log(Format(Tx("解析 Json失败: [%]"), stow(ErrorCode)), er);
+					Log(Format(Tx("解析 Json失败: [%]"), stow(ErrorCode)), er);
 #else
-					log(Format(Tx("解析 Json失败: [%]"), ErrorCode), er);
+					Log(Format(Tx("解析 Json失败: [%]"), ErrorCode), er);
 #endif
-					log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
+					Log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
 					return false;
 				}
 			}
 			else {
 #ifdef UNICODE
-				log(Format(Tx("打开Json文件失败: [%]"), stow(ErrorCode)), er);
+				Log(Format(Tx("打开Json文件失败: [%]"), stow(ErrorCode)), er);
 #else
-				log(Format(Tx("打开Json文件失败: [%]"), ErrorCode), er);
+				Log(Format(Tx("打开Json文件失败: [%]"), ErrorCode), er);
 #endif
-				log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
+				Log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
 				return false;
 			}
 		}
@@ -106,12 +106,17 @@ namespace Typical_Tool {
 		{
 			return ReadStream(_JsonFilePath, this->Value);
 		}
-		//写入 Value到 Json文件: this->Value
+		//读取 Json文件到 _Value
+		bool ReadJsonFile(const Tstr& _JsonFilePath, Json::Value& _JsonValue)
+		{
+			return ReadStream(_JsonFilePath, _JsonValue);
+		}
+		//写入 Value到 Json文件
 		bool WriteJsonFile(std::ios::ios_base::openmode _StreamOpenMode = std::ios::trunc)
 		{
 			return WriteStream(this->JsonFilePath, this->Value, _StreamOpenMode);
 		}
-		//写入 Value到 Json文件: this->Value
+		//写入 Value到 Json文件
 		bool WriteJsonFile(const Tstr& _JsonFilePath, std::ios::ios_base::openmode _StreamOpenMode = std::ios::trunc)
 		{
 			return WriteStream(_JsonFilePath, this->Value, _StreamOpenMode);
@@ -156,7 +161,7 @@ namespace Typical_Tool {
 			this->JsonFilePath = _JsonFilePath;
 		}
 
-		void SetLog(Log& _log) { this->log = _log; }
+		void SetLog(tytool::Log& _log) { this->Log = _log; }
 
 	public:
 
@@ -164,9 +169,9 @@ namespace Typical_Tool {
 		void ToStreamString(LogMessage (*_lm)() = lf)
 		{
 #ifdef UNICODE
-			log(stow(Json::writeString(this->WriterBuilder, this->Value)), _lm);
+			Log(stow(Json::writeString(this->WriterBuilder, this->Value)), _lm);
 #else
-			log(Json::writeString(this->WriterBuilder, this->Value), _lm);
+			Log(Json::writeString(this->WriterBuilder, this->Value), _lm);
 #endif
 		}
 	};

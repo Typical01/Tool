@@ -7,6 +7,10 @@ bool Typical_Tool::Time::IsShowLog = true;
 
 
 
+void Typical_Tool::Time::SetLog(tytool::Log& _Log)
+{
+	Log = _Log;
+}
 void Typical_Tool::Time::SetShowLog(bool _IsShowLog)
 {
 	IsShowLog = _IsShowLog;
@@ -52,30 +56,6 @@ void Typical_Tool::Timer::AddTimer(std::chrono::steady_clock::time_point&& _Time
 	}
 
 	this->TimerContainer.push_back(_TimePoint);
-}
-
-void Typical_Tool::Timer::SetTimer(const std::chrono::steady_clock::time_point& _TimePoint, int _Location)
-{
-	Time_IsValid_RunTime(_Location, "SetTimer()");
-
-	std::lock_guard<mutex> tempMutex(this->mutex_Timer);
-	this->TimerContainer[_Location] = _TimePoint;
-}
-
-void Typical_Tool::Timer::SetTimer(std::chrono::steady_clock::time_point&& _TimePoint, int _Location)
-{
-	Time_IsValid_RunTime(_Location, "SetTimer()");
-	
-	std::lock_guard<mutex> tempMutex(this->mutex_Timer);
-	this->TimerContainer[_Location] = _TimePoint;
-}
-
-std::chrono::steady_clock::time_point Typical_Tool::Timer::GetTimer(int _Location)
-{
-	Time_IsValid_RunTime(_Location, "GetTimer()");
-
-	std::lock_guard<mutex> tempMutex(this->mutex_Timer);
-	return this->TimerContainer[_Location];
 }
 
 std::vector<std::chrono::steady_clock::time_point> Typical_Tool::Timer::GetTimerContainer()
