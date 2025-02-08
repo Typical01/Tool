@@ -1,8 +1,8 @@
 .vs/
-build/*
-build_Unix/*
-build_Android/*
-bin/*
+build/
+build_Unix/
+build_Android/
+bin/
 
 ./*.bat
 
