@@ -7,9 +7,9 @@ bool Typical_Tool::Time::IsShowLog = true;
 
 
 
-void Typical_Tool::Time::SetLog(tytool::Log& _Log)
+void Typical_Tool::Time::SetLog(Log& _Log)
 {
-	Log = _Log;
+	log = _Log;
 }
 void Typical_Tool::Time::SetShowLog(bool _IsShowLog)
 {

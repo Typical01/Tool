@@ -13,7 +13,7 @@ namespace Typical_Tool {
 		Json::StreamWriterBuilder WriterBuilder;
 		Json::CharReaderBuilder ReaderBuilder;
 		Tstr JsonFilePath;
-		Log& Log = lgc;
+		Log& log = lgc;
 
 	public:
 		JsonManage()
@@ -53,8 +53,8 @@ namespace Typical_Tool {
 				return true;
 			}
 			else {
-				Log(Tx("打开Json文件失败: !ofstream.is_open()"), er);
-				Log(Tx("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
+				log(Tx("打开Json文件失败: !ofstream.is_open()"), er);
+				log(Tx("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
 				return false;
 			}
 		}
@@ -76,21 +76,21 @@ namespace Typical_Tool {
 				}
 				else {
 #ifdef UNICODE
-					Log(Format(Tx("解析 Json失败: [%]"), stow(ErrorCode)), er);
+					log(Format(Tx("解析 Json失败: [%]"), stow(ErrorCode)), er);
 #else
-					Log(Format(Tx("解析 Json失败: [%]"), ErrorCode), er);
+					log(Format(Tx("解析 Json失败: [%]"), ErrorCode), er);
 #endif
-					Log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
+					log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
 					return false;
 				}
 			}
 			else {
 #ifdef UNICODE
-				Log(Format(Tx("打开Json文件失败: [%]"), stow(ErrorCode)), er);
+				log(Format(Tx("打开Json文件失败: [%]"), stow(ErrorCode)), er);
 #else
-				Log(Format(Tx("打开Json文件失败: [%]"), ErrorCode), er);
+				log(Format(Tx("打开Json文件失败: [%]"), ErrorCode), er);
 #endif
-				Log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
+				log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
 				return false;
 			}
 		}
@@ -161,7 +161,7 @@ namespace Typical_Tool {
 			this->JsonFilePath = _JsonFilePath;
 		}
 
-		void SetLog(tytool::Log& _log) { this->Log = _log; }
+		void SetLog(Log& _log) { this->log = _log; }
 
 	public:
 
@@ -169,9 +169,9 @@ namespace Typical_Tool {
 		void ToStreamString(LogMessage (*_lm)() = lf)
 		{
 #ifdef UNICODE
-			Log(stow(Json::writeString(this->WriterBuilder, this->Value)), _lm);
+			log(stow(Json::writeString(this->WriterBuilder, this->Value)), _lm);
 #else
-			Log(Json::writeString(this->WriterBuilder, this->Value), _lm);
+			log(Json::writeString(this->WriterBuilder, this->Value), _lm);
 #endif
 		}
 	};

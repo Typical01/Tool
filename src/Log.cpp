@@ -11,6 +11,8 @@ bool Typical_Tool::Log::ShowLog = true;
 bool Typical_Tool::Log::ShowTime = true;
 bool Typical_Tool::Log::SingleLogFile = true;
 bool Typical_Tool::Log::Debug = false;
+bool Typical_Tool::Log::bFlushConsoleOutput = false;
+long long Typical_Tool::Log::PauseTime = 200LL;
 std::atomic<bool> Typical_Tool::Log::IsLogFileWriteThreadStop = true;
 
 

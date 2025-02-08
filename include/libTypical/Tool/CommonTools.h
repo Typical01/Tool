@@ -14,7 +14,7 @@ namespace Typical_Tool {
 	class FileSystem {
 	private:
 		std::filesystem::path Path;
-		Log& Log = lgc;
+		Log& log = lgc;
 
 	public:
 		FileSystem()
@@ -48,17 +48,17 @@ namespace Typical_Tool {
 				}
 
 #ifdef UNICODE
-				Log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("][") + FileType + Tx("] 存在!"), er);
+				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("][") + FileType + Tx("] 存在!"), er);
 #else
-				Log(_TipsChar + Tx(":[") + _Path.string() + Tx("][") + FileType + Tx("] 存在!"), er);
+				log(_TipsChar + Tx(":[") + _Path.string() + Tx("][") + FileType + Tx("] 存在!"), er);
 #endif
 				return true;
 			}
 			else {
 #ifdef UNICODE
-				Log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("] 不存在!"), ts);
+				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("] 不存在!"), ts);
 #else
-				Log(_TipsChar + Tx(":[") + _Path.string() + Tx("] 不存在!"), ts);
+				log(_TipsChar + Tx(":[") + _Path.string() + Tx("] 不存在!"), ts);
 #endif
 				return false;
 			}
@@ -286,7 +286,7 @@ namespace Typical_Tool {
 	public:
 		//设置 std::filesystem::path
 		void SetPath(const std::filesystem::path& _Path) { this->Path = _Path; }
-		void SetLog(tytool::Log& _Log) { this->Log = _Log; }
+		void SetLog(Log& _Log) { this->log = _Log; }
 
 	public:
 		//获取 std::filesystem::path

@@ -117,6 +117,7 @@ namespace Typical_Tool
 	/* LogMessage = lm // 控制台颜色显示
 	* 不需要颜色显示: #undef _ANSIESC_CONSOLE_CHAR_COLOR
 	* Debug: 显示Log中的 Debug消息
+	* _WIN32APP: 对于 Win32 app 显示指定控制台分离
 	*/
 	class Log {
 	private:
@@ -138,6 +139,8 @@ namespace Typical_Tool
 		static bool ShowTime; //显示时间
 		static bool SingleLogFile; //单一日志文件
 		static bool Debug; //#define _Debug(或自定义的Debug) (Debug == true)
+		static bool bFlushConsoleOutput; //可刷新的控制台输出
+		static long long PauseTime; //刷新间隔
 
 		bool CMD; //控制台
 		bool Release; //发行版
@@ -155,8 +158,7 @@ namespace Typical_Tool
 		/* 控制台初始化状态: false(需要初始化), true(跳过初始化)
 		*/
 		template<class Temp = bool>
-		void Init()
-		{
+		void Init() {
 			//控制台初始化
 			if (!init) {
 				// 设置全局区域为 "zh_CN.UTF-8"
@@ -175,8 +177,7 @@ namespace Typical_Tool
 
 				//Tout << "Log Config: zh_CN.UTF-8 完成!\n";
 
-#define _UE_
-#ifndef _UE_
+#ifdef _WIN32APP
 #ifdef _WINDOWS
 					//Windows 控制台编码修改: UTF-8
 
@@ -241,30 +242,54 @@ namespace Typical_Tool
 
 
 	public:
-		static void LogWirte(const LogStringBuffer& LogBuffer)
-		{
+		static void LogWirte(const LogStringBuffer& LogBuffer) {
 			if (IsLogFileWrite) { //写入文件
 				lock_guard<mutex> QueueGuard(mutex_LogFileStream_Out);
 				LogFileWrite_Queue.push(LogBuffer);
 			}
 		}
 
-		static void ConsoleClear(const long long& PauseTime = 200LL) {
-			Log::wait(PauseTime);
+		static void ConsoleClear() {
+			Log::wait(PauseTime, false);
 			Terr << Tx("\033[2J\033[H");  // ANSI 转义序列：清屏并将光标移至左上角
 		}
 
-		static void ShowMessage(const long long& PauseTime = 200LL) {
-			ConsoleClear(PauseTime); //清空控制台消息残留
+		static void ShowMessage() {
+			ConsoleClear(); //清空控制台消息残留
 
 			for (auto tempIndex = ConsoleMessages_Deque.begin(); tempIndex != ConsoleMessages_Deque.end(); tempIndex++) {
 				Tout << tempIndex->second;
 			}
+			Tout << std::flush; //立即刷新
+		}
+
+		// 添加或更新消息
+		static void UpdataMessage(int ID, const LogStringBuffer& LogBuffer) {
+			if (ID == -1) { // -1时, 不分配ID
+				ConsoleMessages_Deque.push_back({ -1, LogBuffer });
+			}
+
+			if (ConsoleMessages_Index.find(ID) != ConsoleMessages_Index.end()) { //现有消息
+				// 更新现有消息
+				size_t index = ConsoleMessages_Index[ID];
+				ConsoleMessages_Deque[index].second = LogBuffer;
+			}
+			else { // 新消息
+				ConsoleMessages_Deque.push_back({ ID, LogBuffer }); //保存新消息的字符串
+				ConsoleMessages_Index[ID] = ConsoleMessages_Deque.size() - 1; //将 新消息绑定到 索引
+			}
+		}
+
+		static void UpdataCursorMessage(int Line, const Tstr& Message) {
+			Tout << "\033[s";					// 保存光标位置 
+			Tout << "\033[" << Line << ";1H";	// 移动光标到第 Line 行，第 1 列
+			Tout << "\033[2K";					// 清除当前行内容
+			Tout << Message;					// 输出新的消息
+			Tout << "\033[u";					// 恢复光标位置
 		}
 
 	private:
-		void LogWirteToFile(std::shared_ptr<Tofstream> _LogFileStream_Out, const Tstr& _Log_FilePath)
-		{
+		void LogWirteToFile(std::shared_ptr<Tofstream> _LogFileStream_Out, const Tstr& _Log_FilePath) {
 			// 不退出, 且队列不为空
 			while (1) {
 				lock_guard<mutex> QueueGuard(mutex_LogFileStream_Out);
@@ -298,8 +323,7 @@ namespace Typical_Tool
 			}
 		}
 
-		static void StopLogWrite()
-		{
+		static void StopLogWrite() {
 			if (!IsLogFileWriteThreadStop.load()) {
 				IsLogFileWriteThreadStop.store(true); //退出 条件
 				LogFileProcessing.join(); //主线程等待 后台退出
@@ -320,31 +344,6 @@ namespace Typical_Tool
 				SetConsoleMode(hOut, dwMode);
 			}
 #endif
-		}
-
-		// 添加或更新消息
-		static void UpdataMessage(int ID, const LogStringBuffer& LogBuffer) {
-			if (ID == -1) { // -1时, 不分配ID
-				ConsoleMessages_Deque.push_back({ -1, LogBuffer });
-			}
-
-			if (ConsoleMessages_Index.find(ID) != ConsoleMessages_Index.end()) { //现有消息
-				// 更新现有消息
-				size_t index = ConsoleMessages_Index[ID];
-				ConsoleMessages_Deque[index].second = LogBuffer;
-			}
-			else { // 新消息
-				ConsoleMessages_Deque.push_back({ ID, LogBuffer }); //保存新消息的字符串
-				ConsoleMessages_Index[ID] = ConsoleMessages_Deque.size() - 1; //将 新消息绑定到 索引
-			}
-		}
-
-		static void UpdataCursorMessage(int Line, const Tstr& Message) {
-			Tout << "\033[s";					// 保存光标位置 
-			Tout << "\033[" << Line << ";1H";	// 移动光标到第 Line 行，第 1 列
-			Tout << "\033[2K";					// 清除当前行内容
-			Tout << Message;					// 输出新的消息
-			Tout << "\033[u";					// 恢复光标位置
 		}
 
 	private:
@@ -371,16 +370,19 @@ namespace Typical_Tool
 			}
 		}
 
-		static void wait(long long _Number)
-		{
+		static void wait(long long _Number, bool bShowLog) {
+			Log::bFlushConsoleOutput = false;
+			if (bShowLog) {
+				Log_Out(ANSIESC_YELLOW, Terr, (Tstr)Log_wr + Format(Tx("等待: [%]ms"), _Number).str() + Log_lf, ANSIESC_RESET, -1, true);
+			}
 			Log_Out(ANSIESC_YELLOW, Terr, (Tstr)Log_wr + Format(Tx("等待: [%]ms"), _Number).str() + Log_lf, ANSIESC_RESET, -1, true);
+			Log::bFlushConsoleOutput = true;
 			std::chrono::milliseconds timeTarget = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()) + 
 				std::chrono::milliseconds(_Number);
 			while (timeTarget > std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())) {}
 		}
 
-		static void Log_Out(const Tstr& _ANSIESC_Color, Tostream& _ostream, const Tstr& _str, const Tstr& _ANSIESC_RESET, const int& MessageKey = -1, bool _IsWirteFile = false)
-		{
+		static void Log_Out(const Tstr& _ANSIESC_Color, Tostream& _ostream, const Tstr& _str, const Tstr& _ANSIESC_RESET, const int& MessageKey = -1, bool _IsWirteFile = false) {
 			LogStringBuffer tempLogBuffer;
 			if (ShowTime) {
 				tempLogBuffer = { _ANSIESC_Color, Log::GetFormatTime(), _str, _ANSIESC_RESET };
@@ -388,24 +390,27 @@ namespace Typical_Tool
 			else {
 				tempLogBuffer = { _ANSIESC_Color, _str, _ANSIESC_RESET };
 			}
-			_ostream << tempLogBuffer;
 
-			//WriteConfigFile log日志
-			if (IsLogAllOutput) { //所有级别
-				LogWirte(tempLogBuffer);
-			}
-			else { //指定级别
-				if (_IsWirteFile) {
+			if (!bFlushConsoleOutput) {
+				_ostream << tempLogBuffer;
+
+				//WriteConfigFile log日志
+				if (IsLogAllOutput) { //所有级别
 					LogWirte(tempLogBuffer);
 				}
+				else { //指定级别
+					if (_IsWirteFile) {
+						LogWirte(tempLogBuffer);
+					}
+				}
 			}
-
-			//显示常驻消息
-			UpdataMessage(MessageKey, tempLogBuffer);
+			else {
+				//显示常驻消息
+				UpdataMessage(MessageKey, tempLogBuffer);
+			}
 		}
 		// _WINDOWS || _CONSOLE
-		void Logs_ustr(const Tstr& text, const LogMessage& lm, const int& MessageKey)
-		{
+		void Logs_ustr(const Tstr& text, const LogMessage& lm, const int& MessageKey) {
 			switch (lm) {
 			case LogMessage::Tip: {
 				if (this->CMD) {
@@ -530,19 +535,23 @@ namespace Typical_Tool
 				}
 			}
 		}
-		void operator()()
+		/*
+		* 输出 _LineNumber 个换行符
+		*/
+		void operator()(__int64 _LineNumber = 0)
 		{
-			if (ShowLog) {
+			for (auto i = 0; i < _LineNumber; i++) {
+				if (ShowLog) {
 #ifdef _DEBUG
-				Logs_lgm();
-				return;
-#endif
-				if (this->Release) {
 					Logs_lgm();
+					return;
+#endif
+					if (this->Release) {
+						Logs_lgm();
+					}
 				}
 			}
 		}
-
 
 	public:
 
@@ -596,6 +605,16 @@ namespace Typical_Tool
 		static void SetDebug(const bool& _Debug)
 		{
 			Debug = _Debug;
+		}
+		//设置 控制台刷新
+		static void SetConsoleFlush(const bool& _bFlush)
+		{
+			bFlushConsoleOutput = _bFlush;
+		}
+		//设置 控制台刷新间隔
+		static void SetPauseTime(const long long& _PauseTime)
+		{
+			PauseTime = _PauseTime;
 		}
 	
 	public:
@@ -738,6 +757,100 @@ namespace Typical_Tool
 			<< Tx("_DEBUG: _CONSOLE\n")
 			<< Tx("lgc(\"Log.h\", lf); \n");
 	}
+
+	static Log& log_Namespace = lgc;
+
+
+
+#ifdef _WINDOWS
+	class ConsoleDoubleBuffer {
+	private:
+		HANDLE hStdout;        // 默认标准输出缓冲区
+		HANDLE hBuffer[2];     // 双缓冲的两个缓冲区
+		int currentBuffer;     // 当前缓冲区索引
+		COORD bufferSize;      // 缓冲区大小
+
+	public:
+		ConsoleDoubleBuffer() {
+			//创建双缓冲
+			hStdout = GetStdHandle(STD_OUTPUT_HANDLE); // 获取标准输出句柄
+			if (hStdout == INVALID_HANDLE_VALUE) {
+				throw Truntime_error(Tx("Failed to get standard output handle."));
+			}
+			hBuffer[0] = hStdout; // 默认缓冲区
+			hBuffer[1] = CreateConsoleScreenBuffer( // 创建第二个缓冲区
+				GENERIC_READ | GENERIC_WRITE,
+				0,
+				nullptr,
+				CONSOLE_TEXTMODE_BUFFER,
+				nullptr
+			);
+			if (hBuffer[1] == INVALID_HANDLE_VALUE) {
+				throw Truntime_error(Tx("Failed to create secondary console buffer."));
+			}
+
+			// 设置缓冲区大小和窗口尺寸
+			CONSOLE_SCREEN_BUFFER_INFO csbi;
+			GetConsoleScreenBufferInfo(hStdout, &csbi);
+			bufferSize = csbi.dwSize;
+			SMALL_RECT rect = csbi.srWindow;
+			for (int i = 0; i < 2; i++) {
+				SetConsoleScreenBufferSize(hBuffer[i], bufferSize);
+				SetConsoleWindowInfo(hBuffer[i], TRUE, &rect);
+			}
+
+			// 初始化缓冲区索引
+			currentBuffer = 0;
+		}
+
+		~ConsoleDoubleBuffer() {
+			// 恢复默认缓冲区
+			SetConsoleActiveScreenBuffer(hStdout);
+
+			// 关闭创建的缓冲区
+			CloseHandle(hBuffer[1]);
+		}
+
+	public:
+
+		bool UpdataBuffer(Tstr& Text) {
+			try {
+				// 绘制到当前缓冲区
+				DWORD written;
+				COORD coord = { 0, 0 };
+				return WriteConsoleOutputCharacter(hBuffer[currentBuffer], Text.c_str(), static_cast<DWORD>(Text.size()), coord, &written);
+			}
+			catch (const std::exception& ex) {
+#ifndef UNICODE
+				lgc(er, Format(Tx("Error: "), ex.what()));
+#else
+				lgc(er, Format(Tx("Error: "), stow(ex.what())));
+#endif
+			}
+		}
+
+		void SwapBuffers(bool bUpdataSuccessful) {
+			if (bUpdataSuccessful) {
+				// 切换活动缓冲区
+				currentBuffer = 1 - currentBuffer;
+				SetConsoleActiveScreenBuffer(hBuffer[currentBuffer]);
+
+				// 清空另一个缓冲区
+				COORD coord = { 0, 0 };
+				DWORD written;
+				FillConsoleOutputCharacter(hBuffer[1 - currentBuffer], Tx(' '), bufferSize.X * bufferSize.Y, coord, &written);
+				FillConsoleOutputAttribute(hBuffer[1 - currentBuffer], FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
+					bufferSize.X * bufferSize.Y, coord, &written);
+				SetConsoleCursorPosition(hBuffer[1 - currentBuffer], coord);
+			}
+		}
+
+		HANDLE GetCurrentBufferHandle() const {
+			return hBuffer[currentBuffer];
+		}
+
+	};
+#endif
 }
 
 
