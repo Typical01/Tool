@@ -935,19 +935,20 @@ namespace Typical_Tool {
 			{
 				if (!_AnalyzeConfig.empty()) {
 					//首字符符号
-					Tchar tempConfigChar = _AnalyzeConfig[0];
+					Tchar tempConfigCharBegin = _AnalyzeConfig[0];
+					Tchar tempConfigCharEnd = _AnalyzeConfig[_AnalyzeConfig.size() - 1];
 
 					//字符串是否非法
-					if (tempConfigChar == Tx('[')) { //配置
+					if (tempConfigCharBegin == Tx('[') && tempConfigCharEnd == Tx(']')) { //配置
 						return ConfigStringFormat::Config;
 					}
-					else if (tempConfigChar >= 0 && tempConfigChar <= 31) { //控制字符: 0~31
+					else if (tempConfigCharBegin >= 0 && tempConfigCharBegin <= 31) { //控制字符: 0~31
 						if (this->ShowManageLog) {
 							log(Tx("AnalyzeFormat: OtherChar[") + _AnalyzeConfig + Tx("]"), War);
 						}
 						return ConfigStringFormat::OtherChar;
 					}
-					else if (tempConfigChar == 127) { //控制字符
+					else if (tempConfigCharBegin == 127) { //控制字符
 						if (this->ShowManageLog) {
 							log(Tx("AnalyzeFormat: OtherChar[") + _AnalyzeConfig + Tx("]"), War);
 						}
