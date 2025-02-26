@@ -131,12 +131,12 @@ bool Typical_Tool::WindowsSystem::ShellMessage::IsSucceed()
 
 // WindowHost
 
-void Typical_Tool::WindowsSystem::WindowHost::设置字体(HFONT hFont)
+void Typical_Tool::WindowsSystem::WindowHost::SetFont(HFONT hFont)
 {
 	WinFont.SetFont(hFont);
 
-	for (auto tempHwnd = this->窗口.begin();
-		tempHwnd != this->窗口.end(); tempHwnd++) {
+	for (auto tempHwnd = this->Window.begin();
+		tempHwnd != this->Window.end(); tempHwnd++) {
 		WinFont.SetWindowFont(tempHwnd->second);
 	}
 }

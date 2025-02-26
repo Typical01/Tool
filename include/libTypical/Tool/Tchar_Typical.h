@@ -68,21 +68,14 @@ namespace Typical_Tool {
 #endif
 
 
-#define __WFILE__ L##__FILE__
-#define __WLINE__ L##__LINE__
-
-#ifndef UNICODE
-#define __TFILE__ __FILE__
-#define __TLINE__ __LINE__
-#else
-#define __TFILE__ __WFILE__
-#define __TLINE__ __WLINE__
-#endif
-
 #ifndef _DEBUG
 #define _LOGERRORINFO(x) (x)
 #else
-#define _LOGERRORINFO(x) (Tstr)Tx("[") + __TFILE__ + Tx("->") + ToStr(__TLINE__)+ Tx("]") + x
+#ifndef UNICODE
+#define _LOGERRORINFO(x) (Tstr)Tx("[") + __FILE__ + Tx("->") + ToStr(__LINE__)+ Tx("]") + x
+#else
+#define _LOGERRORINFO(x) (Tstr)Tx("[") + stow(__FILE__) + Tx("->") + ToStr(__LINE__)+ Tx("]") + x
+#endif
 #endif
 
 
@@ -118,11 +111,11 @@ namespace Typical_Tool {
 #endif
 
 
-#define Log_ts Tx("[INFO]    ")
-#define Log_wr Tx("[WARNING] ")
-#define Log_er Tx("[ERROR]   ")
-#define Log_tx Tx("[TEXT]    ")
-#define Log_lf Tx("\n")
+#define Log_Tips Tx("[INFO]    ")
+#define Log_Warning Tx("[WARNING] ")
+#define Log_Error Tx("[ERROR]   ")
+#define Log_Text Tx("[TEXT]    ")
+#define Log_LineFeed Tx("\n")
 
 
 #define _Bracket(x) (Tstr)Tx("[") + x + Tx("]")

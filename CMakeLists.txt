@@ -17,10 +17,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/Json)
 
 # 设置自定义配置类型: 多配置生成器
 if(CMAKE_CONFIGURATION_TYPES)
-  # 多配置生成器
   set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Debug_Win;Release_Win" CACHE STRING "" FORCE)
 else()
-  # 单配置生成器，确保 CMAKE_BUILD_TYPE 被正确设置
   if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type" FORCE)
   endif()
@@ -43,11 +41,11 @@ add_library(libTypical STATIC ${SRC_Tool_LIST} ${libTypical_libHEADER_LIST} ${li
 
 # 使用设置链接库
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  target_link_libraries(libTypical
-      PRIVATE
-      $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/lib/Json/Debug/libjsoncpp_static.a>
-      $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/lib/Json/Release/libjsoncpp_static.a>
-  )
+    target_link_libraries(libTypical
+        PRIVATE
+        $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/lib/Json/Debug/libjsoncpp_static.a>
+        $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/lib/Json/Release/libjsoncpp_static.a>
+    )
 elseif (MSVC)
     target_link_libraries(libTypical
         PRIVATE
@@ -62,40 +60,31 @@ endif()
 # 根据不同编译器设置编译选项
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   target_compile_options(libTypical
-      PRIVATE
-      -Wall
-      -finput-charset=UTF-8
-      -fexec-charset=UTF-8
+    PRIVATE
+    -Wall
+    -finput-charset=UTF-8
+    -fexec-charset=UTF-8
+    $<$<CONFIG:Debug>:-O0 -g>                     # Debug: 无优化，启用调试信息
+    $<$<CONFIG:Release>:-O2>                     # Release: 启用中等优化
+    $<$<CONFIG:Release>:-finput-charset=UTF-8>   # 输入文件编码
+    $<$<CONFIG:Release>:-fexec-charset=UTF-8>    # 输出文件编码
   )
 elseif (MSVC)
-  target_compile_options(libTypical
-       PRIVATE
-       /W3
-   )
-endif()
-
-# 针对 GNU 编译器的设置
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  target_compile_options(libTypical
+  target_compile_definitions(libTypical
       PRIVATE
-      $<$<CONFIG:Debug>:-O0 -g>                     # Debug: 无优化，启用调试信息
-      $<$<CONFIG:Release>:-O2>                     # Release: 启用中等优化
-      $<$<CONFIG:Release>:-finput-charset=UTF-8>   # 输入文件编码
-      $<$<CONFIG:Release>:-fexec-charset=UTF-8>    # 输出文件编码
+      _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+      _CRT_SECURE_NO_WARNINGS
   )
-endif()
-
-# 针对 MSVC 的设置
-if (MSVC)
   target_compile_options(libTypical
       PRIVATE
+      /W3
+      /FS  # 添加此行以启用 /FS 选项
       $<$<CONFIG:Debug>:/Od /MDd /Zi /utf-8 /U_WINDOWS>    # Debug: 禁用优化，启用调试信息
       $<$<CONFIG:Release>:/O2 /MD /utf-8 /U_WINDOWS>       # Release: 启用优化
       $<$<CONFIG:Debug_Win>:/Od /MDd /Zi /utf-8>                    
       $<$<CONFIG:Release_Win>:/O2 /MD /utf-8>
   )
 endif()
-
 
 
 # 分组源文件和头文件

@@ -53,8 +53,8 @@ namespace Typical_Tool {
 				return true;
 			}
 			else {
-				log(Tx("打开Json文件失败: !ofstream.is_open()"), er);
-				log(Tx("\tJson文件路径: ") + _Bracket(_JsonFilePath), er);
+				log(Tx("打开Json文件失败: !ofstream.is_open()"), Err);
+				log(Tx("\tJson文件路径: ") + _Bracket(_JsonFilePath), Err);
 				return false;
 			}
 		}
@@ -76,21 +76,21 @@ namespace Typical_Tool {
 				}
 				else {
 #ifdef UNICODE
-					log(Format(Tx("解析 Json失败: [%]"), stow(ErrorCode)), er);
+					log(Format(Tx("解析 Json失败: [%]"), stow(ErrorCode)), Err);
 #else
-					log(Format(Tx("解析 Json失败: [%]"), ErrorCode), er);
+					log(Format(Tx("解析 Json失败: [%]"), ErrorCode), Err);
 #endif
-					log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
+					log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), Err);
 					return false;
 				}
 			}
 			else {
 #ifdef UNICODE
-				log(Format(Tx("打开Json文件失败: [%]"), stow(ErrorCode)), er);
+				log(Format(Tx("打开Json文件失败: [%]"), stow(ErrorCode)), Err);
 #else
-				log(Format(Tx("打开Json文件失败: [%]"), ErrorCode), er);
+				log(Format(Tx("打开Json文件失败: [%]"), ErrorCode), Err);
 #endif
-				log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), er);
+				log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), Err);
 				return false;
 			}
 		}
@@ -166,7 +166,7 @@ namespace Typical_Tool {
 	public:
 
 		//输出 writeString到 Terr
-		void ToStreamString(LogMessage (*_lm)() = lf)
+		void ToStreamString(LogMessage (*_lm)() = Lnf)
 		{
 #ifdef UNICODE
 			log(stow(Json::writeString(this->WriterBuilder, this->Value)), _lm);

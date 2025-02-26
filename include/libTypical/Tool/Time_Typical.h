@@ -334,7 +334,7 @@ namespace Typical_Tool {
 		static void sleep(long long _Number)
 		{
 			if (IsShowLog) {
-				log(wr, Format(Tx("休眠: [%]%"), _Number, TimeMeasureToString<Target>()));
+				log(War, Format(Tx("休眠: [%]%"), _Number, TimeMeasureToString<Target>()));
 			}
 			std::this_thread::sleep_for(Target(_Number));
 		}
@@ -342,7 +342,7 @@ namespace Typical_Tool {
 		static void wait(long long _Number)
 		{
 			if (IsShowLog) {
-				log(wr, Format(Tx("等待: [%]%"), _Number, TimeMeasureToString<Target>()));
+				log(War, Format(Tx("等待: [%]%"), _Number, TimeMeasureToString<Target>()));
 			}
 			Target timeTarget = std::chrono::duration_cast<Target>(std::chrono::steady_clock::now().time_since_epoch()) + Target(_Number);
 			while (timeTarget > std::chrono::duration_cast<Target>(std::chrono::steady_clock::now().time_since_epoch())) {}

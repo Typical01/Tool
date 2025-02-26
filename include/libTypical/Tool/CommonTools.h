@@ -48,17 +48,17 @@ namespace Typical_Tool {
 				}
 
 #ifdef UNICODE
-				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("][") + FileType + Tx("] 存在!"), er);
+				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("][") + FileType + Tx("] 存在!"), Err);
 #else
-				log(_TipsChar + Tx(":[") + _Path.string() + Tx("][") + FileType + Tx("] 存在!"), er);
+				log(_TipsChar + Tx(":[") + _Path.string() + Tx("][") + FileType + Tx("] 存在!"), Err);
 #endif
 				return true;
 			}
 			else {
 #ifdef UNICODE
-				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("] 不存在!"), ts);
+				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("] 不存在!"), Tip);
 #else
-				log(_TipsChar + Tx(":[") + _Path.string() + Tx("] 不存在!"), ts);
+				log(_TipsChar + Tx(":[") + _Path.string() + Tx("] 不存在!"), Tip);
 #endif
 				return false;
 			}
@@ -66,7 +66,7 @@ namespace Typical_Tool {
 
 	public:
 		//创建目录: 自动递归创建下级目录
-		bool CreateDirectory()
+		bool CreateDirectorys()
 		{
 			if (Exists(Tx("创建文件夹"), this->Path)) {
 				return false;
@@ -88,14 +88,14 @@ namespace Typical_Tool {
 			}
 			catch (const std::filesystem::filesystem_error& e) {
 #ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::CreateDirectory: 失败原因: { % }"), stow(e.what()).c_str()), er);
+				lgcr(Format(Tx("FileSystem::CreateDirectory: 失败原因: { % }"), stow(e.what()).c_str()), Err);
 #else
-				lgcr(Format(Tx("FileSystem::CreateDirectory: 失败原因: { % }"), e.what()), er);
+				lgcr(Format(Tx("FileSystem::CreateDirectory: 失败原因: { % }"), e.what()), Err);
 #endif
 				return false;
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::CreateDirectory: 其他错误!"), er);
+				lgcr(Tx("FileSystem::CreateDirectory: 其他错误!"), Err);
 				return false;
 			}
 
@@ -118,14 +118,14 @@ namespace Typical_Tool {
 			}
 			catch (const std::filesystem::filesystem_error& e) {
 #ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::Delete: 失败原因: { % }"), stow(e.what()).c_str()), er);
+				lgcr(Format(Tx("FileSystem::Delete: 失败原因: { % }"), stow(e.what()).c_str()), Err);
 #else
-				lgcr(Format(Tx("FileSystem::Delete: 失败原因: { % }"), e.what()), er);
+				lgcr(Format(Tx("FileSystem::Delete: 失败原因: { % }"), e.what()), Err);
 #endif
 				return false;
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::Delete: 其他错误!"), er);
+				lgcr(Tx("FileSystem::Delete: 其他错误!"), Err);
 				return false;
 			}
 
@@ -156,14 +156,14 @@ namespace Typical_Tool {
 			}
 			catch (const std::filesystem::filesystem_error& e) {
 #ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::Copy: 失败原因: { % }"), stow(e.what()).c_str()), er);
+				lgcr(Format(Tx("FileSystem::Copy: 失败原因: { % }"), stow(e.what()).c_str()), Err);
 #else
-				lgcr(Format(Tx("FileSystem::Copy: 失败原因: { % }"), e.what()), er);
+				lgcr(Format(Tx("FileSystem::Copy: 失败原因: { % }"), e.what()), Err);
 #endif
 				return false;
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::Copy: 其他错误!"), er);
+				lgcr(Tx("FileSystem::Copy: 其他错误!"), Err);
 				return false;
 			}
 			return true;
@@ -188,14 +188,14 @@ namespace Typical_Tool {
 			}
 			catch (const std::filesystem::filesystem_error& e) {
 #ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::ReName: 失败原因: { % }"), stow(e.what()).c_str()), er);
+				lgcr(Format(Tx("FileSystem::ReName: 失败原因: { % }"), stow(e.what()).c_str()), Err);
 #else
-				lgcr(Format(Tx("FileSystem::ReName: 失败原因: { % }"), e.what()), er);
+				lgcr(Format(Tx("FileSystem::ReName: 失败原因: { % }"), e.what()), Err);
 #endif
 				return false;
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::ReName: 其他错误!"), er);
+				lgcr(Tx("FileSystem::ReName: 其他错误!"), Err);
 				return false;
 			}
 			return true;
@@ -212,14 +212,14 @@ namespace Typical_Tool {
 			}
 			catch (const std::filesystem::filesystem_error& e) {
 #ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::SetPermissions: 失败原因: { % }"), stow(e.what()).c_str()), er);
+				lgcr(Format(Tx("FileSystem::SetPermissions: 失败原因: { % }"), stow(e.what()).c_str()), Err);
 #else
-				lgcr(Format(Tx("FileSystem::SetPermissions: 失败原因: { % }"), e.what()), er);
+				lgcr(Format(Tx("FileSystem::SetPermissions: 失败原因: { % }"), e.what()), Err);
 #endif
 				return false;
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::SetPermissions: 其他错误!"), er);
+				lgcr(Tx("FileSystem::SetPermissions: 其他错误!"), Err);
 				return false;
 			}
 			return true;
@@ -269,14 +269,14 @@ namespace Typical_Tool {
 			}
 			catch (const std::filesystem::filesystem_error& e) {
 #ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::DirectoryIterator: 失败原因: { % }"), stow(e.what()).c_str()), er);
+				lgcr(Format(Tx("FileSystem::DirectoryIterator: 失败原因: { % }"), stow(e.what()).c_str()), Err);
 #else
-				lgcr(Format(Tx("FileSystem::DirectoryIterator: 失败原因: { % }"), e.what()), er);
+				lgcr(Format(Tx("FileSystem::DirectoryIterator: 失败原因: { % }"), e.what()), Err);
 #endif
 				return std::vector< std::filesystem::directory_entry>();
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::DirectoryIterator: 其他错误!"), er);
+				lgcr(Tx("FileSystem::DirectoryIterator: 其他错误!"), Err);
 				return std::vector< std::filesystem::directory_entry>();
 			}
 
@@ -289,6 +289,14 @@ namespace Typical_Tool {
 		void SetLog(Log& _Log) { this->log = _Log; }
 
 	public:
+		//获取 当前工作路径
+	    static Tstr GetCurrentPath() { 
+#ifdef UNICODE
+			return std::filesystem::current_path().wstring();
+#else
+			return std::filesystem::current_path().string();
+#endif 
+		}
 		//获取 std::filesystem::path
 		std::filesystem::path GetPath() { return this->Path; }
 		//获取 文件名
@@ -326,18 +334,17 @@ namespace Typical_Tool {
 #endif
 		//获取 FPS
 		template<class T = bool>
-		float GetFps()
-		{
+		float GetFps() {
 			//临时统计
 			static int tempCount = 0;
 			static Timer timer; //时间
 			static float fps; //帧率
 
-			if (tempCount > FPS_COUNT)
-			{
+			if (tempCount > FPS_COUNT) {
 				//将时间节点拓展到两个
-				if (timer.GetTimerSize() < 2)
+				if (timer.GetTimerSize() < 2) {
 					timer.AddTimer();
+				}
 
 				tempCount = 0;
 				timer.SetTimer(timer.GetTime(), 2);

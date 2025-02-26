@@ -4,7 +4,7 @@
 
 
 //控制台初始化
-bool Typical_Tool::Log::init = false;
+bool Typical_Tool::Log::LogInitialize = false;
 bool Typical_Tool::Log::IsLogFileWrite = false;
 bool Typical_Tool::Log::IsLogAllOutput = false;
 bool Typical_Tool::Log::ShowLog = true;
