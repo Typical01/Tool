@@ -936,7 +936,10 @@ namespace Typical_Tool {
 				if (!_AnalyzeConfig.empty()) {
 					//首字符符号
 					Tchar tempConfigCharBegin = _AnalyzeConfig[0];
-					Tchar tempConfigCharEnd = _AnalyzeConfig[_AnalyzeConfig.size() - 1];
+					Tchar tempConfigCharEnd = Tx(' ');
+					if (_AnalyzeConfig.size() >= 3) { // Unix("[]\n") | Windows("[]\r")
+						tempConfigCharEnd = _AnalyzeConfig[_AnalyzeConfig.size() - 2];
+					}
 
 					//字符串是否非法
 					if (tempConfigCharBegin == Tx('[') && tempConfigCharEnd == Tx(']')) { //配置
