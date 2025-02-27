@@ -380,6 +380,12 @@ namespace Typical_Tool {
 				ShellMessage temp(OperateName, (int)(long long)ShellExecute(NULL, ShellOperate.c_str(), ShellFile.c_str(), ShellArg.c_str(), NULL, ShowWindow));
 				return temp;
 			}
+
+		public:
+			void Clear() {
+				this->ExeRunItem.clear();
+				this->ExeMenuItem.clear();
+			}
 		};
 
 
