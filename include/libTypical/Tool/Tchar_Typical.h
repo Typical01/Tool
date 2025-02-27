@@ -111,10 +111,11 @@ namespace Typical_Tool {
 #endif
 
 
-#define Log_Tips Tx("[INFO]    ")
+#define Log_Tips	Tx("[INFO]    ")
 #define Log_Warning Tx("[WARNING] ")
-#define Log_Error Tx("[ERROR]   ")
-#define Log_Text Tx("[TEXT]    ")
+#define Log_Error	Tx("[ERROR]   ")
+#define Log_Text	Tx("[TEXT]    ")
+#define Log_Tab		Tx("          ")
 #define Log_LineFeed Tx("\n")
 
 

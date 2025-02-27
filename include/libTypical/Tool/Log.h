@@ -424,7 +424,7 @@ namespace Typical_Tool
 			}
 			case LogMessage::End: {
 				if (this->CMD) {
-					Log_Out(Tx(""), Terr, Format(Tx("  %"), _Text), Tx(""), _MessageKey);
+					Log_Out(Tx(""), Terr, Format(Tx("%%"), Log_Tab, _Text), Tx(""), _MessageKey);
 					return;
 				}
 				else {
@@ -437,7 +437,7 @@ namespace Typical_Tool
 			}
 			case LogMessage::LineFeed: {
 				if (this->CMD) {
-					Log_Out(Tx(""), Terr, Format(Tx("  %%"), _Text, Log_LineFeed), Tx(""), _MessageKey);
+					Log_Out(Tx(""), Terr, Format(Tx("%%%"), Log_Tab, _Text, Log_LineFeed), Tx(""), _MessageKey);
 					return;
 				}
 				else {
@@ -501,7 +501,6 @@ namespace Typical_Tool
 				if (Debug) { // Debug
 					if (!this->Release) {
 						for (auto i = 0; i < _LineNumber; i++) {
-
 							Logs_lgm();
 						}
 					}
@@ -509,7 +508,6 @@ namespace Typical_Tool
 				else { // Release
 					if (this->Release) {
 						for (auto i = 0; i < _LineNumber; i++) {
-
 							Logs_lgm();
 						}
 					}
