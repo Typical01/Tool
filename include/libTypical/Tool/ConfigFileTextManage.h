@@ -184,6 +184,13 @@ namespace Typical_Tool {
 			//获取 其他非配置项
 			std::map<int, Tstr> GetOtherCharMap() { return this->OtherCharMap; }
 
+			void Clear() {
+				this->ConfigFilePath.clear();
+				this->TextCache.clear();
+				this->ConfigMap.clear();
+				this->OtherCharMap.clear();
+			}
+
 		public:
 			//获取 配置项 Value
 			Tstr GetConfigItemValue(const Tstr& _Config, const Tstr& _ConfigItem) {
