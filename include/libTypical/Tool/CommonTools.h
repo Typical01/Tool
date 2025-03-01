@@ -289,7 +289,7 @@ namespace Typical_Tool {
 		void SetLog(Log& _Log) { this->log = _Log; }
 
 	public:
-		//获取 当前工作路径
+		//获取 当前工作路径: 可能变化
 	    static Tstr GetCurrentPath() { 
 #ifdef UNICODE
 			return std::filesystem::current_path().wstring();

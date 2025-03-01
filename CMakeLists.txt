@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(libTypical)
 
+add_definitions(-DUNICODE -D_UNICODE)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -59,6 +61,11 @@ endif()
 
 # 根据不同编译器设置编译选项
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_compile_options("$<$<C_COMPILER_ID:GNU>:-finput-charset=UTF-8>")
+  add_compile_options("$<$<CXX_COMPILER_ID:GNU>:-finput-charset=UTF-8>")
+  add_compile_options("$<$<C_COMPILER_ID:Clang>:-finput-charset=UTF-8>")
+  add_compile_options("$<$<CXX_COMPILER_ID:Clang>:-finput-charset=UTF-8>")
+
   target_compile_options(libTypical
     PRIVATE
     -Wall
@@ -70,6 +77,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     $<$<CONFIG:Release>:-fexec-charset=UTF-8>    # 输出文件编码
   )
 elseif (MSVC)
+  add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+  add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
   target_compile_definitions(libTypical
       PRIVATE
       _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING

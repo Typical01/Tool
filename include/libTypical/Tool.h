@@ -13,6 +13,7 @@
 #include <libTypical/Tool/Json_Typical.h>
 #include <libTypical/Tool/ConfigFileTextManage.h>
 #include <libTypical/Tool/WindowHost.h>
+#include <libTypical/Tool/Languages.h>
 
 
 #endif

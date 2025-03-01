@@ -503,31 +503,66 @@ namespace Typical_Tool {
 			}
 		}
 
-		//添加注册表项以实现 开机自启动
+		// 添加注册表项以实现开机自启动
 		template<class T = bool>
-		bool SetSelfStarting(Tstr valueName, Tstr exePath) {
+		bool SetSelfStarting(Tstr valueName, Tstr exePath, bool _bAutoStart) {
 			LONG result;
 			HKEY hKey;
 
+			// 定义注册表路径，指向当前用户的“启动”项
 			Tstr regPath = Tx("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
 
-			// 打开注册表项  
-			result = RegOpenKeyEx(HKEY_CURRENT_USER, regPath.c_str(), 0, KEY_SET_VALUE, &hKey);
+			// 打开注册表项
+			result = RegOpenKeyEx(HKEY_CURRENT_USER, regPath.c_str(), 0, KEY_QUERY_VALUE | KEY_SET_VALUE, &hKey); //权限: 查询和设置
 			if (result != ERROR_SUCCESS) {
-				lgc(Err, Format(Tx("打开密钥失败!: [%]"), ToStr(result)));
+				lgc(Err, Format(Tx("打开密钥[%]失败!"), ToStr(result)));
 				return false;
 			}
 
-			// 设置注册表值  
-			result = RegSetValueEx(hKey, valueName.c_str(), 0, REG_SZ, (const BYTE*)exePath.c_str(), ((int)exePath.size() + 1) * sizeof(wchar_t));
-			if (result != ERROR_SUCCESS) {
-				lgc(Err, Format(Tx("设置注册表值失败!: [%]"), ToStr(result)));
-				RegCloseKey(hKey);
-				return false;
+			// 查询指定的注册表值
+			DWORD dwType = REG_SZ;
+			wchar_t existingValue[MAX_PATH];
+			DWORD dwSize = sizeof(existingValue);
+			result = RegQueryValueEx(hKey, valueName.c_str(), nullptr, &dwType, reinterpret_cast<LPBYTE>(existingValue), &dwSize);
+
+			if (_bAutoStart) { // 如果需要设置为自启动
+				// 如果注册表值不存在，或者存在但路径不同，则添加或更新该值
+				if (result == ERROR_FILE_NOT_FOUND || (result == ERROR_SUCCESS && exePath != existingValue)) {
+					result = RegSetValueEx(hKey, valueName.c_str(), 0, REG_SZ, reinterpret_cast<const BYTE*>(exePath.c_str()), (exePath.size() + 1) * sizeof(wchar_t));
+					if (result != ERROR_SUCCESS) {
+						lgc(Err, Format(Tx("设置注册表值[%]失败!"), ToStr(result)));
+						RegCloseKey(hKey);
+						return false;
+					}
+					lgc(Tip, Tx("已[设置]开机自启动."));
+				}
+				else if (result != ERROR_SUCCESS) {
+					lgc(Err, Format(Tx("设置: 查询注册表值[%]失败!"), ToStr(result)));
+					RegCloseKey(hKey);
+					return false;
+				}
+			}
+			else { // 如果不需要设置为自启动
+				// 如果注册表值存在，则删除该值
+				if (result == ERROR_SUCCESS) {
+					result = RegDeleteValue(hKey, valueName.c_str());
+					if (result != ERROR_SUCCESS) {
+						lgc(Err, Format(Tx("删除注册表值[%]失败!"), ToStr(result)));
+						RegCloseKey(hKey);
+						return false;
+					}
+					lgc(Tip, Tx("已[取消]开机自启动."));
+				}
+				else if (result != ERROR_FILE_NOT_FOUND) {
+					lgc(Err, Format(Tx("取消: 查询注册表值[%]失败!"), ToStr(result)));
+					RegCloseKey(hKey);
+					return false;
+				}
 			}
 
+			// 关闭注册表项
 			RegCloseKey(hKey);
-			lgc(Tip, Tx("注册表注册成功!"));
+			lgc(Tip, Tx("注册表修改成功!"));
 			return true;
 		}
 
@@ -594,42 +629,6 @@ namespace Typical_Tool {
 			else {
 				lgc(Tx("无法获取当前可执行文件的路径!"));
 				return false;
-			}
-		}
-
-		template<class T = bool>
-		bool CreateFolder(const Tstr& folderPath) {
-			DWORD attributes = GetFileAttributes(folderPath.c_str());
-
-			// 检查路径是否存在且不是目录  
-			if (attributes == INVALID_FILE_ATTRIBUTES) {
-				// 路径不存在或出错，尝试创建目录  
-				if (CreateDirectory(folderPath.c_str(), NULL) || GetLastError() == ERROR_ALREADY_EXISTS) {
-					lgc(Tip, Format(Tx("文件夹: [%] 创建成功!"), folderPath));
-
-					return true;
-				}
-				lgc(Err, Format(Tx("文件夹: [%] 创建失败!!"), folderPath));
-
-				// 创建失败!且不是因为路径已存在  
-				return false;
-			}
-			else if (attributes & FILE_ATTRIBUTE_DIRECTORY) {
-				lgc(Tip, Format(Tx("文件夹: [%] 已存在!"), folderPath));
-				// 路径已经是一个目录  
-				return true;
-			}
-			lgc(Err, Format(Tx("文件夹: [%] 创建失败!(路径存在, 但不是目录)!"), folderPath));
-			// 路径存在但不是目录（可能是一个文件）  
-			return false;
-		}
-
-		//打开文件夹
-		template<class T = bool>
-		void OpenFolder(const Tstr& path) {
-			ShellMessage OpenFolder(Tx("打开文件夹"), (int)ShellExecute(NULL, NULL, path.c_str(), NULL, NULL, SW_SHOWNORMAL));
-			if (!OpenFolder.IsSucceed()) {
-				lg(Err, Tx("ShellExecute: 打开文件夹 失败!!"));
 			}
 		}
 
