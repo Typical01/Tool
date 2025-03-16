@@ -14,7 +14,8 @@ namespace Typical_Tool {
 	class FileSystem {
 	private:
 		std::filesystem::path Path;
-		Log& log = lgc;
+		Log& LogDebug = lgc;
+		Log& LogRelease = lgcr;
 
 	public:
 		FileSystem()
@@ -33,34 +34,64 @@ namespace Typical_Tool {
 		}
 
 	private:
-		bool Exists(const Tstr& _TipsChar, const std::filesystem::path& _Path)
-		{	
+		/*
+		* _TipsChar: 提示文本
+		* _Path: 检查的路径
+		* _bShowRelease: 输出到 Release
+		* _bFileTrue: 文件存在时为真, 否则取反
+		*/
+		bool Exists(const Tstr& _TipsChar, const std::filesystem::path& _Path, bool _bShowRelease = false, bool _bFileTrue = true)
+		{
 			Tstr FileType;
 			if (std::filesystem::exists(_Path)) {
 				if (std::filesystem::is_regular_file(_Path)) { // 检查路径是否是普通文件
 					FileType = Tx("文件");
 				}
-				else if (std::filesystem::is_directory(_Path)){ // 检查路径是否是目录
+				else if (std::filesystem::is_directory(_Path)) { // 检查路径是否是目录
 					FileType = Tx("目录");
 				}
 				else {
 					FileType = Tx("其他(符号链接...)");
 				}
 
-#ifdef UNICODE
-				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("][") + FileType + Tx("] 存在!"), Err);
-#else
-				log(_TipsChar + Tx(":[") + _Path.string() + Tx("][") + FileType + Tx("] 存在!"), Err);
-#endif
-				return true;
+				if (_bShowRelease) {
+					if (_bFileTrue) {
+						LogRelease(_TipsChar + Tx(":[") + _Path.PathToStr() + Tx("][") + FileType + Tx("] 存在!"), Tip);
+					}
+					else {
+						LogRelease(_TipsChar + Tx(":[") + _Path.PathToStr() + Tx("][") + FileType + Tx("] 存在!"), Err);
+					}
+					return true;
+				}
+				else {
+					if (_bFileTrue) {
+						LogDebug(_TipsChar + Tx(":[") + _Path.PathToStr() + Tx("][") + FileType + Tx("] 存在!"), Tip);
+					}
+					else {
+						LogDebug(_TipsChar + Tx(":[") + _Path.PathToStr() + Tx("][") + FileType + Tx("] 存在!"), Err);
+					}
+					return true;
+				}
 			}
 			else {
-#ifdef UNICODE
-				log(_TipsChar + Tx(":[") + _Path.wstring() + Tx("] 不存在!"), Tip);
-#else
-				log(_TipsChar + Tx(":[") + _Path.string() + Tx("] 不存在!"), Tip);
-#endif
-				return false;
+				if (_bShowRelease) {
+					if (_bFileTrue) {
+						LogRelease(_TipsChar + Tx(":[") + _Path.PathToStr() + Tx("] 不存在!"), Err);
+					}
+					else {
+						LogRelease(_TipsChar + Tx(":[") + _Path.PathToStr() + Tx("] 不存在!"), Tip);
+					}
+					return false;
+				}
+				else {
+					if (_bFileTrue) {
+						LogDebug(_TipsChar + Tx(":[") + _Path.PathToStr() + Tx("] 不存在!"), Err);
+					}
+					else {
+						LogDebug(_TipsChar + Tx(":[") + _Path.PathToStr() + Tx("] 不存在!"), Tip);
+					}
+					return false;
+				}
 			}
 		}
 
@@ -72,9 +103,9 @@ namespace Typical_Tool {
 				return false;
 			}
 #ifdef UNICODE
-			auto PathSlash = this->Path.wstring().find_last_of(Tx("\\/"));
+			auto PathSlash = this->Path.PathToStr().find_last_of(Tx("\\/"));
 #else
-			auto PathSlash = this->Path.string().find_last_of(Tx("\\/"));
+			auto PathSlash = this->Path.PathToStr().find_last_of(Tx("\\/"));
 #endif
 			try {
 				if (PathSlash == Tstr::npos) {
@@ -86,16 +117,17 @@ namespace Typical_Tool {
 					std::filesystem::create_directories(this->Path);
 				}
 			}
-			catch (const std::filesystem::filesystem_error& e) {
-#ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::CreateDirectory: 失败原因: { % }"), stow(e.what()).c_str()), Err);
-#else
-				lgcr(Format(Tx("FileSystem::CreateDirectory: 失败原因: { % }"), e.what()), Err);
-#endif
+			catch (const std::filesystem::filesystem_error& Error) {
+				LogRelease(Format(Tx("FileSystem::CreateDirectory: 失败原因: { % }"), stow(Error.what())), Err);
+				LogRelease(Format(Tx("FileSystem::CreateDirectory: 路径: { \n\tPath1: [%]\n\tPath2: [%]\n}"), 
+					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
+				Exists(Tx("创建文件夹(Path1)"), Error.path1(), true, false);
+				Exists(Tx("创建文件夹(Path2)"), Error.path2(), true, false);
+
 				return false;
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::CreateDirectory: 其他错误!"), Err);
+				LogRelease(Tx("FileSystem::CreateDirectory: 其他错误!"), Err);
 				return false;
 			}
 
@@ -116,16 +148,17 @@ namespace Typical_Tool {
 					std::filesystem::remove(this->Path);
 				}
 			}
-			catch (const std::filesystem::filesystem_error& e) {
-#ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::Delete: 失败原因: { % }"), stow(e.what()).c_str()), Err);
-#else
-				lgcr(Format(Tx("FileSystem::Delete: 失败原因: { % }"), e.what()), Err);
-#endif
+			catch (const std::filesystem::filesystem_error& Error) {
+				LogRelease(Format(Tx("FileSystem::Delete: 失败原因: { % }"), stow(Error.what())), Err);
+				LogRelease(Format(Tx("FileSystem::Delete: 路径: { \n\tPath1: [%]\n\tPath2: [%]\n}"),
+					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
+				Exists(Tx("删除文件/目录(Path1)"), Error.path1(), true);
+				Exists(Tx("删除文件/目录(Path2)"), Error.path2(), true);
+
 				return false;
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::Delete: 其他错误!"), Err);
+				LogRelease(Tx("FileSystem::Delete: 其他错误!"), Err);
 				return false;
 			}
 
@@ -154,16 +187,17 @@ namespace Typical_Tool {
 					std::filesystem::copy(this->Path, _TargetPath, std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::recursive);
 				}
 			}
-			catch (const std::filesystem::filesystem_error& e) {
-#ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::Copy: 失败原因: { % }"), stow(e.what()).c_str()), Err);
-#else
-				lgcr(Format(Tx("FileSystem::Copy: 失败原因: { % }"), e.what()), Err);
-#endif
+			catch (const std::filesystem::filesystem_error& Error) {
+				LogRelease(Format(Tx("FileSystem::Copy: 失败原因: { % }"), stow(Error.what()).c_str()), Err);
+				LogRelease(Format(Tx("FileSystem::Copy: 路径: { \n\tPath1: [%]\n\tPath2: [%]\n}"),
+					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
+				Exists(Tx("复制文件/目录(Path1)"), Error.path1(), true);
+				Exists(Tx("复制文件/目录(Path2)"), Error.path2(), true);
+
 				return false;
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::Copy: 其他错误!"), Err);
+				LogRelease(Tx("FileSystem::Copy: 其他错误!"), Err);
 				return false;
 			}
 			return true;
@@ -176,28 +210,47 @@ namespace Typical_Tool {
 				if (!Exists(Tx("重命名文件/目录"), this->Path)) {
 					return false;
 				}
+
+				try {
+					std::filesystem::rename(this->Path, NewPathName);
+				}
+				catch (const std::filesystem::filesystem_error& Error) {
+					LogRelease(Format(Tx("FileSystem::ReName: 失败原因: { % }"), stow(Error.what()).c_str()), Err);
+					LogRelease(Format(Tx("FileSystem::ReName: 路径: { \n\tPath1: [%]\n\tPath2: [%]\n}"),
+						Error.path1().PathToStr(), Error.path2().PathToStr()), War);
+					Exists(Tx("重命名文件/目录(Path1)"), Error.path1(), true);
+					Exists(Tx("重命名文件/目录(Path2)"), Error.path2(), true);
+
+					return false;
+				}
+				catch (...) {
+					LogRelease(Tx("FileSystem::ReName: 其他错误!"), Err);
+					return false;
+				}
 			}
 			else {
 				if (!Exists(Tx("移动文件/目录"), this->Path)) {
 					return false;
 				}
-			}
 
-			try {
-				std::filesystem::rename(this->Path, NewPathName);
+				try {
+					std::filesystem::rename(this->Path, NewPathName);
+				}
+				catch (const std::filesystem::filesystem_error& Error) {
+					LogRelease(Format(Tx("FileSystem::ReName: 失败原因: { % }"), stow(Error.what()).c_str()), Err);
+					LogRelease(Format(Tx("FileSystem::ReName: 路径: { \n\tPath1: [%]\n\tPath2: [%]\n}"),
+						Error.path1().PathToStr(), Error.path2().PathToStr()), War);
+					Exists(Tx("移动文件/目录(Path1)"), Error.path1(), true);
+					Exists(Tx("移动文件/目录(Path2)"), Error.path2(), true);
+
+					return false;
+				}
+				catch (...) {
+					LogRelease(Tx("FileSystem::ReName: 其他错误!"), Err);
+					return false;
+				}
 			}
-			catch (const std::filesystem::filesystem_error& e) {
-#ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::ReName: 失败原因: { % }"), stow(e.what()).c_str()), Err);
-#else
-				lgcr(Format(Tx("FileSystem::ReName: 失败原因: { % }"), e.what()), Err);
-#endif
-				return false;
-			}
-			catch (...) {
-				lgcr(Tx("FileSystem::ReName: 其他错误!"), Err);
-				return false;
-			}
+			
 			return true;
 		}
 		//修改文件/目录权限
@@ -210,16 +263,17 @@ namespace Typical_Tool {
 			try {
 				std::filesystem::permissions(this->Path, _perms);
 			}
-			catch (const std::filesystem::filesystem_error& e) {
-#ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::SetPermissions: 失败原因: { % }"), stow(e.what()).c_str()), Err);
-#else
-				lgcr(Format(Tx("FileSystem::SetPermissions: 失败原因: { % }"), e.what()), Err);
-#endif
+			catch (const std::filesystem::filesystem_error& Error) {
+				LogRelease(Format(Tx("FileSystem::SetPermissions: 失败原因: { % }"), stow(Error.what()).c_str()), Err);
+				LogRelease(Format(Tx("FileSystem::SetPermissions: 路径: { \n\tPath1: [%]\n\tPath2: [%]\n}"),
+					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
+				Exists(Tx("修改文件/目录权限(Path1)"), Error.path1(), true);
+				Exists(Tx("修改文件/目录权限(Path2)"), Error.path2(), true);
+
 				return false;
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::SetPermissions: 其他错误!"), Err);
+				LogRelease(Tx("FileSystem::SetPermissions: 其他错误!"), Err);
 				return false;
 			}
 			return true;
@@ -267,16 +321,17 @@ namespace Typical_Tool {
 					}
 				}
 			}
-			catch (const std::filesystem::filesystem_error& e) {
-#ifdef UNICODE
-				lgcr(Format(Tx("FileSystem::DirectoryIterator: 失败原因: { % }"), stow(e.what()).c_str()), Err);
-#else
-				lgcr(Format(Tx("FileSystem::DirectoryIterator: 失败原因: { % }"), e.what()), Err);
-#endif
+			catch (const std::filesystem::filesystem_error& Error) {
+				LogRelease(Format(Tx("FileSystem::DirectoryIterator: 失败原因: { % }"), stow(Error.what()).c_str()), Err);
+				LogRelease(Format(Tx("FileSystem::DirectoryIterator: 路径: { \n\tPath1: [%]\n\tPath2: [%]\n}"),
+					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
+				Exists(Tx("遍历目录(Path1)"), Error.path1(), true);
+				Exists(Tx("遍历目录(Path2)"), Error.path2(), true);
+
 				return std::vector< std::filesystem::directory_entry>();
 			}
 			catch (...) {
-				lgcr(Tx("FileSystem::DirectoryIterator: 其他错误!"), Err);
+				LogRelease(Tx("FileSystem::DirectoryIterator: 其他错误!"), Err);
 				return std::vector< std::filesystem::directory_entry>();
 			}
 
@@ -286,77 +341,111 @@ namespace Typical_Tool {
 	public:
 		//设置 std::filesystem::path
 		void SetPath(const std::filesystem::path& _Path) { this->Path = _Path; }
-		void SetLog(Log& _Log) { this->log = _Log; }
+		void SetLog(Log& _Log) { this->LogDebug = _Log; }
 
 	public:
 		//获取 当前工作路径: 可能变化
 	    static Tstr GetCurrentPath() { 
-#ifdef UNICODE
-			return std::filesystem::current_path().wstring();
-#else
-			return std::filesystem::current_path().string();
-#endif 
+			return std::filesystem::current_path().PathToStr();
 		}
 		//获取 std::filesystem::path
 		std::filesystem::path GetPath() { return this->Path; }
 		//获取 文件名
 		Tstr GetFileName() const {
-#ifdef UNICODE
-			return this->Path.filename().wstring();
-#else
-			return this->Path.filename().string();
-#endif 
+			return this->Path.filename().PathToStr();
 		}
 		//获取 文件扩展名
 		Tstr GetExtensionName() const { 
-#ifdef UNICODE
-			return this->Path.extension().wstring();
-#else
-			return this->Path.extension().string();
-#endif
+			return this->Path.extension().PathToStr();
 		}
 		//获取 父级目录名
 		Tstr GetParentName() const { 
-#ifdef UNICODE
-			return this->Path.parent_path().wstring();
-#else
-			return this->Path.parent_path().string();
-#endif	
+			return this->Path.parent_path().PathToStr();
 		}
 	};
 
-	namespace GameTools
-	{
-		//帧率-----------------------------------------------------------------------------------------------------------
 
-#ifndef FPS_COUNT
-#define FPS_COUNT 60 //Fps 统计的间隔(帧率)
-#endif
-		//获取 FPS
-		template<class T = bool>
-		float GetFps() {
-			//临时统计
-			static int tempCount = 0;
-			static Timer timer; //时间
-			static float fps; //帧率
 
-			if (tempCount > FPS_COUNT) {
-				//将时间节点拓展到两个
-				if (timer.GetTimerSize() < 2) {
-					timer.AddTimer();
-				}
-
-				tempCount = 0;
-				timer.SetTimer(timer.GetTime(), 2);
-				float tempTime = (float)timer.ComputTime_FirstToEnd();
-				fps = FPS_COUNT / (tempTime / 1000.0f); //获取的系统时间为毫秒数
-				timer.SetTimer(timer.GetTime(), 1);
+	class ThreadPool {
+	public:
+		// 构造函数，创建指定数量的工作线程
+		ThreadPool(size_t _NumThreads) : StopThread(false) {
+			for (size_t i = 0; i < _NumThreads; ++i) {
+				Workers.emplace_back([this] {
+					while (true) {
+						std::function<void()> task;
+						{
+							std::unique_lock<std::mutex> lock(QueueMutex);
+							Condition.wait(lock, [this] { return StopThread || !Tasks.empty(); });
+							if (StopThread && Tasks.empty()) return;
+							task = std::move(Tasks.front());
+							Tasks.pop();
+						}
+						task();
+					}
+					});
 			}
-
-			tempCount++;
-			return fps;
 		}
-	}
+
+		// 析构函数，停止线程池
+		~ThreadPool() {
+			JoinAll();
+		}
+
+		// 提交任务到线程池
+		template <class F, class... Args>
+		auto Enqueue(F&& _Func, Args&&... _Args) -> std::future<typename std::result_of<F(Args...)>::type> {
+			using return_type = typename std::result_of<F(Args...)>::type;
+
+			auto task = std::make_shared<std::packaged_task<return_type()>>(
+				std::bind(std::forward<F>(_Func), std::forward<Args>(_Args)...)
+			);
+
+			std::future<return_type> res = task->get_future();
+			{
+				std::unique_lock<std::mutex> lock(QueueMutex);
+				if (StopThread) {
+					throw wruntime_error(_LOGERRORINFO(Tx("tytl::ThreadPool: enqueue on stopped ThreadPool!")));
+				}
+				Tasks.emplace([task]() { (*task)(); });
+			}
+			Condition.notify_one();
+			return res;
+		}
+
+		/*
+		* 当前任务数量
+		*/
+		bool WorkNumber() {
+			{
+				std::unique_lock<std::mutex> lock(QueueMutex);
+				return Tasks.size();
+			}
+		}
+
+		/*
+		* 主动连接所有线程
+		*/
+		void JoinAll() {
+			{
+				std::unique_lock<std::mutex> lock(QueueMutex);
+				StopThread = true;
+			}
+			Condition.notify_all();
+			for (auto& tempThread : Workers) {
+				if (tempThread.joinable()) {
+					tempThread.join();
+				}
+			}
+		}
+
+	private:
+		std::vector<std::thread> Workers; // 工作线程
+		std::queue<std::function<void()>> Tasks; // 任务队列
+		std::mutex QueueMutex; // 保护任务队列的互斥锁
+		std::condition_variable Condition; // 条件变量，用于线程同步
+		bool StopThread; // 停止标志
+	};
 }
 
 #endif

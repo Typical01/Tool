@@ -55,32 +55,6 @@ namespace Typical_Tool {
 
 
 
-		//class ConfigValue {
-		//private:
-		//	std::map<Tstr, Tstr> Config; //配置
-		//	std::shared_ptr<class ConfigFileTextManage> ConfigFileTextManage;
-		//	Log& log = lgc;
-
-		//public:
-		//	ConfigValue() {}
-
-		//	ConfigValue(std::shared_ptr<class tytl::StringManage::ConfigFileTextManage> _ConfigFileTextManage, std::map<Tstr, Tstr>& _Config)
-		//		: ConfigFileTextManage(_ConfigFileTextManage), Config(_Config)
-		//	{
-
-		//	}
-
-		//	Tstr operator[](const Tstr& _ConfigItem) {
-		//		if (Config.empty()) {
-		//			log(Format(Tx("ConfigValue::operator[] Config为空!")));
-		//			return Tstr();
-		//		}
-
-		//		return ConfigFileTextManage->GetConfigItemValue(Config, _ConfigItem);
-		//	}
-		//};
-
-
 
 		/* 配置字符串格式, 基础结构:
 		*	[config]\n
@@ -761,13 +735,13 @@ namespace Typical_Tool {
 			bool Format(std::vector<Tstr>& _FormatMap)
 			{
 				bool FirstLineText = true; //第一行文本
-				int TextLine = 1; //文本行数
+				//int TextLine = 1; //文本行数
 
 				//示例文本: 总是在配置文件的开头
-				auto tempFormatSampleText = this->OtherCharMap.find(0);
+				/*auto tempFormatSampleText = this->OtherCharMap.find(0);
 				if (tempFormatSampleText != this->OtherCharMap.end()) {
 					_FormatMap.push_back(tempFormatSampleText->second);
-				}
+				}*/
 
 				if (!this->ConfigMap.empty())
 				{
@@ -777,11 +751,11 @@ namespace Typical_Tool {
 					for (auto tempConfig = this->ConfigMap.begin(); tempConfig != this->ConfigMap.end(); tempConfig++)
 					{
 						//其他字符
-						auto tempOtherChar = this->OtherCharMap.find(TextLine);
+						/*auto tempOtherChar = this->OtherCharMap.find(TextLine);
 						if (tempOtherChar != this->OtherCharMap.end()) {
 							_FormatMap.push_back(tempOtherChar->second);
-						}
-						TextLine++;
+							TextLine++;
+						}*/
 
 						//配置
 						auto tempConfigText = Tx("[") + tempConfig->first + Tx("]");
@@ -1056,14 +1030,6 @@ namespace Typical_Tool {
 				log(Tx("  key3=value3"));
 				log(Tx("配置格式 示例结束!"), Tip);
 			}
-			template<class T = bool>
-			void AddConfig_FormatSampleText()
-			{
-				this->OtherCharMap.insert(std::make_pair(0, Tx("//配置格式 示例\n// [ping-baidu]\n\
-// 参数=/k ping -t www.baidu.com\n// 文件=cmd\n// 显示窗口=是 (是/否)\n\
-// 模式=打开文件 (打开文件/打开文件夹/管理员运行)\n// 菜单按键=是 (是/否: 托盘菜单中添加/程序启动时运行)\n\n")));
-			}
-
 		};
 
 }

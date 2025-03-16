@@ -39,6 +39,7 @@ namespace Typical_Tool {
 #define Tchar char
 #define Tstr std::string
 #define ToStr std::to_string
+#define PathToStr std::filesystem::path::string
 #define Tstrlen strlen
 #define Tostream std::ostream
 #define Tofstream std::ofstream
@@ -54,6 +55,7 @@ namespace Typical_Tool {
 #define Tchar wchar_t
 #define Tstr std::wstring
 #define ToStr std::to_wstring
+#define PathToStr std::filesystem::path::wstring
 #define Tstrlen wcslen
 #define Tostream std::wostream
 #define Tofstream std::wofstream
@@ -66,6 +68,7 @@ namespace Typical_Tool {
 #define Tfgets std::fgetws
 
 #endif
+
 
 
 #ifndef _DEBUG

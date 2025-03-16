@@ -38,6 +38,19 @@ namespace Typical_Tool {
 				return true;
 			}
 		}
+		bool Init(const Tstr& _JsonFilePath, bool _IsReadJsonFile, int& _ErrorTips)
+		{
+			this->WriterBuilder["emitUTF8"] = true; //utf-8字符显示为非 /uxxx
+			this->WriterBuilder["indentation"] = "    "; // 设置缩进
+			this->JsonFilePath = _JsonFilePath; //保存 Json文件路径
+
+			if (_IsReadJsonFile) {
+				return ReadJsonFile(_JsonFilePath, _ErrorTips);
+			}
+			else {
+				return true;
+			}
+		}
 
 	private:
 		bool WriteStream(const Tstr& _JsonFilePath, Json::Value& _Value, std::ios::ios_base::openmode _StreamOpenMode)
@@ -94,6 +107,51 @@ namespace Typical_Tool {
 				return false;
 			}
 		}
+		bool ReadStream(const Tstr& _JsonFilePath, Json::Value& _Value, int& _ErrorTips)
+		{
+#ifdef UNICODE
+			std::ifstream JsonFile(wtos(_JsonFilePath), Tifstream::binary);
+#else
+			std::ifstream JsonFile(_JsonFilePath, ifstream::binary);
+#endif
+			std::string ErrorCode;
+			if (JsonFile.is_open()) {
+#ifdef UNICODE
+				if (Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+#else
+				if (Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+#endif
+
+					_ErrorTips = 1;
+
+					return true;
+				}
+				else {
+#ifdef UNICODE
+					log(Format(Tx("解析 Json失败: [%]"), stow(ErrorCode)), Err);
+#else
+					log(Format(Tx("解析 Json失败: [%]"), ErrorCode), Err);
+#endif
+					log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), Err);
+
+					_ErrorTips = -1;
+
+					return false;
+				}
+			}
+			else {
+#ifdef UNICODE
+				log(Format(Tx("打开Json文件失败: [%]"), stow(ErrorCode)), Err);
+#else
+				log(Format(Tx("打开Json文件失败: [%]"), ErrorCode), Err);
+#endif
+				log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), Err);
+				
+				_ErrorTips = -1;
+
+				return false;
+			}
+		}
 
 	public:
 		//读取 Json文件到 _Value
@@ -105,6 +163,10 @@ namespace Typical_Tool {
 		bool ReadJsonFile(const Tstr& _JsonFilePath)
 		{
 			return ReadStream(_JsonFilePath, this->Value);
+		}
+		bool ReadJsonFile(const Tstr& _JsonFilePath, int& _ErrorTips)
+		{
+			return ReadStream(_JsonFilePath, this->Value, _ErrorTips);
 		}
 		//读取 Json文件到 _Value
 		bool ReadJsonFile(const Tstr& _JsonFilePath, Json::Value& _JsonValue)

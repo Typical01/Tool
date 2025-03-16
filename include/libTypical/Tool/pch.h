@@ -27,6 +27,8 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
+#include <functional>
+#include <future>
 
 #include <type_traits>
 #include <cassert>

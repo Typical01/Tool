@@ -57,7 +57,7 @@ namespace Typical_Tool {
 
 
 		// WindowFont
-		class  WindowFont {
+		class WindowFont {
 		private:
 			static HFONT Font;
 
@@ -65,7 +65,7 @@ namespace Typical_Tool {
 			WindowFont() {
 				Font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
-				Font = CreateFontA(
+				Font = CreateFont(
 					-16, -7, 0, 0,
 					400, //粗度 一般这个值设为400
 					FALSE, //斜体
@@ -73,13 +73,15 @@ namespace Typical_Tool {
 					FALSE, //删除线
 					DEFAULT_CHARSET, OUT_CHARACTER_PRECIS, CLIP_CHARACTER_PRECIS, DEFAULT_QUALITY,
 					FF_DONTCARE,
-					"微软雅黑"
+					Tx("微软雅黑")
 				);
 
 			}
 			WindowFont(HFONT hFont) {
 				Font = hFont;
 			}
+
+			HFONT GetFont() { return Font; }
 
 			void SetFont(HFONT hFont);
 
@@ -189,6 +191,9 @@ namespace Typical_Tool {
 				this->Window.insert(std::make_pair(windowName, window));
 				return true;
 			}
+
+			WindowFont GetWindowFont() { return this->WinFont; }
+
 			void SetFont(HFONT hFont);
 		public:
 
@@ -228,20 +233,21 @@ namespace Typical_Tool {
 		class  ShellConfig {
 		public:
 			Tstr OperateName; //操作名
-
 			Tstr ShellOperate; //Shell操作
 			Tstr File; //文件
 			Tstr Arg; //参数
 			Tstr WindowShow; //窗口显示
 			Tstr MenuButton; //菜单按键
 
-			ShellConfig(Tstr _OperateName, Tstr _ShellOperate, Tstr _File, Tstr _Arg = NULL, Tstr _WindowShow = Tx("是"), Tstr _MenuButton = Tx("否"))
-				: OperateName(_OperateName), ShellOperate(_ShellOperate), File(_File), Arg(_Arg), WindowShow(_WindowShow), MenuButton(_MenuButton)
+			ShellConfig(const Tstr& OperateName, const Tstr& _ShellOperate, const Tstr& _File,
+				const Tstr& _Arg = NULL, const Tstr& _WindowShow = Tx("是"), const Tstr& _MenuButton = Tx("否"),
+				int _ID_Shell = 0)
+				: ShellOperate(_ShellOperate), File(_File), Arg(_Arg), WindowShow(_WindowShow), MenuButton(_MenuButton)
 			{}
 
 			bool operator<(const ShellConfig& other) const
 			{
-				if (OperateName < other.OperateName) {
+				if (this->OperateName < other.OperateName) {
 					return true;
 				}
 				else {
@@ -252,7 +258,6 @@ namespace Typical_Tool {
 			void OutConfig()
 			{
 				lgc(Tip, Tx("ShellConfig::OutConfig()"));
-				lgc(Tx("操作名: ") + this->OperateName);
 				lgc(Tx("菜单按钮: ") + this->MenuButton);
 				lgc(Tx("Shell操作: ") + this->ShellOperate);
 				lgc(Tx("文件: ") + this->File);
@@ -288,14 +293,14 @@ namespace Typical_Tool {
 						tempShell->OutConfig(); //输出配置
 					}
 					else {
-						int MenuItemID = WindowHost::GetHMENU();
+						int tempMenuID = WindowHost::GetHMENU();
 						//int 菜单项总数 = GetMenuItemCount(菜单);
 
-						ExeMenuItem.insert(std::make_pair(MenuItemID, *tempShell));
+						ExeMenuItem.insert({ tempMenuID, *tempShell });
 						lgc(Format(Tx("操作名: [%]"), OperateName));
 						lgc(Tx("  注册: 程序菜单项"));
 						//添加菜单项
-						if (AppendMenu(Menu, MF_STRING, MenuItemID, OperateName.c_str())) {
+						if (AppendMenu(Menu, MF_STRING, tempMenuID, OperateName.c_str())) {
 							tempShell->OutConfig(); //输出配置
 							lgc(Tx("  程序菜单项: 成功!"));
 						}
@@ -308,7 +313,7 @@ namespace Typical_Tool {
 			//程序启动项Shell
 			void ExeRunItemShell() {
 				//遍历执行所有: 程序启动项
-				if (ExeRunItem.size() != 0) {
+				if (ExeRunItem.size() > 0) {
 					for (auto tempShell = ExeRunItem.begin(); tempShell != ExeRunItem.end(); tempShell++) {
 						auto OperateName = tempShell->OperateName;
 						auto ShellOperate = tempShell->ShellOperate;
@@ -321,27 +326,25 @@ namespace Typical_Tool {
 				}
 				else {
 					lgcr(War, Tx("ExeRunItemShell: 没有执行项!"));
-					lgcr();
 				}
 			}
 			//程序菜单项Shell
 			void ExeMenuItemShell(int _MenuItemID) {
 				//查找并执行对应菜单ID的 Shell配置
-				auto temp = ExeMenuItem.find(_MenuItemID);
-				if (temp != ExeMenuItem.end()) {
-					ShellConfig tempShellConfig = temp->second;
+				auto tempIndex = ExeMenuItem.find(_MenuItemID);
+				if (tempIndex != ExeMenuItem.end()) {
+					ShellConfig tempShellConfig = tempIndex->second;
 
-					auto OperateName = tempShellConfig.OperateName;
-					auto ShellOperate = tempShellConfig.ShellOperate;
-					auto File = tempShellConfig.File;
-					auto Arg = tempShellConfig.Arg;
-					auto WindowShow = tempShellConfig.WindowShow;
+					Tstr OperateName = tempShellConfig.OperateName;
+					Tstr ShellOperate = tempShellConfig.ShellOperate;
+					Tstr File = tempShellConfig.File;
+					Tstr Arg = tempShellConfig.Arg;
+					Tstr WindowShow = tempShellConfig.WindowShow;
 
 					ExecuteAnalyze(OperateName, ShellOperate, File, Arg, WindowShow);
 				}
 				else {
 					lgcr(Err, Format(Tx("ExeMenuItemShell: 没有找到菜单选项 [%]!"), _MenuItemID));
-					lgcr();
 				}
 			}
 
@@ -410,6 +413,52 @@ namespace Typical_Tool {
 			ChangeDisplaySettings(&NewDevMode, 0);
 		}
 
+		// 分辨率信息
+		struct Resolution {
+			__int32 Width;
+			__int32 Height;
+		};
+
+		/* 获取所有支持的分辨率
+		* _ResolutionIndex: ENUM_CURRENT_SETTINGS(当前分辨率)
+		*/
+		template<class T = bool>
+		std::vector<Resolution> GetSupportedResolutions(__int32 _ResolutionIndex = ENUM_CURRENT_SETTINGS) {
+			std::vector<Resolution> resolutions;
+			DEVMODE devMode = { 0 };
+			devMode.dmSize = sizeof(DEVMODE);
+
+			if (_ResolutionIndex != 0) {
+				// 枚举所有显示设置
+				for (__int32 i = 0; EnumDisplaySettings(NULL, i, &devMode); i++) {
+					Resolution res;
+					res.Width = devMode.dmPelsWidth;
+					res.Height = devMode.dmPelsHeight;
+
+					// 避免重复添加相同的分辨率
+					bool isDuplicate = false;
+					for (const auto& existingRes : resolutions) {
+						if (existingRes.Width == res.Width && existingRes.Height == res.Height) {
+							isDuplicate = true;
+							break;
+						}
+					}
+
+					if (!isDuplicate) {
+						resolutions.push_back(res);
+					}
+				}
+			}
+			else {
+				EnumDisplaySettings(NULL, _ResolutionIndex, &devMode);
+				Resolution res;
+				res.Width = devMode.dmPelsWidth;
+				res.Height = devMode.dmPelsHeight;
+				resolutions.push_back(res);
+			}
+
+			return resolutions;
+		}
 
 		//程序操作----------------------------------------------------------------------------------------------------------------
 
