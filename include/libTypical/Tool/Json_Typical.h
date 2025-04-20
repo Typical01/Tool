@@ -13,7 +13,6 @@ namespace Typical_Tool {
 		Json::StreamWriterBuilder WriterBuilder;
 		Json::CharReaderBuilder ReaderBuilder;
 		Tstr JsonFilePath;
-		Log& log = lgc;
 
 	public:
 		JsonManage()
@@ -34,9 +33,7 @@ namespace Typical_Tool {
 			if (_IsReadJsonFile) {
 				return ReadJsonFile(_JsonFilePath);
 			}
-			else {
-				return true;
-			}
+			return true;
 		}
 		bool Init(const Tstr& _JsonFilePath, bool _IsReadJsonFile, int& _ErrorTips)
 		{
@@ -47,30 +44,26 @@ namespace Typical_Tool {
 			if (_IsReadJsonFile) {
 				return ReadJsonFile(_JsonFilePath, _ErrorTips);
 			}
-			else {
-				return true;
-			}
+			return true;
 		}
 
 	private:
 		bool WriteStream(const Tstr& _JsonFilePath, Json::Value& _Value, std::ios::ios_base::openmode _StreamOpenMode)
 		{
 			Tofstream JsonFileOut(_JsonFilePath, _StreamOpenMode);
-			if (JsonFileOut.is_open()) {
-#ifdef UNICODE
-				JsonFileOut << stow(Json::writeString(this->WriterBuilder, _Value));
-#else
-				JsonFileOut << Json::writeString(this->WriterBuilder, _Value);
-#endif
-				
-				return true;
-			}
-			else {
-				log(Tx("打开Json文件失败: !ofstream.is_open()"), Err);
-				log(Tx("\tJson文件路径: ") + _Bracket(_JsonFilePath), Err);
+			if (!JsonFileOut.is_open()) {
+				LogDebug(TEXT("JsonManage::WriteStream: 打开Json文件失败: !ofstream.is_open()"), Err);
+				LogDebug(Printf(TEXT("JsonManage::WriteStream: Json文件路径: [%s]"), _Bracket(_JsonFilePath)), Err);
 				return false;
 			}
+#ifdef UNICODE
+			JsonFileOut << stow(Json::writeString(this->WriterBuilder, _Value));
+#else
+			JsonFileOut << Json::writeString(this->WriterBuilder, _Value);
+#endif
+			return true;
 		}
+
 		bool ReadStream(const Tstr& _JsonFilePath, Json::Value& _Value)
 		{
 #ifdef UNICODE
@@ -79,34 +72,33 @@ namespace Typical_Tool {
 			std::ifstream JsonFile(_JsonFilePath, ifstream::binary);
 #endif
 			std::string ErrorCode;
-			if (JsonFile.is_open()) {
+			if (!JsonFile.is_open()) {
 #ifdef UNICODE
-				if (Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+				LogDebug(Printf(TEXT("JsonManage::WriteStream: 打开Json文件失败: [%s]"), stow(ErrorCode)), Err);
 #else
-				if (Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+				LogDebug(Printf(TEXT("JsonManage::WriteStream: 打开Json文件失败: [%s]"), ErrorCode), Err);
 #endif
-					return true;
-				}
-				else {
-#ifdef UNICODE
-					log(Format(Tx("解析 Json失败: [%]"), stow(ErrorCode)), Err);
-#else
-					log(Format(Tx("解析 Json失败: [%]"), ErrorCode), Err);
-#endif
-					log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), Err);
-					return false;
-				}
-			}
-			else {
-#ifdef UNICODE
-				log(Format(Tx("打开Json文件失败: [%]"), stow(ErrorCode)), Err);
-#else
-				log(Format(Tx("打开Json文件失败: [%]"), ErrorCode), Err);
-#endif
-				log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), Err);
+				LogDebug(Printf(TEXT("JsonManage::WriteStream: Json文件路径: [%s]"), _Bracket(_JsonFilePath)), Err);
 				return false;
 			}
+
+#ifdef UNICODE
+			if (!Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+#else
+			if (!Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+#endif
+
+#ifdef UNICODE
+				LogDebug(Printf(TEXT("JsonManage::WriteStream: 解析 Json失败: [%s]"), stow(ErrorCode)), Err);
+#else
+				LogDebug(Printf(TEXT("JsonManage::WriteStream: 解析 Json失败: [%s]"), ErrorCode), Err);
+#endif
+				LogDebug(Printf(TEXT("JsonManage::WriteStream: Json文件路径: [%s]"), _Bracket(_JsonFilePath)), Err);
+				return false;
+			}
+			return true;
 		}
+
 		bool ReadStream(const Tstr& _JsonFilePath, Json::Value& _Value, int& _ErrorTips)
 		{
 #ifdef UNICODE
@@ -115,42 +107,38 @@ namespace Typical_Tool {
 			std::ifstream JsonFile(_JsonFilePath, ifstream::binary);
 #endif
 			std::string ErrorCode;
-			if (JsonFile.is_open()) {
+			if (!JsonFile.is_open()) {
 #ifdef UNICODE
-				if (Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+				LogDebug(Printf(TEXT("JsonManage::ReadStream: 打开Json文件失败: [%s]"), stow(ErrorCode)), Err);
 #else
-				if (Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+				LogDebug(Printf(TEXT("JsonManage::ReadStream: 打开Json文件失败: [%s]"), ErrorCode), Err);
 #endif
+				LogDebug(Printf(TEXT("JsonManage::ReadStream: Json文件路径: [%s]"), _Bracket(_JsonFilePath)), Err);
 
-					_ErrorTips = 1;
-
-					return true;
-				}
-				else {
-#ifdef UNICODE
-					log(Format(Tx("解析 Json失败: [%]"), stow(ErrorCode)), Err);
-#else
-					log(Format(Tx("解析 Json失败: [%]"), ErrorCode), Err);
-#endif
-					log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), Err);
-
-					_ErrorTips = -1;
-
-					return false;
-				}
-			}
-			else {
-#ifdef UNICODE
-				log(Format(Tx("打开Json文件失败: [%]"), stow(ErrorCode)), Err);
-#else
-				log(Format(Tx("打开Json文件失败: [%]"), ErrorCode), Err);
-#endif
-				log(Format(Tx("\tJson文件路径: [%]"), _Bracket(_JsonFilePath)), Err);
-				
 				_ErrorTips = -1;
 
 				return false;
 			}
+
+#ifdef UNICODE
+			if (!Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+#else
+			if (!Json::parseFromStream(this->ReaderBuilder, JsonFile, &_Value, &ErrorCode)) {
+#endif
+
+#ifdef UNICODE
+				LogDebug(Printf(TEXT("JsonManage::ReadStream: 解析 Json失败: [%s]"), stow(ErrorCode)), Err);
+#else
+				LogDebug(Printf(TEXT("JsonManage::ReadStream: 解析 Json失败: [%s]"), ErrorCode), Err);
+#endif
+				LogDebug(Printf(TEXT("JsonManage::ReadStream: Json文件路径: [%s]"), _Bracket(_JsonFilePath)), Err);
+
+				_ErrorTips = -1;
+
+				return false;
+			}
+			_ErrorTips = 1;
+			return true;
 		}
 
 	public:
@@ -223,17 +211,15 @@ namespace Typical_Tool {
 			this->JsonFilePath = _JsonFilePath;
 		}
 
-		void SetLog(Log& _log) { this->log = _log; }
-
 	public:
 
 		//输出 writeString到 Terr
 		void ToStreamString(LogMessage (*_lm)() = Lnf)
 		{
 #ifdef UNICODE
-			log(stow(Json::writeString(this->WriterBuilder, this->Value)), _lm);
+			LogDebug(stow(Json::writeString(this->WriterBuilder, this->Value)), _lm);
 #else
-			log(Json::writeString(this->WriterBuilder, this->Value), _lm);
+			LogDebug(Json::writeString(this->WriterBuilder, this->Value), _lm);
 #endif
 		}
 	};

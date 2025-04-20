@@ -45,40 +45,40 @@ namespace Typical_Tool {
 	Tstr TimeMeasureToString(TimeMeasure _Tm) {
 		switch (_Tm) {
 		case TimeMeasure::ns: {
-			return Tx("ns");
+			return TEXT("ns");
 		}
 		case TimeMeasure::us: {
-			return Tx("us");
+			return TEXT("us");
 		}
 		case TimeMeasure::ms: {
-			return Tx("ms");
+			return TEXT("ms");
 		}
 		case TimeMeasure::sec: {
-			return Tx("s");
+			return TEXT("s");
 		}
 		case TimeMeasure::min: {
-			return Tx("m");
+			return TEXT("m");
 		}
 		case TimeMeasure::hour: {
-			return Tx("h");
+			return TEXT("h");
 		}
 		case TimeMeasure::day: {
-			return Tx("day");
+			return TEXT("day");
 		}
 		case TimeMeasure::week: {
-			return Tx("week");
+			return TEXT("week");
 		}
 		case TimeMeasure::month: {
-			return Tx("month");
+			return TEXT("month");
 		}
 		case TimeMeasure::year: {
-			return Tx("year");
+			return TEXT("year");
 		}
 		case TimeMeasure::century: {
-			return Tx("century");
+			return TEXT("century");
 		}
 		default: {
-			return Tx("unknown");
+			return TEXT("unknown");
 		}
 		}
 	}
@@ -86,66 +86,72 @@ namespace Typical_Tool {
 	template<typename Target>
 	Tstr TimeMeasureToString() {
 		if constexpr (std::is_same<Target, time::century>::value) {
-			return Tx("century");
+			return TEXT("century");
 		}
 		if constexpr (std::is_same<Target, time::year>::value) {
-			return Tx("year");
+			return TEXT("year");
 		}
 		if constexpr (std::is_same<Target, time::month>::value) {
-			return Tx("month");
+			return TEXT("month");
 		}
 		if constexpr (std::is_same<Target, time::week>::value) {
-			return Tx("week");
+			return TEXT("week");
 		}
 		if constexpr (std::is_same<Target, time::day>::value) {
-			return Tx("day");
+			return TEXT("day");
 		}
 		else if constexpr (std::is_same<Target, time::hour>::value) {
-			return Tx("h");
+			return TEXT("h");
 		}
 		else if constexpr (std::is_same<Target, time::min>::value) {
-			return Tx("m");
+			return TEXT("m");
 		}
 		else if constexpr (std::is_same<Target, time::sec>::value) {
-			return Tx("s");
+			return TEXT("s");
 		}
 		else if constexpr (std::is_same<Target, time::ms>::value) {
-			return Tx("ms");
+			return TEXT("ms");
 		}
 		else if constexpr (std::is_same<Target, time::us>::value) {
-			return Tx("us");
+			return TEXT("us");
 		}
 		else if constexpr (std::is_same<Target, time::ns>::value) {
-			return Tx("ns");
+			return TEXT("ns");
 		}
 		else {
-			return Tx("unknown");
+			return TEXT("unknown");
 		}
 	}
 #define TimeToStr TimeMeasureToString
 
-	// TimePoint: 时间
-	// Target: 转换前的时间计量
-	// Result: 转换后的时间计量
-	// return 转换后的时间
+	/// <summary>
+	/// 时间转换
+	/// </summary>
+	/// <param name="Target">: 转换前的时间计量</param>
+	/// <param name="Result">: 转换后的时间计量</param>
+	/// <param name="TimePoint">: 时间</param>
+	/// <returns></returns>
 	template<class Target = time::sec, class Result = time::ms>
 	static long long TransformTimes(const long long& TimePoint)
 	{
 		return std::chrono::duration_cast<Result>(Target(TimePoint)).count();
 	}
 
-	/*
-	* Target: NULL
-	* _Tm: 当前时间的单位
-	* _Time: 当前时间
-	* _bShowMeasure: 字符串结果带单位
-	* _FormatPlaceholder: 格式占位符宽度, 进位不足时补 '0'
-	* _TimeIntervalStr: 每级单位时间的间隔符号
-	* _Number(Left/Right)IntervalStr: 突出当前时间的格式
-	*/
+	/// <summary>
+	/// 时间单位自动转换字符串
+	/// </summary>
+	/// <param name="Target">: NULL</param>
+	/// <param name="_Time">: 当前时间</param>
+	/// <param name="_Tm">: 当前时间的单位</param>
+	/// <param name="_bShowMeasure">: 字符串结果带单位</param>
+	/// <param name="_FormatPlaceholder">: 格式占位符宽度, 进位不足时补 '0'</param>
+	/// <param name="_TimeIntervalStr">: 每级单位时间的间隔符号</param>
+	/// <param name="_NumberLeftIntervalStr">: 突出当前时间的格式 Left</param>
+	/// <param name="_NumberRightIntervalStr">: 突出当前时间的格式 Right</param>
+	/// <returns></returns>
 	template <class Target = bool>
-	Tstr TimeAutoToStr(long long _Time, TimeMeasure _Tm, bool _bShowMeasure = true, int _FormatPlaceholder = 1, const Tstr& _TimeIntervalStr = Tx(" "),
-		const Tstr& _NumberLeftIntervalStr = Tx(""), const Tstr& _NumberRightIntervalStr = Tx("")) {
+	Tstr TimeAutoToStr(long long _Time, TimeMeasure _Tm, bool _bShowMeasure = true, int _FormatPlaceholder = 1, const Tstr& _TimeIntervalStr = TEXT(" "),
+		const Tstr& _NumberLeftIntervalStr = TEXT(""), const Tstr& _NumberRightIntervalStr = TEXT("")) {
 		if (_Tm == TimeMeasure::century) {
 			if (_bShowMeasure) {
 				return ToStr(_Time) + _TimeIntervalStr + TimeToStr(Tm::century);
@@ -184,16 +190,16 @@ namespace Typical_Tool {
 			}
 			if (_bShowMeasure) {
 				// 格式化数字，保证数字至少为两位
-				oss.str(Tx(""));  // 清空字符串流
+				oss.str(TEXT(""));  // 清空字符串流
 				oss.clear();  // 清除错误标志
-				oss << std::setw(_FormatPlaceholder) << std::setfill(Tx('0')) << it->second;  // 设置最小宽度为 2，填充字符为 0
+				oss << std::setw(_FormatPlaceholder) << std::setfill(TEXT('0')) << it->second;  // 设置最小宽度为 2，填充字符为 0
 				Result += _NumberLeftIntervalStr + oss.str() + _NumberRightIntervalStr + TimeToStr(it->first); // 拼接单位
 			}
 			else {
 				// 格式化数字，保证数字至少为两位
-				oss.str(Tx(""));  // 清空字符串流
+				oss.str(TEXT(""));  // 清空字符串流
 				oss.clear();  // 清除错误标志
-				oss << std::setw(_FormatPlaceholder) << std::setfill(Tx('0')) << it->second;  // 设置最小宽度为 2，填充字符为 0
+				oss << std::setw(_FormatPlaceholder) << std::setfill(TEXT('0')) << it->second;  // 设置最小宽度为 2，填充字符为 0
 				Result += _NumberLeftIntervalStr + oss.str() + _NumberRightIntervalStr; // 拼接间隔
 			}
 		}
@@ -220,11 +226,11 @@ namespace Typical_Tool {
 		bool IsSaveAllTimePoint;
 
 	public:
-		/*
-		* _IsSaveAllTimePoint: 是否保存所有的时间节点
-		*	保存: 大量数据时, 占用内存; 接口传入(int)
-		*	不保存: 只保存(第一次/前一次/后一次)的时间节点; 接口传入(TimePointLocation/tpl)
-		*/
+		/// <summary>
+		/// 保存: 大量数据时, 占用内存; 接口传入(int) |
+		/// 不保存: 只保存(第一次/前一次/后一次)的时间节点; 接口传入(TimePointLocation/tpl)
+		/// </summary>
+		/// <param name="_IsSaveAllTimePoint">: 是否保存所有的时间节点</param>
 		Timer(bool _IsSaveAllTimePoint = false)
 			: IsSaveAllTimePoint(_IsSaveAllTimePoint)
 		{
@@ -249,7 +255,7 @@ namespace Typical_Tool {
 						return false;
 					}
 					return true;
-					}, _LOGERRORINFO(_FunctionName + Tx(": Location < 0 || Location > TimerContainer.size() - 1")));
+					}, _LOGERRORINFO(_FunctionName + TEXT(": Location < 0 || Location > TimerContainer.size() - 1")));
 			}
 			else {
 				_IsValid_RunTime<int>(_Number, [&](int _Number)->bool {
@@ -257,7 +263,7 @@ namespace Typical_Tool {
 						return false;
 					}
 					return true;
-					}, _LOGERRORINFO(_FunctionName + Tx(": Location < 0 || Location > 2 (Location: 0/1/2)")));
+					}, _LOGERRORINFO(_FunctionName + TEXT(": Location < 0 || Location > 2 (Location: 0/1/2)")));
 			}
 		}
 
@@ -269,21 +275,21 @@ namespace Typical_Tool {
 		void AddTimer(std::chrono::steady_clock::time_point&& _TimePoint);
 
 		void SetTimer(const std::chrono::steady_clock::time_point& _TimePoint, int _Location) {
-			Time_IsValid_RunTime(_Location, Tx("SetTimer()"));
+			Time_IsValid_RunTime(_Location, TEXT("SetTimer()"));
 
-			std::lock_guard<mutex> tempMutex(this->mutex_Timer);
+			std::lock_guard<std::mutex> tempMutex(this->mutex_Timer);
 			this->TimerContainer[_Location] = _TimePoint;
 		}
 		void SetTimer(std::chrono::steady_clock::time_point&& _TimePoint, int _Location) {
-			Time_IsValid_RunTime(_Location, Tx("SetTimer()"));
+			Time_IsValid_RunTime(_Location, TEXT("SetTimer()"));
 
-			std::lock_guard<mutex> tempMutex(this->mutex_Timer);
+			std::lock_guard<std::mutex> tempMutex(this->mutex_Timer);
 			this->TimerContainer[_Location] = _TimePoint;
 		}
 		std::chrono::steady_clock::time_point GetTimer(int _Location) {
-			Time_IsValid_RunTime(_Location, Tx("GetTimer()"));
+			Time_IsValid_RunTime(_Location, TEXT("GetTimer()"));
 
-			std::lock_guard<mutex> tempMutex(this->mutex_Timer);
+			std::lock_guard<std::mutex> tempMutex(this->mutex_Timer);
 			return this->TimerContainer[_Location];
 		}
 
@@ -309,8 +315,8 @@ namespace Typical_Tool {
 		template<class Target = time::sec>
 		long long ComputTime(int _LocationBegin, int _LocationEnd)
 		{
-			Time_IsValid_RunTime(_LocationBegin, Tx("ComputTime"));
-			Time_IsValid_RunTime(_LocationEnd, Tx("ComputTime"));
+			Time_IsValid_RunTime(_LocationBegin, TEXT("ComputTime"));
+			Time_IsValid_RunTime(_LocationEnd, TEXT("ComputTime"));
 
 			// front - end
 			return std::chrono::duration_cast<Target>(
@@ -324,17 +330,15 @@ namespace Typical_Tool {
 	class Time {
 	public:
 		static bool IsShowLog;
-		inline static Log& log = lgc;
 
 	public:
 		static void SetShowLog(bool _IsShowLog);
-		static void SetLog(tytool::Log& _Log);
 
 		template<class Target = time::sec>
 		static void sleep(long long _Number)
 		{
 			if (IsShowLog) {
-				log(War, Format(Tx("休眠: [%]%"), _Number, TimeMeasureToString<Target>()));
+				LogDebug(War, Printf(TEXT("休眠: [%s]%s"), _Number, TimeMeasureToString<Target>()));
 			}
 			std::this_thread::sleep_for(Target(_Number));
 		}
@@ -342,15 +346,15 @@ namespace Typical_Tool {
 		static void wait(long long _Number)
 		{
 			if (IsShowLog) {
-				log(War, Format(Tx("等待: [%]%"), _Number, TimeMeasureToString<Target>()));
+				LogDebug(War, Printf(TEXT("等待: [%s]%s"), _Number, TimeMeasureToString<Target>()));
 			}
 			Target timeTarget = std::chrono::duration_cast<Target>(std::chrono::steady_clock::now().time_since_epoch()) + Target(_Number);
 			while (timeTarget > std::chrono::duration_cast<Target>(std::chrono::steady_clock::now().time_since_epoch())) {}
 		}
 
 
-		static void FormatTime(Tstr& text, const Tstr& timeFormat = Tx("%Y-%m-%d %H:%M:%S"),
-			const Tstr& textLeftFormat = Tx("["), const Tstr& textRigthFormat = Tx("]"))
+		static void FormatTime(Tstr& text, const Tstr& timeFormat = TEXT("%Y-%m-%d %H:%M:%S"),
+			const Tstr& textLeftFormat = TEXT("["), const Tstr& textRigthFormat = TEXT("]"))
 		{
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();;
 			// 获取当前时间点（自epoch以来的时间）
@@ -364,7 +368,7 @@ namespace Typical_Tool {
 			oss << std::put_time(now_tm, timeFormat.c_str()); // 自定义时间格式
 
 			//不需要修饰字符时, 直接返回格式化后的时间文本
-			if (textLeftFormat == Tx("") && textRigthFormat == Tx("")) {
+			if (textLeftFormat == TEXT("") && textRigthFormat == TEXT("")) {
 				text = oss.str() + text;
 			}
 			else {
@@ -372,8 +376,8 @@ namespace Typical_Tool {
 			}
 		}
 
-		static Tstr GetFormatTime(const Tstr& timeFormat = Tx("%Y-%m-%d %H:%M:%S"),
-			const Tstr& textLeftFormat = Tx("["), const Tstr& textRigthFormat = Tx("]"))
+		static Tstr GetFormatTime(const Tstr& timeFormat = TEXT("%Y-%m-%d %H:%M:%S"),
+			const Tstr& textLeftFormat = TEXT("["), const Tstr& textRigthFormat = TEXT("]"))
 		{
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();;
 			// 获取当前时间点（自epoch以来的时间）
@@ -387,7 +391,7 @@ namespace Typical_Tool {
 			oss << std::put_time(now_tm, timeFormat.c_str()); // 自定义时间格式
 
 			//不需要修饰字符时, 直接返回格式化后的时间文本
-			if (textLeftFormat == Tx("") && textRigthFormat == Tx("")) {
+			if (textLeftFormat == TEXT("") && textRigthFormat == TEXT("")) {
 				return oss.str();
 			}
 			else {
