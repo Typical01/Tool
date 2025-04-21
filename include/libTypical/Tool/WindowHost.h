@@ -535,21 +535,21 @@ namespace Typical_Tool {
 
 		//进程DPI_AWARENESS_CONTEXT_SYSTEM_AWARE
 		template<class T = bool>
-		void WindowDPI(bool bNewSelect = true) {
+		void WindowDPI() {
 			// 设置 DPI 感知
-			if (bNewSelect) {
-				//#include <Shcore.h>
-				//链接 Shcore.lib 库
-				SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+			
+			//#include <Shcore.h>
+			//链接 Shcore.lib 库
+#ifdef WIN32APP
+			SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+#else
+			if (SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) == NULL) { //传入的值无效
+				lgc(TEXT("Windows DPI: 传入的值无效."));
+				return;
 			}
-			else {
-				if (SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) == NULL) { //传入的值无效
-					lgc(TEXT("Windows DPI: 传入的值无效."));
-					return;
-				}
 
-				lgc(TEXT("Windows DPI: DPI感知(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) 设置成功!"));
-			}
+			lgc(TEXT("Windows DPI: DPI感知(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE) 设置成功!"));
+#endif
 		}
 
 		//单一实例窗口程序
@@ -641,9 +641,8 @@ namespace Typical_Tool {
 				return false;
 			}
 
-			// 如果路径含空格，自动添加双引号
-			if (exePath.find(TEXT(' ')) != Tstr::npos &&
-				(exePath.front() != TEXT('\"') || exePath.back() != TEXT('\"'))) {
+			// 路径自动添加双引号
+			if (exePath.front() != TEXT('\"') || exePath.back() != TEXT('\"')) {
 				exePath = Printf(TEXT("\"%s\""), exePath); // "%s"
 			}
 

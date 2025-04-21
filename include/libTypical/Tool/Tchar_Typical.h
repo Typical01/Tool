@@ -55,6 +55,7 @@ namespace Typical_Tool {
 #define PathToStr		std::filesystem::path::string
 #define Tstrlen			strlen
 #define Tostream		std::ostream
+#define Tiostream		std::iostream
 #define Tofstream		std::ofstream
 #define Tifstream		std::ifstream
 #define Tfstream		std::fstream
@@ -72,6 +73,7 @@ namespace Typical_Tool {
 #define PathToStr		std::filesystem::path::string
 #define Tstrlen			strlen
 #define Tostream		std::ostream
+#define Tiostream		std::iostream
 #define Tofstream		std::ofstream
 #define Tifstream		std::ifstream
 #define Tfstream		std::fstream
@@ -88,6 +90,7 @@ namespace Typical_Tool {
 #define PathToStr		std::filesystem::path::wstring
 #define Tstrlen			wcslen
 #define Tostream		std::wostream
+#define Tiostream		std::wiostream
 #define Tofstream		std::wofstream
 #define Tifstream		std::wifstream
 #define Tfstream		std::wfstream
@@ -162,22 +165,6 @@ namespace Typical_Tool {
 
 #define _Bracket(x) (Tstr)TEXT("[") + x + TEXT("]")
 #define _Brace(x)	(Tstr)TEXT("{") + x + TEXT("}")
-
-
-#ifndef UNICODE
-	inline Tostream& Tout = std::cout;
-	inline Tostream& Terr = std::cerr;
-
-#else
-#ifdef UTF8
-	inline Tostream& Tout = std::cout;
-	inline Tostream& Terr = std::cerr;
-#else
-	inline Tostream& Tout = std::wcout;
-	inline Tostream& Terr = std::wcerr;
-#endif
-
-#endif
 
 
 	class wruntime_error : public std::exception { // base of all runtime-error exceptions

@@ -119,6 +119,21 @@ namespace Typical_Tool
 		inline static std::thread LogFileProcessing;						//日志文件处理: 主要是输出到[./Log/时间_程序名.txt]文件
 		inline static std::atomic<bool> IsLogFileWriteThreadStop = true;	//是否 停止日志文件写入线程
 
+#ifndef UNICODE
+		inline static Tostream& Tout = std::cout;
+		inline static Tostream& Terr = std::cerr;
+			   
+#else		   
+#ifdef UTF8	   
+		inline static Tostream& Tout = std::cout;
+		inline static Tostream& Terr = std::cerr;
+#else		   
+		inline static Tostream& Tout = std::wcout;
+		inline static Tostream& Terr = std::wcerr;
+#endif
+
+#endif
+
 	private:
 		inline static bool LogInitialize = false;			//控制台初始化
 		inline static bool IsLogFileWrite = false;			//是否 写入日志文件
@@ -148,23 +163,6 @@ namespace Typical_Tool
 		void Initialize() {
 			//控制台初始化
 			if (!LogInitialize) {
-				// 设置全局地区: 数字表示方法...
-#ifdef English
-				std::locale::global(std::locale("en_US.UTF-8"));
-				Log_Out(ANSIESC_GREEN, Terr, Printf(TEXT("Log::Initialize: en_US.UTF-8 Successful!\n"), Log_Tips), ANSIESC_RESET, -1, true);
-#else
-				std::locale::global(std::locale("zh_CN.UTF-8"));
-				Log_Out(ANSIESC_GREEN, Terr, Printf(TEXT("Log::Initialize: zh_CN.UTF-8 成功!\n"), Log_Tips), ANSIESC_RESET, -1, true);
-#endif
-				if (!Tout.good()) {
-					throw Truntime_error(_LOGERRORINFO(TEXT("Log::Initialize: Tout Not good!")));
-				}
-				if (!Terr.good()) {
-					throw Truntime_error(_LOGERRORINFO(TEXT("Log::Initialize: Terr Not good!")));
-				}
-				// 设置 cout/cerr 使用全局地区
-				Tout.imbue(std::locale());
-				Terr.imbue(std::locale());
 #ifdef WIN32APP
 #ifdef _WINDOWS
 				//Windows 控制台编码修改: UTF-8
@@ -176,44 +174,94 @@ namespace Typical_Tool
 					LogMessageBox(TEXT("Log::Initialize: 分离控制台失败!"), Log_Error, MB_ICONSTOP);
 					LogMessageBox(Printf(TEXT("Log::Initialize: 错误代码: [%s]"), ToStr(GetLastError())).str().c_str(), Log_Error, MB_ICONSTOP);
 				}
-				else {
-					if (Debug) {
-						Log_Out(ANSIESC_GREEN, Terr, Printf(TEXT("%sLog::Initialize: 分离控制台.\n"), Log_Tips), ANSIESC_RESET, -1, true);
-					}
-				}
 				//分配控制台: 当不是控制台程序时
 				if (AllocConsole() == 0) {
 					LogMessageBox(TEXT("Log::Initialize: 分配控制台失败!"), Log_Error, MB_ICONSTOP);
 					LogMessageBox(Printf(TEXT("Log::Initialize: 错误代码: [%s]"), ToStr(GetLastError())).str().c_str(), Log_Error, MB_ICONSTOP);
 				}
-				else {
-					if (Debug) {
-						Log_Out(ANSIESC_GREEN, Terr, Printf(TEXT("%sLog::Initialize: 分配控制台.\n"), Log_Tips), ANSIESC_RESET, -1, true);
-					}
-				}
 
 				// 获取标准输出流的句柄
 				FILE* FilePtr;
 				// 重定向标准输出流
-				freopen_s(&FilePtr, "CONOUT$", "w", stdout);
-				if (FilePtr == nullptr) {
+				errno_t err = freopen_s(&FilePtr, "CONOUT$", "w", stdout);
+				if (err != 0) {
 					LogMessageBox(TEXT("Log::Initialize: 重定向标准输出流失败!"), Log_Error, MB_ICONSTOP);
-					LogMessageBox(Printf(TEXT("Log::Initialize: 错误代码: [%s]"), ToStr(GetLastError())).str().c_str(), Log_Error, MB_ICONSTOP);
+					LogMessageBox(Printf(TEXT("Log::Initialize: 错误代码: [%s]"), err), Log_Error, MB_ICONSTOP);
 					return;
 				}
 				// 重定向标准错误流
-				freopen_s(&FilePtr, "CONOUT$", "w", stderr);
-				if (FilePtr == nullptr) {
+				err = freopen_s(&FilePtr, "CONOUT$", "w", stderr);
+				if (err != 0) {
 					LogMessageBox(TEXT("Log::Initialize: : 重定向标准错误流失败!"), Log_Error, MB_ICONSTOP);
-					LogMessageBox(Printf(TEXT("Log::Initialize: 错误代码: [%s]"), GetLastError()).str().c_str(), Log_Error, MB_ICONSTOP);
+					LogMessageBox(Printf(TEXT("Log::Initialize: 错误代码: [%s]"), err), Log_Error, MB_ICONSTOP);
 					return;
 				}
+				err = freopen_s(&FilePtr, "CONIN$", "r", stdin);
+				if (err != 0) {
+					LogMessageBox(TEXT("Log::Initialize: : 重定向标准输入流失败!"), Log_Error, MB_ICONSTOP);
+					LogMessageBox(Printf(TEXT("Log::Initialize: 错误代码: [%s]"), err), Log_Error, MB_ICONSTOP);
+					return;
+				}
+				// 设置标准句柄
+				HANDLE hConOut = CreateFile(TEXT("CONOUT$"), GENERIC_WRITE | GENERIC_READ,
+					FILE_SHARE_WRITE | FILE_SHARE_READ,
+					NULL, OPEN_EXISTING, 0, NULL);
+				SetStdHandle(STD_OUTPUT_HANDLE, hConOut);
+				SetStdHandle(STD_ERROR_HANDLE, hConOut);
+
+				HANDLE hConIn = CreateFile(TEXT("CONIN$"), GENERIC_READ | GENERIC_WRITE,
+					FILE_SHARE_READ | FILE_SHARE_WRITE,
+					NULL, OPEN_EXISTING, 0, NULL);
+				SetStdHandle(STD_INPUT_HANDLE, hConIn);
 #endif
+
 				// 获取控制台窗口的句柄
 				hConsole = GetConsoleWindow();
 				EnableAnsiEscape();
+
+				//检查标准输出流
+				if (!Tout.good() || !Terr.good()) {
+					LogMessageBox(TEXT("Log::Initialize: Tout/Terr 无效!"), Log_Error, MB_ICONSTOP);
+				}
+				else {
+					// 设置全局地区: 数字表示方法...
+#ifdef English
+					std::locale::global(std::locale("en_US.UTF-8"));
+					Log_Out(ANSIESC_GREEN, Terr, Printf(TEXT("Log::Initialize: en_US.UTF-8 Successful!\n"), Log_Tips), ANSIESC_RESET, -1, true);
+#else
+					std::locale::global(std::locale("zh_CN.UTF-8"));
+					Log_Out(ANSIESC_GREEN, Terr, Printf(TEXT("Log::Initialize: zh_CN.UTF-8 成功!\n"), Log_Tips), ANSIESC_RESET, -1, true);
 #endif
+					// 设置 cout/cerr 使用全局地区
+					Tout.imbue(std::locale(""));
+					Terr.imbue(std::locale(""));
+				}
 #endif
+#else
+				//检查标准输出流
+				if (!Tout.good()) {
+					LogMessageBox(TEXT("Log::Initialize: Tout 无效!"), Log_Error, MB_ICONSTOP);
+					throw Truntime_error(TEXT("Log::Initialize: Tout Not good!"));
+				}
+				if (!Terr.good()) {
+					LogMessageBox(TEXT("Log::Initialize: Terr 无效!"), Log_Error, MB_ICONSTOP);
+					throw Truntime_error(TEXT("Log::Initialize: Terr Not good!"));
+				}
+
+				// 设置全局地区: 数字表示方法...
+#ifdef English
+				std::locale::global(std::locale("en_US.UTF-8"));
+				Log_Out(ANSIESC_GREEN, Terr, Printf(TEXT("Log::Initialize: en_US.UTF-8 Successful!\n"), Log_Tips), ANSIESC_RESET, -1, true);
+#else
+				std::locale::global(std::locale("zh_CN.UTF-8"));
+				Log_Out(ANSIESC_GREEN, Terr, Printf(TEXT("Log::Initialize: zh_CN.UTF-8 成功!\n"), Log_Tips), ANSIESC_RESET, -1, true);
+#endif
+				// 设置 cout/cerr 使用全局地区
+				Tout.imbue(std::locale(""));
+				Terr.imbue(std::locale(""));
+#endif
+
+
 				//完成初始化
 				LogInitialize = true;
 			}
@@ -292,6 +340,10 @@ namespace Typical_Tool
 
 	private:
 		static void Log_Out(const Tstr& _ANSIESC_Color, Tostream& _Ostream, const Tstr& _str, const Tstr& _ANSIESC_RESET, const int& _MessageKey = -1, bool _IsWirteFile = false) {
+			if (!_Ostream.good()) {
+				return;
+			}
+			
 			LogStringBuffer tempLogBuffer;
 			if (bShowTime) {
 				tempLogBuffer = { _ANSIESC_Color, Log::GetFormatTime(), _str, _ANSIESC_RESET };

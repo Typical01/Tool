@@ -560,7 +560,7 @@ namespace Typical_Tool {
 				if (!this->FormatText) {
 					if (!_IsSureWrite) {
 						std::vector<Tstr> tempWriteConfig_Vec;
-						if (this->tytl::Printf(tempWriteConfig_Vec)) {
+						if (this->Printf(tempWriteConfig_Vec)) {
 							if (!WriteFile(this->ConfigFilePath, tempWriteConfig_Vec)) {
 								LogDebug(TEXT("ConfigFileTextManage::WriteConfigFile: 可能没有对应的文件, 或文件正在被使用!"), War);
 								return false;
@@ -598,7 +598,7 @@ namespace Typical_Tool {
 					}
 					else { //强制写入
 						std::vector<Tstr> tempWriteConfig_Vec;
-						this->tytl::Printf(tempWriteConfig_Vec); //无视格式化是否成功
+						this->Printf(tempWriteConfig_Vec); //无视格式化是否成功
 						if (!WriteFile(this->ConfigFilePath, tempWriteConfig_Vec)) {
 							LogDebug(TEXT("ConfigFileTextManage::WriteConfigFile: 可能没有对应的文件, 或文件正在被使用!"), War);
 							return false;
@@ -775,7 +775,7 @@ namespace Typical_Tool {
 					_FormatMap.push_back(TEXT(""));
 
 					LogDebug(TEXT("ConfigFileTextManage::tytl::Printf: 配置项不足以形成格式!"), War);
-					ConfigFormatSample();
+					//ConfigFormatSample();
 					return false;
 				}
 			}
