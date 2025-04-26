@@ -167,28 +167,15 @@ namespace Typical_Tool {
 
 			return true;
 		}
-		//复制文件/目录: _OnlyCopyNewFile 只复制最新时间的文件
-		bool Copy(const Tstr& _TargetPath, bool _OnlyCopyNewFile = false)
+		//复制文件/目录: _bOverWrite 覆盖原文件/目录
+		bool Copy(const Tstr& _TargetPath, std::filesystem::copy_options _copy_options = std::filesystem::copy_options::update_existing | std::filesystem::copy_options::recursive)
 		{
 			if (!Exists(TEXT("复制文件/目录"), this->Path) && !Exists(TEXT("复制文件/目录"), _TargetPath)) {
 				return false;
 			}
 
 			try {
-				if (_OnlyCopyNewFile) {
-					auto Source_time = std::filesystem::last_write_time(this->Path);
-					auto Target_time = std::filesystem::last_write_time(_TargetPath);
-
-					//仅复制新文件
-					if (Source_time > Target_time) {
-						std::filesystem::copy(this->Path, _TargetPath, std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::recursive);
-					}
-					else { //旧文件
-					}
-				}
-				else {
-					std::filesystem::copy(this->Path, _TargetPath, std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::recursive);
-				}
+				std::filesystem::copy(this->Path, _TargetPath, _copy_options);
 			}
 			catch (const std::filesystem::filesystem_error& Error) {
 				ErrorMessage = stow(Error.what());
@@ -264,14 +251,14 @@ namespace Typical_Tool {
 			return true;
 		}
 		//修改文件/目录权限
-		bool SetPermissions(const std::filesystem::perms& _perms)
+		bool SetPermissions(const std::filesystem::perms& _perms, std::filesystem::perm_options _perm_options = std::filesystem::perm_options::add)
 		{
 			if (!Exists(TEXT("修改文件/目录权限"), this->Path)) {
 				return false;
 			}
 
 			try {
-				std::filesystem::permissions(this->Path, _perms);
+				std::filesystem::permissions(this->Path, _perms, _perm_options);
 			}
 			catch (const std::filesystem::filesystem_error& Error) {
 				ErrorMessage = stow(Error.what());

@@ -398,7 +398,7 @@ namespace Typical_Tool
 			}
 			case LogMessage::End: {
 				if (this->Console) {
-					Log_Out(TEXT(""), Terr, Printf(TEXT("%s%s"), Log_Tab, _Text), TEXT(""), _MessageKey);
+					Log_Out(TEXT(""), Tout, Printf(TEXT("%s%s"), Log_Tab, _Text), TEXT(""), _MessageKey);
 					return;
 				}
 				else {
@@ -409,7 +409,7 @@ namespace Typical_Tool
 			}
 			case LogMessage::LineFeed: {
 				if (this->Console) {
-					Log_Out(TEXT(""), Terr, Printf(TEXT("%s%s%s"), Log_Tab, _Text, Log_LineFeed), TEXT(""), _MessageKey);
+					Log_Out(TEXT(""), Tout, Printf(TEXT("%s%s%s"), Log_Tab, _Text, Log_LineFeed), TEXT(""), _MessageKey);
 					return;
 				}
 				else {
@@ -568,7 +568,7 @@ namespace Typical_Tool
 				IsLogAllOutput = true;
 
 				if (Debug) {
-					Log_Out(ANSIESC_YELLOW, Terr, Printf(TEXT("%sLog::SetAllLogFileWrite: 文件输出级别[All]n"), Log_Warning), ANSIESC_RESET, -1, true);
+					Log_Out(ANSIESC_YELLOW, Terr, Printf(TEXT("%sLog::SetAllLogFileWrite: 文件输出级别[All]\n"), Log_Warning), ANSIESC_RESET, -1, true);
 				}
 			}
 			else {
