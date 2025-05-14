@@ -1,36 +1,42 @@
-#include <libTypical/Tool/StringManage.h>
+#include <TypicalTool/Tool/StringManage.h>
 
+
+
+#ifdef _WINDOWS
+
+#include <Windows.h>
 
 namespace Typical_Tool {
-    namespace StringManage
-    {
-        // 将 std::string 转换为 std::wstring
-        std::wstring UTF8ToWstring(const std::string& _UTF8_String) {
-            std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-            return converter.from_bytes(_UTF8_String);
+    namespace StringManage {
+
+        // 将 UTF-8 std::string 转换为 std::wstring
+        std::wstring UTF8ToWstring(const std::string& utf8_str) {
+            int len = MultiByteToWideChar(CP_UTF8, 0, utf8_str.c_str(), -1, nullptr, 0);
+            if (len == 0) {
+                return L"";
+            }
+            std::wstring wstr(len - 1, L'\0');
+            MultiByteToWideChar(CP_UTF8, 0, utf8_str.c_str(), -1, &wstr[0], len);
+            return wstr;
         }
 
-        // 将 std::wstring 转换为 std::string
-        std::string WstringToUTF8(const std::wstring& _WString) {
-            std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-            return converter.to_bytes(_WString);
+        // 将 std::wstring 转换为 UTF-8 std::string
+        std::string WstringToUTF8(const std::wstring& wstr) {
+            int len = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+            if (len == 0) {
+                return "";
+            }
+            std::string str(len - 1, '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], len, nullptr, nullptr);
+            return str;
         }
 
-        // 将 std::string 转换为 std::wstring
-        std::wstring UTF8ToWstring(std::string&& _UTF8_String) {
-            return UTF8ToWstring(_UTF8_String);
-        }
-
-        // 将 std::wstring 转换为 std::string
-        std::string WstringToUTF8(std::wstring&& _WString) {
-            return WstringToUTF8(_WString);
-        }
     }
 }
 
 
+#elif _ICU4C_
 
-#ifdef _ICU4C_
 //icu4c
 #include <unicode/unistr.h>
 
@@ -93,9 +99,26 @@ namespace Typical_Tool {
         std::string Typical_Tool::StringManage::WstringToUTF8(std::wstring&& _WString) {
             return WstringToUTF8(_WString);  // 使用常量引用版本
         }
-
-
-
     }
 }
+
+#else
+
+namespace Typical_Tool {
+    namespace StringManage
+    {
+        // 将 std::string 转换为 std::wstring
+        std::wstring UTF8ToWstring(const std::string& _UTF8_String) {
+            std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+            return converter.from_bytes(_UTF8_String);
+        }
+
+        // 将 std::wstring 转换为 std::string
+        std::string WstringToUTF8(const std::wstring& _WString) {
+            std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+            return converter.to_bytes(_WString);
+        }
+    }
+}
+
 #endif

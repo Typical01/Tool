@@ -1,2 +1,2 @@
-#include <libTypical/Tool/Tchar_Typical.h>
+#include <TypicalTool/Tool/Tchar_Typical.h>
 

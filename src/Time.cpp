@@ -1,6 +1,6 @@
-#include <libTypical/Tool/pch.h>
+#include <TypicalTool/Tool/pch.h>
 
-#include <libTypical/Tool/Time_Typical.h>
+#include <TypicalTool/Tool/Time_Typical.h>
 
 
 bool Typical_Tool::Time::IsShowLog = true;
@@ -60,9 +60,9 @@ std::vector<std::chrono::steady_clock::time_point> Typical_Tool::Timer::GetTimer
 	return this->TimerContainer;
 }
 
-int Typical_Tool::Timer::GetTimerSize()
+int32_t Typical_Tool::Timer::GetTimerSize()
 {
 	std::lock_guard<std::mutex> tempMutex(this->mutex_Timer);
-	return (int)this->TimerContainer.size();
+	return (int32_t)this->TimerContainer.size();
 }
 

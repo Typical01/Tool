@@ -1,6 +1,6 @@
-#include <libTypical/Tool/pch.h>
+#include <TypicalTool/Tool/pch.h>
 
-#include <libTypical/Tool/Log.h>
+#include <TypicalTool/Tool/Log.h>
 
 
 //控制台初始化
@@ -12,7 +12,7 @@
 //bool Typical_Tool::Log::SingleLogFile		= true;
 //bool Typical_Tool::Log::Debug				= false;
 //bool Typical_Tool::Log::bFlushConsoleOutput = false;
-//long long Typical_Tool::Log::PauseTime		= 200LL;
+//int64_t Typical_Tool::Log::PauseTime		= 200LL;
 //std::atomic<bool> Typical_Tool::Log::IsLogFileWriteThreadStop = true;
 
 

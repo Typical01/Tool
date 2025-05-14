@@ -1,3 +1,3 @@
-#include <libTypical/Tool/pch.h>
+#include <TypicalTool/Tool/pch.h>
 
-#include <libTypical/Tool/FileManage.h>
+#include <TypicalTool/Tool/FileManage.h>

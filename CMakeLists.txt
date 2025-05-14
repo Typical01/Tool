@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 3.10)
-project(libTypical)
+project(TypicalTool LANGUAGES C CXX)
 
 add_definitions(-DUNICODE -D_UNICODE)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_SHARED_LINKER_FLAGS_DEBUG_WIN "/DEBUG")
+set(CMAKE_SHARED_LINKER_FLAGS_RELEASE_WIN "/OPT:REF")
+
 # 查找源文件和头文件
 file(GLOB_RECURSE SRC_Tool_LIST "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-file(GLOB_RECURSE libTypical_libHEADER_LIST "${CMAKE_CURRENT_SOURCE_DIR}/include/libTypical/*.h")
-file(GLOB_RECURSE libTypical_Tool_libHEADER_LIST "${CMAKE_CURRENT_SOURCE_DIR}/include/libTypical/**/*.h")
+file(GLOB_RECURSE TypicalTool_libHEADER_LIST "${CMAKE_CURRENT_SOURCE_DIR}/include/TypicalTool/*.h")
+file(GLOB_RECURSE TypicalTool_Tool_libHEADER_LIST "${CMAKE_CURRENT_SOURCE_DIR}/include/TypicalTool/**/*.h")
 
 file(GLOB_RECURSE Json_libHEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/Json/*.h")
 
@@ -39,17 +42,17 @@ foreach(CONFIGURATION IN ITEMS Debug Release Debug_Win Release_Win)
 endforeach()
 
 # 创建静态库
-add_library(libTypical STATIC ${SRC_Tool_LIST} ${libTypical_libHEADER_LIST} ${libTypical_Tool_libHEADER_LIST})
+add_library(TypicalTool SHARED ${SRC_Tool_LIST} ${TypicalTool_libHEADER_LIST} ${TypicalTool_Tool_libHEADER_LIST})
 
 # 使用设置链接库
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_link_libraries(libTypical
+    target_link_libraries(TypicalTool
         PRIVATE
         $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/lib/Json/Debug/libjsoncpp_static.a>
         $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/lib/Json/Release/libjsoncpp_static.a>
     )
 elseif (MSVC)
-    target_link_libraries(libTypical
+    target_link_libraries(TypicalTool
         PRIVATE
         $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/lib/Json/Debug/jsoncpp_static.lib>
         $<$<CONFIG:Debug_Win>:${CMAKE_CURRENT_SOURCE_DIR}/lib/Json/Debug/jsoncpp_static.lib>
@@ -66,7 +69,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
   add_compile_options("$<$<C_COMPILER_ID:Clang>:-finput-charset=UTF-8>")
   add_compile_options("$<$<CXX_COMPILER_ID:Clang>:-finput-charset=UTF-8>")
 
-  target_compile_options(libTypical
+  target_compile_options(TypicalTool
     PRIVATE
     -Wall
     -finput-charset=UTF-8
@@ -81,12 +84,13 @@ elseif (MSVC)
   add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
   add_compile_options(/EHsc)
 
-  target_compile_definitions(libTypical
+  target_compile_definitions(TypicalTool
       PRIVATE
       _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
       _CRT_SECURE_NO_WARNINGS
+      TYPICALTOOL_EXPORTS
   )
-  target_compile_options(libTypical
+  target_compile_options(TypicalTool
       PRIVATE
       /W3
       /FS  # 添加此行以启用 /FS 选项
@@ -99,8 +103,8 @@ endif()
 
 
 # 分组源文件和头文件
-source_group("HeaderFiles" FILES ${libTypical_libHEADER_LIST})
-source_group("Tool_HeaderFiles" FILES ${libTypical_Tool_libHEADER_LIST})
+source_group("HeaderFiles" FILES ${TypicalTool_libHEADER_LIST})
+source_group("Tool_HeaderFiles" FILES ${TypicalTool_Tool_libHEADER_LIST})
 source_group("SourceFiles" FILES ${SRC_Tool_LIST})
 source_group("Json_libHeaderFiles" FILES ${Json_libHEADER_FILES})
 # source_group("icu4c_libHeaderFiles" FILES ${icu4c_libHEADER_FILES})

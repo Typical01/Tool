@@ -1,32 +1,32 @@
 #ifdef _WINDOWS
 
-#include <libTypical/Tool/pch.h>
-#include <libTypical/Tool/WindowHost.h>
+#include <TypicalTool/Tool/pch.h>
+#include <TypicalTool/Tool/WindowHost.h>
 
 
-int Typical_Tool::WindowsSystem::WindowHost::hMenu = 1000;
+int32_t Typical_Tool::WindowsSystem::WindowHost::hMenu = 1000;
 HINSTANCE Typical_Tool::WindowsSystem::WindowHost::hIns;
 //UINT Typical_Tool::WindowsSystem::WindowHost::WM_TASKBARCREATED_WH;
 
 
 
-void Typical_Tool::WindowsSystem::MoveCursorLocation(int x, int y) {
+void Typical_Tool::WindowsSystem::MoveCursorLocation(int32_t x, int32_t y) {
 	COORD pos = { (SHORT)x,(SHORT)y };
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleCursorPosition(hOut, pos);
 }
 
 // WindowKey
-void Typical_Tool::WindowsSystem::Key::wait_s(long long ms)
+void Typical_Tool::WindowsSystem::Key::wait_s(int64_t ms)
 {
-	long long timeTarget = (std::chrono::duration_cast<std::chrono::milliseconds>(
+	int64_t timeTarget = (std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::high_resolution_clock::now().time_since_epoch()) + std::chrono::milliseconds(ms)).count();
 	while (timeTarget > std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::high_resolution_clock::now().time_since_epoch()).count()) {
 	}
 }
 
-void Typical_Tool::WindowsSystem::Key::KeyClick(const BYTE& _bVk, const long long& _intervalTime, const ktm& _keyMode, void(*_func)())
+void Typical_Tool::WindowsSystem::Key::KeyClick(const BYTE& _bVk, const int64_t& _intervalTime, const ktm& _keyMode, void(*_func)())
 {
 	switch (_keyMode) {
 	case ktm::ClickOne: {
@@ -55,7 +55,7 @@ void Typical_Tool::WindowsSystem::Key::KeyClick(const BYTE& _bVk, const long lon
 	}
 }
 
-void Typical_Tool::WindowsSystem::Key::MouseClick(DWORD _bVk, const long long& _intervalTime, void(*_func)())
+void Typical_Tool::WindowsSystem::Key::MouseClick(DWORD _bVk, const int64_t& _intervalTime, void(*_func)())
 {
 	mouse_event(_bVk, 0, 0, 0, 0);
 	wait_s(_intervalTime);
@@ -113,7 +113,7 @@ void Typical_Tool::WindowsSystem::WindowFont::SetFont(HFONT hFont)
 
 
 // WindowMessage
-int Typical_Tool::WindowsSystem::ShellMessage::GetErrorCode()
+int32_t Typical_Tool::WindowsSystem::ShellMessage::GetErrorCode()
 {
 	return this->ErrorCode;
 }
@@ -141,7 +141,7 @@ void Typical_Tool::WindowsSystem::WindowHost::SetFont(HFONT hFont)
 	}
 }
 
-int Typical_Tool::WindowsSystem::WindowHost::GetHMENU()
+int32_t Typical_Tool::WindowsSystem::WindowHost::GetHMENU()
 {
 	WindowHost::hMenu++;
 	return WindowHost::hMenu;

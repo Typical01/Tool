@@ -1,3 +1,0 @@
-C:/Users/22793/source/repos/Tool/CMakeFiles/libTypical.dir
-C:/Users/22793/source/repos/Tool/CMakeFiles/edit_cache.dir
-C:/Users/22793/source/repos/Tool/CMakeFiles/rebuild_cache.dir
