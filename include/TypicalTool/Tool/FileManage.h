@@ -101,11 +101,8 @@ namespace Typical_Tool {
 			if (Exists(TEXT("创建文件夹"), this->Path)) {
 				return false;
 			}
-#ifdef UNICODE
 			auto PathSlash = this->Path.PathToStr().find_last_of(TEXT("\\/"));
-#else
-			auto PathSlash = this->Path.PathToStr().find_last_of(TEXT("\\/"));
-#endif
+
 			try {
 				if (PathSlash == Tstr::npos) {
 					//单级目录
@@ -117,11 +114,7 @@ namespace Typical_Tool {
 				}
 			}
 			catch (const std::filesystem::filesystem_error& Error) {
-#ifndef UNICODE
-				ErrorMessage = Error.what();
-#else
 				ErrorMessage = stow(Error.what());
-#endif
 				LogRelease(Printf(TEXT("FileSystem::CreateDirectory: 失败原因: { %s }"), ErrorMessage), Err);
 				LogRelease(Printf(TEXT("FileSystem::CreateDirectory: 路径: { \n\tPath1: [%s]\n\tPath2: [%s]\n}"), 
 					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
@@ -154,11 +147,7 @@ namespace Typical_Tool {
 				}
 			}
 			catch (const std::filesystem::filesystem_error& Error) {
-#ifndef UNICODE
-				ErrorMessage = Error.what();
-#else
 				ErrorMessage = stow(Error.what());
-#endif
 				LogRelease(Printf(TEXT("FileSystem::Delete: 失败原因: { %s }"), ErrorMessage), Err);
 				LogRelease(Printf(TEXT("FileSystem::Delete: 路径: { \n\tPath1: [%s]\n\tPath2: [%s]\n}"),
 					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
@@ -186,11 +175,7 @@ namespace Typical_Tool {
 				std::filesystem::copy(this->Path, _TargetPath, _copy_options);
 			}
 			catch (const std::filesystem::filesystem_error& Error) {
-#ifndef UNICODE
-				ErrorMessage = Error.what();
-#else
 				ErrorMessage = stow(Error.what());
-#endif
 				LogRelease(Printf(TEXT("FileSystem::Copy: 失败原因: { %s }"), ErrorMessage), Err);
 				LogRelease(Printf(TEXT("FileSystem::Copy: 路径: { \n\tPath1: [%s]\n\tPath2: [%s]\n}"),
 					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
@@ -220,11 +205,7 @@ namespace Typical_Tool {
 					std::filesystem::rename(this->Path, NewPathName);
 				}
 				catch (const std::filesystem::filesystem_error& Error) {
-#ifndef UNICODE
-					ErrorMessage = Error.what();
-#else
 					ErrorMessage = stow(Error.what());
-#endif
 					LogRelease(Printf(TEXT("FileSystem::ReName: 失败原因: { %s }"), ErrorMessage), Err);
 					LogRelease(Printf(TEXT("FileSystem::ReName: 路径: { \n\tPath1: [%s]\n\tPath2: [%s]\n}"),
 						Error.path1().PathToStr(), Error.path2().PathToStr()), War);
@@ -248,11 +229,7 @@ namespace Typical_Tool {
 					std::filesystem::rename(this->Path, NewPathName);
 				}
 				catch (const std::filesystem::filesystem_error& Error) {
-#ifndef UNICODE
-					ErrorMessage = Error.what();
-#else
 					ErrorMessage = stow(Error.what());
-#endif
 					LogRelease(Printf(TEXT("FileSystem::ReName: 失败原因: { %s }"), ErrorMessage), Err);
 					LogRelease(Printf(TEXT("FileSystem::ReName: 路径: { \n\tPath1: [%s]\n\tPath2: [%s]\n}"),
 						Error.path1().PathToStr(), Error.path2().PathToStr()), War);
@@ -281,11 +258,7 @@ namespace Typical_Tool {
 				std::filesystem::permissions(this->Path, _perms, _perm_options);
 			}
 			catch (const std::filesystem::filesystem_error& Error) {
-#ifndef UNICODE
-				ErrorMessage = Error.what();
-#else
 				ErrorMessage = stow(Error.what());
-#endif
 				LogRelease(Printf(TEXT("FileSystem::SetPermissions: 失败原因: { %s }"), ErrorMessage), Err);
 				LogRelease(Printf(TEXT("FileSystem::SetPermissions: 路径: { \n\tPath1: [%s]\n\tPath2: [%s]\n}"),
 					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
@@ -330,11 +303,7 @@ namespace Typical_Tool {
 				}
 			}
 			catch (const std::filesystem::filesystem_error& Error) {
-#ifndef UNICODE
-				ErrorMessage = Error.what();
-#else
 				ErrorMessage = stow(Error.what());
-#endif
 				LogRelease(Printf(TEXT("FileSystem::DirectoryIterator: 失败原因: { %s }"), ErrorMessage), Err);
 				LogRelease(Printf(TEXT("FileSystem::DirectoryIterator: 路径: { \n\tPath1: [%s]\n\tPath2: [%s]\n}"),
 					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
@@ -382,11 +351,7 @@ namespace Typical_Tool {
 				}
 			}
 			catch (const std::filesystem::filesystem_error& Error) {
-#ifndef UNICODE
-				ErrorMessage = Error.what();
-#else
 				ErrorMessage = stow(Error.what());
-#endif
 				LogRelease(Printf(TEXT("FileSystem::DirectoryIterator: 失败原因: { %s }"), ErrorMessage), Err);
 				LogRelease(Printf(TEXT("FileSystem::DirectoryIterator: 路径: { \n\tPath1: [%s]\n\tPath2: [%s]\n}"),
 					Error.path1().PathToStr(), Error.path2().PathToStr()), War);
